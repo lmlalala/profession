@@ -8,13 +8,16 @@
     "dev": "vite",
     "preview": "vite preview --open",
     "lint": "eslint . --fix",
-    "lint:check": "eslint ."
+    "lint:check": "eslint .",
+    "lint:html": "htmlhint \"pages/**/*.html\" \"index.html\"",
+    "lint:all": "pnpm run lint:check && pnpm run lint:html"
   },
   "devDependencies": {
     "@esbuild/win32-x64": "^0.27.3",
     "@eslint/js": "^10.0.1",
     "eslint": "^10.0.2",
     "globals": "^17.4.0",
+    "htmlhint": "^1.9.1",
     "vite": "^5.4.21"
   },
   "pnpm": {

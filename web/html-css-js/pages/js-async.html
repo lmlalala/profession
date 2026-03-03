@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -219,7 +219,7 @@ Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// �
 
 <span class="cmt">// 重试机制</span>
 <span class="kw">async function</span> <span class="fn">retry</span>(fn, times = <span class="num">3</span>, delay = <span class="num">1000</span>) {
-  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < times; i++) {
+  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; times; i++) {
     <span class="kw">try</span> { <span class="kw">return await</span> <span class="fn">fn</span>() }
     <span class="kw">catch</span> (e) {
       <span class="kw">if</span> (i === times - <span class="num">1</span>) <span class="kw">throw</span> e

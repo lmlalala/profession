@@ -175,7 +175,7 @@
   <span class="kw">let</span> newIdx = <span class="num">0</span>
 
   <span class="cmt">// 第一轮：顺序遍历，处理前缀相同的节点</span>
-  <span class="kw">for</span> (; oldFiber && newIdx < newChildren.length; newIdx++) {
+  <span class="kw">for</span> (; oldFiber && newIdx &lt; newChildren.length; newIdx++) {
     <span class="kw">const</span> newChild = newChildren[newIdx]
     <span class="kw">if</span> (oldFiber.key !== newChild.key) <span class="kw">break</span>  <span class="cmt">// key 不同，退出第一轮</span>
     <span class="kw">const</span> newFiber = <span class="fn">updateElement</span>(returnFiber, oldFiber, newChild)
@@ -189,12 +189,12 @@
     oldFiber = oldFiber.sibling
   }
   <span class="cmt">// 遍历剩余新节点，查找可复用的旧节点</span>
-  <span class="kw">for</span> (; newIdx < newChildren.length; newIdx++) {
+  <span class="kw">for</span> (; newIdx &lt; newChildren.length; newIdx++) {
     <span class="kw">const</span> newChild = newChildren[newIdx]
     <span class="kw">const</span> matchedFiber = existingChildren.<span class="fn">get</span>(newChild.key ?? newIdx)
     <span class="kw">if</span> (matchedFiber) {
       existingChildren.<span class="fn">delete</span>(newChild.key ?? newIdx)
-      <span class="kw">if</span> (matchedFiber.index < lastPlacedIndex) <span class="cmt">// 需要移动</span>
+      <span class="kw">if</span> (matchedFiber.index &lt; lastPlacedIndex) <span class="cmt">// 需要移动</span>
         newFiber.effectTag = <span class="str">'PLACEMENT'</span>
       <span class="kw">else</span>
         lastPlacedIndex = matchedFiber.index  <span class="cmt">// 不需要移动</span>

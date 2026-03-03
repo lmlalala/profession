@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -159,10 +159,10 @@ counter.<span class="fn">decrement</span>() <span class="cmt">// 11</span>
 counter.<span class="fn">getCount</span>()  <span class="cmt">// 11</span>
 
 <span class="cmt">// 经典面试题：循环中的闭包</span>
-<span class="kw">for</span> (<span class="kw">var</span> i = <span class="num">0</span>; i < <span class="num">3</span>; i++) {
+<span class="kw">for</span> (<span class="kw">var</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
   setTimeout(() => console.<span class="fn">log</span>(i), <span class="num">0</span>) <span class="cmt">// 3 3 3（var 共享同一个 i）</span>
 }
-<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">3</span>; i++) {
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; <span class="num">3</span>; i++) {
   setTimeout(() => console.<span class="fn">log</span>(i), <span class="num">0</span>) <span class="cmt">// 0 1 2（let 每次迭代新作用域）</span>
 }</span></div>
         <div class="demo-box">
