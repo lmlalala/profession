@@ -362,31 +362,6 @@ export function formatterPercentNum(
 }
 
 /**
- * 数字转百分比（轻量版）：补零，不带正号，保留 2 位小数
- * @param num 数值（会乘以 100）
- * @param decimal 保留小数位，默认 2
- * @param errValue 缺省值，默认 0
- * @returns 百分比字符串或缺省值
- *
- * @example
- * num2Percent(0.125) // '12.50%'
- * num2Percent(0.1, 0) // '10%'
- * num2Percent('abc') // 0
- */
-export const num2Percent = (
-  num: number | string,
-  decimal: number = 2,
-  errValue: number | string = 0,
-): string | number => {
-  return formatterPercentNum(num, {
-    decimal,
-    forceZero: true,
-    plusSign: false,
-    errValue,
-  })
-}
-
-/**
  * 金额格式化：保留 2 位小数、强制补零、千分位
  * @param amount 金额数字或字符串
  * @returns 格式化后的金额字符串，如 '1,234,567.89'
