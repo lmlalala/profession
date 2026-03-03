@@ -2,8 +2,9 @@
    公共样式 — HTML5 + CSS3 + JS 学习项目
    ============================================= */
 
-/* CSS 自定义属性（变量） */
-:root {
+/* CSS 自定义属性（变量）— 暗色主题（默认） */
+:root,
+[data-theme="dark"] {
   --color-bg: #0f1117;
   --color-surface: #1a1d27;
   --color-surface-2: #22263a;
@@ -16,6 +17,8 @@
   --color-text: #e2e8f0;
   --color-text-muted: #8892b0;
   --color-code-bg: #161b2e;
+  --color-nav-bg: rgba(15, 17, 23, 0.85);
+  --color-console-bg: #0d1117;
   --radius: 10px;
   --radius-sm: 6px;
   --shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
@@ -24,10 +27,38 @@
   --font-sans: 'Inter', 'PingFang SC', 'Microsoft YaHei', sans-serif;
 }
 
+/* 亮色主题 */
+[data-theme="light"] {
+  --color-bg: #f5f6fa;
+  --color-surface: #ffffff;
+  --color-surface-2: #eef0f6;
+  --color-border: #d1d5e0;
+  --color-primary: #5a52e0;
+  --color-primary-light: #6c63ff;
+  --color-secondary: #00a882;
+  --color-accent: #e8405a;
+  --color-warning: #d4a017;
+  --color-text: #1a1d2e;
+  --color-text-muted: #5a6280;
+  --color-code-bg: #f0f2f8;
+  --color-nav-bg: rgba(245, 246, 250, 0.92);
+  --color-console-bg: #e8eaf2;
+  --shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+}
+
 /* Reset */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-html { scroll-behavior: smooth; font-size: 16px; }
+html {
+  scroll-behavior: smooth;
+  /* PC 端基准字体：18px，让整体内容更大更易读 */
+  font-size: 18px;
+}
+/* 响应式根字体大小 */
+@media (max-width: 1280px) { html { font-size: 17px; } }
+@media (max-width: 1024px) { html { font-size: 16px; } }
+@media (max-width: 768px)  { html { font-size: 15px; } }
+@media (max-width: 480px)  { html { font-size: 14px; } }
 
 body {
   font-family: var(--font-sans);
@@ -42,7 +73,7 @@ body {
   position: fixed;
   top: 0; left: 0; right: 0;
   z-index: 1000;
-  background: rgba(15, 17, 23, 0.85);
+  background: var(--color-nav-bg);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   border-bottom: 1px solid var(--color-border);
@@ -81,7 +112,7 @@ body {
 
 /* ── 页面主体 ── */
 .page-wrapper {
-  max-width: 1100px;
+  max-width: 1200px;
   margin: 0 auto;
   padding: 80px 2rem 4rem;
 }
@@ -154,17 +185,33 @@ body {
   overflow-x: auto;
   margin: 0.75rem 0;
   white-space: pre;
+  color: var(--color-text);
+}
+/* 暗色主题语法高亮 */
+[data-theme="dark"] .code-block,
+:root .code-block {
   color: #abb2bf;
 }
-.code-block .kw  { color: #c678dd; } /* 关键字 */
-.code-block .fn  { color: #61afef; } /* 函数名 */
-.code-block .str { color: #98c379; } /* 字符串 */
-.code-block .num { color: #d19a66; } /* 数字 */
-.code-block .cmt { color: #5c6370; font-style: italic; } /* 注释 */
-.code-block .cls { color: #e5c07b; } /* 类名 */
-.code-block .tag { color: #e06c75; } /* HTML 标签 */
-.code-block .atr { color: #d19a66; } /* 属性 */
-.code-block .val { color: #98c379; } /* 属性值 */
+[data-theme="dark"] .code-block .kw,  :root .code-block .kw  { color: #c678dd; }
+[data-theme="dark"] .code-block .fn,  :root .code-block .fn  { color: #61afef; }
+[data-theme="dark"] .code-block .str, :root .code-block .str { color: #98c379; }
+[data-theme="dark"] .code-block .num, :root .code-block .num { color: #d19a66; }
+[data-theme="dark"] .code-block .cmt, :root .code-block .cmt { color: #5c6370; font-style: italic; }
+[data-theme="dark"] .code-block .cls, :root .code-block .cls { color: #e5c07b; }
+[data-theme="dark"] .code-block .tag, :root .code-block .tag { color: #e06c75; }
+[data-theme="dark"] .code-block .atr, :root .code-block .atr { color: #d19a66; }
+[data-theme="dark"] .code-block .val, :root .code-block .val { color: #98c379; }
+/* 亮色主题语法高亮 */
+[data-theme="light"] .code-block { color: #383a42; }
+[data-theme="light"] .code-block .kw  { color: #a626a4; }
+[data-theme="light"] .code-block .fn  { color: #4078f2; }
+[data-theme="light"] .code-block .str { color: #50a14f; }
+[data-theme="light"] .code-block .num { color: #c18401; }
+[data-theme="light"] .code-block .cmt { color: #a0a1a7; font-style: italic; }
+[data-theme="light"] .code-block .cls { color: #c18401; }
+[data-theme="light"] .code-block .tag { color: #e45649; }
+[data-theme="light"] .code-block .atr { color: #986801; }
+[data-theme="light"] .code-block .val { color: #50a14f; }
 
 /* ── 演示区 ── */
 .demo-box {
@@ -232,9 +279,28 @@ body {
 .btn-outline:hover { background: rgba(108, 99, 255, 0.1); }
 .btn-sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
 
+/* ── 主题切换按钮 ── */
+.theme-toggle {
+  margin-left: auto;
+  flex-shrink: 0;
+  background: transparent;
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  padding: 0.3rem 0.55rem;
+  font-size: 1rem;
+  line-height: 1;
+  transition: background var(--transition), border-color var(--transition);
+  color: var(--color-text);
+}
+.theme-toggle:hover {
+  background: var(--color-surface-2);
+  border-color: var(--color-primary);
+}
+
 /* ── 输出控制台 ── */
 .console-output {
-  background: #0d1117;
+  background: var(--color-console-bg);
   border: 1px solid var(--color-border);
   border-radius: var(--radius-sm);
   padding: 0.75rem 1rem;
@@ -245,11 +311,11 @@ body {
   overflow-y: auto;
   margin-top: 0.75rem;
 }
-.console-output .log   { color: #abb2bf; }
+.console-output .log   { color: var(--color-text); }
 .console-output .info  { color: var(--color-secondary); }
 .console-output .warn  { color: var(--color-warning); }
 .console-output .error { color: var(--color-accent); }
-.console-output .result { color: #e5c07b; }
+.console-output .result { color: var(--color-warning); }
 
 /* ── 网格布局辅助 ── */
 .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; }
@@ -280,7 +346,7 @@ th, td {
   border-bottom: 1px solid var(--color-border);
 }
 th { color: var(--color-text-muted); font-weight: 600; background: var(--color-surface-2); }
-tr:hover td { background: rgba(255,255,255,0.02); }
+tr:hover td { background: var(--color-surface-2); }
 
 /* ── 滚动条 ── */
 ::-webkit-scrollbar { width: 6px; height: 6px; }

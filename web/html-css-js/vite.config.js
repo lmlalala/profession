@@ -1,6 +1,23 @@
 import { defineConfig } from 'vite'
+import postcssPxtorem from 'postcss-pxtorem'
 
 export default defineConfig({
+  css: {
+    postcss: {
+      plugins: [
+        postcssPxtorem({
+          rootValue: 16,
+          propList: ['*'],
+          // 不转换以下属性，避免影响边框等细节
+          exclude: /node_modules/i,
+          // 小于 1px 的不转换
+          minPixelValue: 1,
+          // 不转换媒体查询中的 px（媒体查询断点保持 px）
+          mediaQuery: false,
+        }),
+      ],
+    },
+  },
   // 多页面应用配置
   build: {
     rollupOptions: {
