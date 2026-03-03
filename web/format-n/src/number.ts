@@ -27,16 +27,16 @@ export interface FormatDecimalOptions {
    * - `'format'` 文本化展示：支持对 0 的格式化处理
    */
   event?: 'blur' | 'input' | 'format' | null
-  /** 最小小数位数，不足时强制补零（input 事件无效） */
-  placesMin?: number | null
-  /** 最大小数位数，为 0 时不允许输入小数 */
-  placesMax?: number | null
   /** 格式化数字最小值（input 事件无效，建议 @blur 处理） */
   valueMin?: number | null
   /** 格式化数字最大值 */
   valueMax?: number | null
   /** 最大整数位数 */
   intMax?: number | null
+  /** 最小小数位数，不足时强制补零（input 事件无效） */
+  placesMin?: number | null
+  /** 最大小数位数，为 0 时不允许输入小数 */
+  placesMax?: number | null
   /** 绝对值，仅允许 >= 0 的数字 */
   abs?: boolean | null
   /** 不允许为 0，为 0 则输出空（input 事件无效） */
