@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS 面试高频考点</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    /* BFC 演示 */
+    .bfc-no-clear::after { content: ''; display: none; }
+    .bfc-float { float: left; width: 60px; height: 60px; background: var(--color-primary); border-radius: 4px; margin-right: 10px; }
+    .bfc-parent { background: rgba(255,255,255,0.05); border: 2px dashed var(--color-border); padding: 8px; border-radius: 4px; margin-bottom: 0.5rem; }
+    .bfc-parent.bfc-active { overflow: hidden; border-color: var(--color-secondary); }
+    .bfc-text { font-size: 0.8rem; color: var(--color-text-muted); }
+
+    /* 居中方案 */
+    .center-demo {
+      height: 100px;
+      background: var(--color-surface-2);
+      border: 1px dashed var(--color-border);
+      border-radius: 4px;
+      position: relative;
+      margin-bottom: 0.5rem;
+    }
+    .center-child {
+      width: 80px; height: 40px;
+      background: var(--color-primary);
+      border-radius: 4px;
+      color: #fff;
+      font-size: 0.7rem;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .center-flex { display: flex; align-items: center; justify-content: center; }
+    .center-grid { display: grid; place-items: center; }
+    .center-abs .center-child { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
+    .center-abs2 .center-child { position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; }
+
+    /* 层叠上下文 */
+    .stacking-demo { position: relative; height: 120px; }
+    .stack-box {
+      position: absolute;
+      width: 80px; height: 80px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; color: #fff;
+    }
+
+    /* 响应式 */
+    .rwd-demo { font-size: 0.85rem; }
+
+    /* CSS 变量 */
+    .var-demo {
+      --btn-color: #6c63ff;
+      --btn-radius: 8px;
+    }
+    .var-btn {
+      background: var(--btn-color);
+      border-radius: var(--btn-radius);
+      color: #fff;
+      padding: 0.5rem 1rem;
+      border: none;
+      cursor: pointer;
+      font-size: 0.875rem;
+      transition: all 0.3s;
+    }
+
+    /* 伪元素 */
+    .pseudo-demo .clearfix::after {
+      content: '';
+      display: table;
+      clear: both;
+    }
+    .pseudo-item::before {
+      content: '▶ ';
+      color: var(--color-primary);
+    }
+    .pseudo-tooltip {
+      position: relative;
+      display: inline-block;
+      cursor: pointer;
+      color: var(--color-primary-light);
+      border-bottom: 1px dashed var(--color-primary);
+    }
+    .pseudo-tooltip::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      padding: 0.3rem 0.6rem;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+    .pseudo-tooltip:hover::after { opacity: 1; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="css-animation.html">CSS 动画</a></li>
+      <li><a href="css-interview.html" class="active">CSS 面试</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">CSS 面试高频考点</h1>
+    <p class="page-subtitle">BFC · 层叠上下文 · 居中方案 · 响应式 · CSS 变量 · 伪元素 · 性能优化</p>
+
+    <!-- 1. BFC -->
+    <section class="section">
+      <h2 class="section-title">1. BFC 块级格式化上下文 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>BFC 是什么？</strong>
+          Block Formatting Context，独立的渲染区域，内部布局不影响外部。
+          <br><strong>触发 BFC 的方式：</strong>
+          <code>overflow: hidden/auto/scroll</code> | <code>display: flex/grid/inline-block</code> |
+          <code>position: absolute/fixed</code> | <code>float: left/right</code>
+        </div>
+        <p class="card-title">BFC 的三大作用</p>
+        <div class="grid-2">
+          <div>
+            <div class="demo-label">① 清除浮动（父元素高度塌陷）</div>
+            <div class="bfc-parent" id="bfcParent">
+              <div class="bfc-float"></div>
+              <p class="bfc-text">父元素未触发 BFC，高度塌陷</p>
+            </div>
+            <button class="btn btn-outline btn-sm" onclick="toggleBFC()">切换 overflow:hidden</button>
+          </div>
+          <div>
+            <div class="demo-label">② 阻止 margin 合并</div>
+            <div class="code-block" style="font-size:0.78rem">
+<span class="cmt">/* 相邻兄弟 margin 会合并 */</span>
+.p1 { margin-bottom: 20px; }
+.p2 { margin-top: 30px; }
+<span class="cmt">/* 实际间距 = max(20,30) = 30px */</span>
+
+<span class="cmt">/* 用 BFC 包裹其中一个可阻止合并 */</span>
+.wrapper { overflow: hidden; }</div>
+            <div class="demo-label" style="margin-top:0.5rem">③ 阻止浮动元素覆盖</div>
+            <div class="code-block" style="font-size:0.78rem">
+.float { float: left; width: 60px; }
+.text  { overflow: hidden; } <span class="cmt">/* BFC */</span>
+<span class="cmt">/* text 不会被 float 覆盖，自适应宽度 */</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 层叠上下文 -->
+    <section class="section">
+      <h2 class="section-title">2. 层叠上下文（Stacking Context）<span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>触发层叠上下文的条件：</strong>
+          <code>position + z-index（非auto）</code> |
+          <code>opacity &lt; 1</code> |
+          <code>transform</code> |
+          <code>filter</code> |
+          <code>will-change</code> |
+          <code>display: flex/grid 的子元素 + z-index</code>
+        </div>
+        <div class="demo-label">层叠顺序（从低到高）</div>
+        <div style="display:flex;align-items:center;gap:0.5rem;flex-wrap:wrap;margin:0.75rem 0;font-size:0.8rem">
+          <span style="background:rgba(255,255,255,0.05);padding:0.3rem 0.6rem;border-radius:4px">背景/边框</span>
+          <span>→</span>
+          <span style="background:rgba(255,255,255,0.05);padding:0.3rem 0.6rem;border-radius:4px">负z-index</span>
+          <span>→</span>
+          <span style="background:rgba(255,255,255,0.05);padding:0.3rem 0.6rem;border-radius:4px">块级盒子</span>
+          <span>→</span>
+          <span style="background:rgba(255,255,255,0.05);padding:0.3rem 0.6rem;border-radius:4px">浮动盒子</span>
+          <span>→</span>
+          <span style="background:rgba(255,255,255,0.05);padding:0.3rem 0.6rem;border-radius:4px">行内盒子</span>
+          <span>→</span>
+          <span style="background:rgba(108,99,255,0.3);padding:0.3rem 0.6rem;border-radius:4px;color:var(--color-primary-light)">z-index:0</span>
+          <span>→</span>
+          <span style="background:rgba(0,212,170,0.2);padding:0.3rem 0.6rem;border-radius:4px;color:var(--color-secondary)">正z-index</span>
+        </div>
+        <div class="stacking-demo demo-box">
+          <div class="stack-box" style="background:var(--color-primary);left:0;top:10px;z-index:1">z:1</div>
+          <div class="stack-box" style="background:var(--color-secondary);color:#0f1117;left:40px;top:30px;z-index:3">z:3</div>
+          <div class="stack-box" style="background:var(--color-accent);left:80px;top:5px;z-index:2">z:2</div>
+          <div class="stack-box" style="background:var(--color-warning);color:#0f1117;left:120px;top:20px;z-index:4">z:4</div>
+        </div>
+        <div class="callout warn" style="margin-top:0.75rem">
+          <strong>常见陷阱</strong>
+          子元素的 z-index 只在同一层叠上下文内比较。父元素 z-index 低，子元素无论设多高都无法超过其他父元素的子元素。
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 居中方案 -->
+    <section class="section">
+      <h2 class="section-title">3. 水平垂直居中方案 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="grid-2">
+          <div>
+            <div class="demo-label">① Flexbox（推荐）</div>
+            <div class="center-demo center-flex"><div class="center-child">flex</div></div>
+            <div class="code-block" style="font-size:0.78rem">.parent {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}</div>
+          </div>
+          <div>
+            <div class="demo-label">② Grid place-items</div>
+            <div class="center-demo center-grid"><div class="center-child">grid</div></div>
+            <div class="code-block" style="font-size:0.78rem">.parent {
+  display: grid;
+  place-items: center;
+}</div>
+          </div>
+          <div>
+            <div class="demo-label">③ absolute + transform</div>
+            <div class="center-demo center-abs"><div class="center-child">abs</div></div>
+            <div class="code-block" style="font-size:0.78rem">.parent { position: relative; }
+.child {
+  position: absolute;
+  top: 50%; left: 50%;
+  transform: translate(-50%, -50%);
+}</div>
+          </div>
+          <div>
+            <div class="demo-label">④ absolute + margin:auto</div>
+            <div class="center-demo center-abs2"><div class="center-child">auto</div></div>
+            <div class="code-block" style="font-size:0.78rem">.parent { position: relative; }
+.child {
+  position: absolute;
+  inset: 0; /* top/right/bottom/left: 0 */
+  margin: auto;
+  width: 80px; height: 40px;
+}</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 响应式设计 -->
+    <section class="section">
+      <h2 class="section-title">4. 响应式设计 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 媒体查询 */</span>
+<span class="kw">@media</span> (max-width: <span class="num">768px</span>) {
+  .container { flex-direction: column; }
+}
+<span class="kw">@media</span> (min-width: <span class="num">768px</span>) <span class="kw">and</span> (max-width: <span class="num">1024px</span>) {
+  .grid { grid-template-columns: <span class="fn">repeat</span>(<span class="num">2</span>, <span class="num">1fr</span>); }
+}
+
+<span class="cmt">/* 视口单位 */</span>
+width: <span class="num">100vw</span>;   <span class="cmt">/* 视口宽度 100% */</span>
+height: <span class="num">100vh</span>;  <span class="cmt">/* 视口高度 100% */</span>
+font-size: <span class="num">5vw</span>; <span class="cmt">/* 随视口宽度缩放 */</span>
+
+<span class="cmt">/* clamp：响应式字体大小 */</span>
+font-size: <span class="fn">clamp</span>(<span class="num">1rem</span>, <span class="num">2.5vw</span>, <span class="num">2rem</span>); <span class="cmt">/* min, preferred, max */</span>
+
+<span class="cmt">/* 图片响应式 */</span>
+img { max-width: <span class="num">100%</span>; height: auto; }
+
+<span class="cmt">/* 移动端 meta 标签（必须！）*/</span>
+&lt;meta name=<span class="str">"viewport"</span> content=<span class="str">"width=device-width, initial-scale=1.0"</span>&gt;</div>
+        <div class="callout tip">
+          <strong>移动优先（Mobile First）</strong>
+          先写手机样式，再用 <code>min-width</code> 媒体查询覆盖大屏样式。比"桌面优先"性能更好，因为移动端不需要下载和解析覆盖样式。
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. CSS 变量 -->
+    <section class="section">
+      <h2 class="section-title">5. CSS 自定义属性（变量）</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 定义（通常在 :root 全局定义）*/</span>
+:root {
+  --color-primary: #6c63ff;
+  --spacing-md: 1rem;
+  --radius: 8px;
+}
+<span class="cmt">/* 使用 */</span>
+.btn { background: <span class="fn">var</span>(--color-primary); padding: <span class="fn">var</span>(--spacing-md); }
+
+<span class="cmt">/* 带默认值 */</span>
+color: <span class="fn">var</span>(--text-color, #333);
+
+<span class="cmt">/* JS 动态修改 */</span>
+document.documentElement.style.<span class="fn">setProperty</span>(<span class="str">'--color-primary'</span>, <span class="str">'#ff6584'</span>)</div>
+        <div class="demo-box var-demo">
+          <div class="demo-label">动态主题切换演示</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:0.75rem">
+            <button class="btn btn-sm" style="background:#6c63ff;color:#fff" onclick="setTheme('#6c63ff','#00d4aa')">紫色主题</button>
+            <button class="btn btn-sm" style="background:#ff6584;color:#fff" onclick="setTheme('#ff6584','#ffd166')">粉色主题</button>
+            <button class="btn btn-sm" style="background:#00d4aa;color:#0f1117" onclick="setTheme('#00d4aa','#6c63ff')">绿色主题</button>
+          </div>
+          <button class="var-btn" id="varBtn">CSS 变量按钮</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 伪元素 -->
+    <section class="section">
+      <h2 class="section-title">6. 伪元素 ::before / ::after <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 必须有 content 属性（可以为空字符串）*/</span>
+.item::before { content: <span class="str">'▶ '</span>; color: #6c63ff; }
+
+<span class="cmt">/* 清除浮动（经典 clearfix）*/</span>
+.clearfix::after {
+  content: <span class="str">''</span>;
+  display: table;
+  clear: both;
+}
+
+<span class="cmt">/* 纯 CSS tooltip */</span>
+[data-tip]::after {
+  content: <span class="fn">attr</span>(data-tip); <span class="cmt">/* 读取 HTML 属性 */</span>
+  position: absolute;
+  <span class="cmt">/* ... */</span>
+}</div>
+        <div class="demo-box pseudo-demo">
+          <p class="pseudo-item">使用 ::before 添加图标</p>
+          <p class="pseudo-item">无需修改 HTML 结构</p>
+          <p class="pseudo-item">常用于装饰、清除浮动</p>
+          <p style="margin-top:0.75rem">
+            <span class="pseudo-tooltip" data-tip="这是纯 CSS tooltip，无 JS！">hover 我查看 tooltip</span>
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 性能优化 -->
+    <section class="section">
+      <h2 class="section-title">7. CSS 性能优化 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>优化点</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>使用 transform/opacity 做动画</td><td>只触发 Composite，不触发 Reflow/Repaint</td></tr>
+              <tr><td>will-change: transform</td><td>提前告知浏览器该元素会变化，创建独立图层（慎用，耗内存）</td></tr>
+              <tr><td>避免使用 @import</td><td>串行加载，改用 &lt;link&gt; 并行加载</td></tr>
+              <tr><td>减少选择器嵌套层级</td><td>浏览器从右向左匹配，层级越深越慢</td></tr>
+              <tr><td>使用 contain: layout</td><td>限制重排范围，提升性能</td></tr>
+              <tr><td>关键 CSS 内联</td><td>首屏关键样式内联，减少渲染阻塞</td></tr>
+              <tr><td>避免频繁读取布局属性</td><td>offsetWidth/scrollTop 等会强制同步布局（强制重排）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>重排（Reflow）vs 重绘（Repaint）vs 合成（Composite）</strong>
+          重排 &gt; 重绘 &gt; 合成（性能开销从高到低）。
+          修改 <code>width/height/margin/padding/top/left</code> → 重排。
+          修改 <code>color/background/visibility</code> → 重绘。
+          修改 <code>transform/opacity</code> → 合成（最快）。
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // BFC 演示
+    function toggleBFC() {
+      const p = document.getElementById('bfcParent')
+      p.classList.toggle('bfc-active')
+      p.querySelector('.bfc-text').textContent = p.classList.contains('bfc-active')
+        ? '✅ overflow:hidden 触发 BFC，高度自适应'
+        : '父元素未触发 BFC，高度塌陷'
+    }
+
+    // CSS 变量主题切换
+    function setTheme(primary, secondary) {
+      document.documentElement.style.setProperty('--color-primary', primary)
+      document.documentElement.style.setProperty('--color-secondary', secondary)
+      document.documentElement.style.setProperty('--color-primary-light', primary)
+      const btn = document.getElementById('varBtn')
+      btn.style.background = primary
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+src
+node_modules
+*.config.ts
+*.config.js
+eslint.config.js
+tsconfig.json
+.prettierrc
+.prettierignore
+.gitignore

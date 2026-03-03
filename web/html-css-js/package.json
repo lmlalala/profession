@@ -1,0 +1,25 @@
+{
+  "name": "html-css-js-study",
+  "version": "1.0.0",
+  "description": "HTML5 + CSS3 + JavaScript 渐进式学习项目",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "preview": "vite preview --open",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint ."
+  },
+  "devDependencies": {
+    "@esbuild/win32-x64": "^0.27.3",
+    "@eslint/js": "^10.0.1",
+    "eslint": "^10.0.2",
+    "globals": "^17.4.0",
+    "vite": "^5.4.21"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

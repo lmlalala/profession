@@ -1,0 +1,51 @@
+{
+  "name": "vue3-nuxt-study",
+  "type": "module",
+  "private": true,
+  "scripts": {
+    "build": "nuxt build",
+    "dev": "nuxt dev",
+    "generate": "nuxt generate",
+    "preview": "nuxt preview",
+    "postinstall": "nuxt prepare",
+    "typecheck": "vue-tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write \"**/*.{ts,vue}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,vue}\" --ignore-path .gitignore"
+  },
+  "dependencies": {
+    "@oxc-minify/binding-win32-x64-msvc": "^0.116.0",
+    "@oxc-parser/binding-win32-x64-msvc": "^0.116.0",
+    "@oxc-transform/binding-win32-x64-msvc": "^0.116.0",
+    "@pinia/nuxt": "^0.9.0",
+    "element-plus": "^2.9.7",
+    "nuxt": "^3.15.4",
+    "pinia": "^2.3.1",
+    "vue": "^3.5.13",
+    "vue-router": "^4.5.0"
+  },
+  "devDependencies": {
+    "@element-plus/nuxt": "^1.0.10",
+    "@eslint/js": "^10.0.1",
+    "@nuxt/devtools": "^2.3.2",
+    "@types/node": "^22.13.9",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-vue": "^10.8.0",
+    "globals": "^17.4.0",
+    "prettier": "^3.8.1",
+    "sass-embedded": "^1.97.3",
+    "typescript": "^5.8.2",
+    "typescript-eslint": "^8.56.1",
+    "vue-eslint-parser": "^10.4.0",
+    "vue-tsc": "^2.2.4"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "@parcel/watcher",
+      "esbuild",
+      "vue-demi"
+    ]
+  }
+}

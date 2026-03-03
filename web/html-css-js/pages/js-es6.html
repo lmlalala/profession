@@ -1,0 +1,494 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS ES6+ 现代语法</title>
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="css-animation.html">CSS 动画</a></li>
+      <li><a href="css-interview.html">CSS 面试</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html" class="active">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">ES6+ 现代语法</h1>
+    <p class="page-subtitle">解构 · 展开 · 箭头函数 · 模板字符串 · 类 · 模块 · Symbol · 迭代器 · 生成器 · Proxy · WeakRef</p>
+
+    <!-- 1. 解构与展开 -->
+    <section class="section">
+      <h2 class="section-title">1. 解构赋值与展开运算符</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 数组解构</span>
+<span class="kw">const</span> [a, b, ...rest] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
+<span class="cmt">// a=1, b=2, rest=[3,4,5]</span>
+
+<span class="cmt">// 跳过元素 / 默认值</span>
+<span class="kw">const</span> [, second, , fourth = <span class="num">99</span>] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>]
+<span class="cmt">// second=2, fourth=99（默认值）</span>
+
+<span class="cmt">// 对象解构</span>
+<span class="kw">const</span> { name, age = <span class="num">18</span>, address: { city } } = {
+  name: <span class="str">'Alice'</span>, address: { city: <span class="str">'Beijing'</span> }
+}
+<span class="cmt">// name='Alice', age=18, city='Beijing'</span>
+
+<span class="cmt">// 重命名</span>
+<span class="kw">const</span> { name: userName, role: userRole = <span class="str">'user'</span> } = { name: <span class="str">'Bob'</span> }
+
+<span class="cmt">// 函数参数解构</span>
+<span class="kw">function</span> <span class="fn">greet</span>({ name, greeting = <span class="str">'Hello'</span> }) {
+  <span class="kw">return</span> <span class="str">`${greeting}, ${name}!`</span>
+}
+
+<span class="cmt">// 展开运算符</span>
+<span class="kw">const</span> arr1 = [<span class="num">1</span>, <span class="num">2</span>], arr2 = [<span class="num">3</span>, <span class="num">4</span>]
+<span class="kw">const</span> merged = [...arr1, ...arr2]  <span class="cmt">// [1,2,3,4]</span>
+
+<span class="kw">const</span> obj1 = { a: <span class="num">1</span> }, obj2 = { b: <span class="num">2</span>, a: <span class="num">99</span> }
+<span class="kw">const</span> mergedObj = { ...obj1, ...obj2 } <span class="cmt">// { a:99, b:2 }（后者覆盖）</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runDestructure()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r1.clear()">清空</button>
+          <div class="console-output" id="out1"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 模板字符串 / 标签模板 -->
+    <section class="section">
+      <h2 class="section-title">2. 模板字符串与标签模板</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 模板字符串</span>
+<span class="kw">const</span> name = <span class="str">'Alice'</span>
+<span class="kw">const</span> msg = <span class="str">`Hello, ${name}! 1+1=${1+1}`</span>
+
+<span class="cmt">// 多行字符串</span>
+<span class="kw">const</span> html = <span class="str">`
+  &lt;div&gt;
+    &lt;h1&gt;${name}&lt;/h1&gt;
+  &lt;/div&gt;
+`</span>
+
+<span class="cmt">// 标签模板（Tagged Template）</span>
+<span class="kw">function</span> <span class="fn">highlight</span>(strings, ...values) {
+  <span class="kw">return</span> strings.<span class="fn">reduce</span>((acc, str, i) =>
+    acc + str + (values[i] !== <span class="kw">undefined</span> ? <span class="str">`[${values[i]}]`</span> : <span class="str">''</span>), <span class="str">''</span>)
+}
+<span class="fn">highlight</span><span class="str">`Name: ${name}, Age: ${25}`</span>
+<span class="cmt">// "Name: [Alice], Age: [25]"</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runTemplate()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r2.clear()">清空</button>
+          <div class="console-output" id="out2"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Symbol -->
+    <section class="section">
+      <h2 class="section-title">3. Symbol <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// Symbol：唯一标识符</span>
+<span class="kw">const</span> s1 = Symbol(<span class="str">'id'</span>)
+<span class="kw">const</span> s2 = Symbol(<span class="str">'id'</span>)
+s1 === s2  <span class="cmt">// false（每次都是唯一的）</span>
+
+<span class="cmt">// 全局 Symbol（Symbol.for 共享）</span>
+<span class="kw">const</span> gs1 = Symbol.<span class="fn">for</span>(<span class="str">'shared'</span>)
+<span class="kw">const</span> gs2 = Symbol.<span class="fn">for</span>(<span class="str">'shared'</span>)
+gs1 === gs2  <span class="cmt">// true</span>
+
+<span class="cmt">// Symbol 作为对象 key（不被枚举）</span>
+<span class="kw">const</span> ID = Symbol(<span class="str">'id'</span>)
+<span class="kw">const</span> user = { [ID]: <span class="num">42</span>, name: <span class="str">'Alice'</span> }
+Object.<span class="fn">keys</span>(user)    <span class="cmt">// ['name']（不含 Symbol）</span>
+user[ID]             <span class="cmt">// 42</span>
+
+<span class="cmt">// 内置 Symbol（Well-known Symbols）</span>
+<span class="kw">class</span> <span class="cls">MyArray</span> {
+  [Symbol.iterator]() { <span class="cmt">/* 自定义迭代 */</span> }
+}
+<span class="kw">class</span> <span class="cls">Foo</span> {
+  [Symbol.toPrimitive](hint) {
+    <span class="kw">if</span> (hint === <span class="str">'number'</span>) <span class="kw">return</span> <span class="num">42</span>
+    <span class="kw">return</span> <span class="str">'Foo'</span>
+  }
+}</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runSymbol()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r3.clear()">清空</button>
+          <div class="console-output" id="out3"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 迭代器与生成器 -->
+    <section class="section">
+      <h2 class="section-title">4. 迭代器（Iterator）与生成器（Generator）<span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 迭代器协议：对象有 next() 方法，返回 { value, done }</span>
+<span class="kw">function</span> <span class="fn">createRange</span>(start, end) {
+  <span class="kw">let</span> current = start
+  <span class="kw">return</span> {
+    [Symbol.iterator]() { <span class="kw">return</span> <span class="kw">this</span> },
+    <span class="fn">next</span>() {
+      <span class="kw">return</span> current <= end
+        ? { value: current++, done: <span class="kw">false</span> }
+        : { value: <span class="kw">undefined</span>, done: <span class="kw">true</span> }
+    }
+  }
+}
+[...createRange(<span class="num">1</span>, <span class="num">5</span>)]  <span class="cmt">// [1,2,3,4,5]</span>
+
+<span class="cmt">// 生成器函数（function*）</span>
+<span class="kw">function</span>* <span class="fn">fibonacci</span>() {
+  <span class="kw">let</span> [a, b] = [<span class="num">0</span>, <span class="num">1</span>]
+  <span class="kw">while</span> (<span class="kw">true</span>) {
+    <span class="kw">yield</span> a;
+    [a, b] = [b, a + b]
+  }
+}
+<span class="kw">const</span> fib = <span class="fn">fibonacci</span>()
+fib.<span class="fn">next</span>().value  <span class="cmt">// 0</span>
+fib.<span class="fn">next</span>().value  <span class="cmt">// 1</span>
+fib.<span class="fn">next</span>().value  <span class="cmt">// 1</span>
+
+<span class="cmt">// yield* 委托给另一个可迭代对象</span>
+<span class="kw">function</span>* <span class="fn">concat</span>(...iters) {
+  <span class="kw">for</span> (<span class="kw">const</span> iter <span class="kw">of</span> iters) <span class="kw">yield</span>* iter
+}
+[...concat([<span class="num">1</span>,<span class="num">2</span>], [<span class="num">3</span>,<span class="num">4</span>], [<span class="num">5</span>])]  <span class="cmt">// [1,2,3,4,5]</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runGenerator()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r4.clear()">清空</button>
+          <div class="console-output" id="out4"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Proxy / Reflect -->
+    <section class="section">
+      <h2 class="section-title">5. Proxy 与 Reflect <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>Proxy</strong> 拦截对象的基本操作（读取、赋值、删除等），是 Vue3 响应式系统的核心。
+        </div>
+        <div class="code-block"><span class="cmt">// 数据验证代理</span>
+<span class="kw">const</span> validator = {
+  <span class="fn">set</span>(target, key, value) {
+    <span class="kw">if</span> (key === <span class="str">'age'</span> && (typeof value !== <span class="str">'number'</span> || value < <span class="num">0</span>))
+      <span class="kw">throw</span> <span class="kw">new</span> TypeError(<span class="str">'age 必须是非负数字'</span>)
+    target[key] = value
+    <span class="kw">return</span> <span class="kw">true</span>
+  }
+}
+<span class="kw">const</span> person = <span class="kw">new</span> Proxy({}, validator)
+person.age = <span class="num">25</span>    <span class="cmt">// ✅</span>
+person.age = <span class="str">'old'</span> <span class="cmt">// ❌ TypeError</span>
+
+<span class="cmt">// 响应式代理（Vue3 原理简化版）</span>
+<span class="kw">function</span> <span class="fn">reactive</span>(obj) {
+  <span class="kw">return</span> <span class="kw">new</span> Proxy(obj, {
+    <span class="fn">get</span>(target, key) {
+      console.<span class="fn">log</span>(<span class="str">`读取 ${key}`</span>)
+      <span class="kw">return</span> Reflect.<span class="fn">get</span>(target, key)
+    },
+    <span class="fn">set</span>(target, key, value) {
+      console.<span class="fn">log</span>(<span class="str">`设置 ${key} = ${value}`</span>)
+      <span class="kw">return</span> Reflect.<span class="fn">set</span>(target, key, value)
+    }
+  })
+}</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runProxy()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r5.clear()">清空</button>
+          <div class="console-output" id="out5"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 可选链 / 空值合并 / 逻辑赋值 -->
+    <section class="section">
+      <h2 class="section-title">6. ES2020+ 新特性</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 可选链 ?.（ES2020）</span>
+<span class="kw">const</span> user = { profile: { avatar: <span class="str">'url'</span> } }
+user?.profile?.avatar     <span class="cmt">// "url"</span>
+user?.address?.city       <span class="cmt">// undefined（不报错）</span>
+user?.greet?.()           <span class="cmt">// undefined（方法可选链）</span>
+
+<span class="cmt">// 空值合并 ??（ES2020）</span>
+<span class="kw">null</span> ?? <span class="str">'default'</span>    <span class="cmt">// "default"</span>
+<span class="kw">undefined</span> ?? <span class="str">'default'</span> <span class="cmt">// "default"</span>
+<span class="num">0</span> ?? <span class="str">'default'</span>       <span class="cmt">// 0（0 不是 null/undefined）</span>
+<span class="str">''</span> ?? <span class="str">'default'</span>      <span class="cmt">// ""（区别于 || 运算符）</span>
+
+<span class="cmt">// 逻辑赋值（ES2021）</span>
+a ||= b   <span class="cmt">// 等价于 a = a || b</span>
+a &&= b   <span class="cmt">// 等价于 a = a && b</span>
+a ??= b   <span class="cmt">// 等价于 a = a ?? b</span>
+
+<span class="cmt">// Object.fromEntries（ES2019）</span>
+<span class="kw">const</span> entries = [[<span class="str">'a'</span>, <span class="num">1</span>], [<span class="str">'b'</span>, <span class="num">2</span>]]
+Object.<span class="fn">fromEntries</span>(entries)  <span class="cmt">// { a:1, b:2 }</span>
+
+<span class="cmt">// Array 新方法（ES2023）</span>
+[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="fn">at</span>(-<span class="num">1</span>)           <span class="cmt">// 3（支持负索引）</span>
+[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="fn">toReversed</span>()      <span class="cmt">// [3,2,1]（不修改原数组）</span>
+[<span class="num">3</span>,<span class="num">1</span>,<span class="num">2</span>].<span class="fn">toSorted</span>()        <span class="cmt">// [1,2,3]（不修改原数组）</span>
+[<span class="num">1</span>,<span class="num">2</span>,<span class="num">3</span>].<span class="fn">with</span>(<span class="num">1</span>, <span class="num">99</span>)        <span class="cmt">// [1,99,3]（不修改原数组）</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runModern()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r6.clear()">清空</button>
+          <div class="console-output" id="out6"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../js/runner.js"></script>
+  <script>
+    const r1 = createRunner('out1')
+    const r2 = createRunner('out2')
+    const r3 = createRunner('out3')
+    const r4 = createRunner('out4')
+    const r5 = createRunner('out5')
+    const r6 = createRunner('out6')
+
+    function runDestructure() {
+      r1.run(() => {
+        const [a, b, ...rest] = [1, 2, 3, 4, 5]
+        console.log('数组解构 a,b:', a, b)
+        console.log('rest:', JSON.stringify(rest))
+
+        const [, second, , fourth = 99] = [1, 2, 3]
+        console.log('跳过+默认值 second,fourth:', second, fourth)
+
+        const { name, age = 18, address: { city } } = { name: 'Alice', address: { city: 'Beijing' } }
+        console.log('对象解构 name,age,city:', name, age, city)
+
+        const { name: userName, role: userRole = 'user' } = { name: 'Bob' }
+        console.log('重命名 userName,userRole:', userName, userRole)
+
+        function greet({ name, greeting = 'Hello' }) { return `${greeting}, ${name}!` }
+        console.log('参数解构:', greet({ name: 'Charlie' }))
+        console.log('参数解构:', greet({ name: 'Dave', greeting: 'Hi' }))
+
+        const arr1 = [1, 2], arr2 = [3, 4]
+        console.log('展开合并数组:', JSON.stringify([...arr1, ...arr2]))
+
+        const obj1 = { a: 1 }, obj2 = { b: 2, a: 99 }
+        console.log('展开合并对象:', JSON.stringify({ ...obj1, ...obj2 }))
+
+        // 交换变量
+        let x = 1, y = 2;
+        [x, y] = [y, x]
+        console.log('解构交换变量 x,y:', x, y)
+      })
+    }
+
+    function runTemplate() {
+      r2.run(() => {
+        const name = 'Alice', age = 25
+        console.log(`模板字符串: Hello, ${name}! 明年 ${age + 1} 岁`)
+
+        function highlight(strings, ...values) {
+          return strings.reduce((acc, str, i) =>
+            acc + str + (values[i] !== undefined ? `【${values[i]}】` : ''), '')
+        }
+        console.log('标签模板:', highlight`姓名: ${name}, 年龄: ${age}`)
+
+        // 安全 HTML 转义
+        function safeHtml(strings, ...values) {
+          const escape = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+          return strings.reduce((acc, str, i) => acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
+        }
+        const userInput = '<script>alert("xss")</script>'
+        console.log('安全 HTML:', safeHtml`<p>${userInput}</p>`)
+      })
+    }
+
+    function runSymbol() {
+      r3.run(() => {
+        const s1 = Symbol('id'), s2 = Symbol('id')
+        console.log('Symbol 唯一性 s1===s2:', s1 === s2)
+        console.log('Symbol.for 共享:', Symbol.for('x') === Symbol.for('x'))
+
+        const ID = Symbol('id')
+        const user = { [ID]: 42, name: 'Alice', role: 'admin' }
+        console.log('Object.keys（不含Symbol）:', JSON.stringify(Object.keys(user)))
+        console.log('Symbol key 访问:', user[ID])
+        console.log('getOwnPropertySymbols:', Object.getOwnPropertySymbols(user).length, '个 Symbol')
+
+        // Symbol.toPrimitive
+        class Money {
+          constructor(amount, currency) { this.amount = amount; this.currency = currency }
+          [Symbol.toPrimitive](hint) {
+            if (hint === 'number') return this.amount
+            if (hint === 'string') return `${this.amount} ${this.currency}`
+            return this.amount
+          }
+          [Symbol.toStringTag]() { return 'Money' }
+        }
+        const price = new Money(99.9, 'CNY')
+        console.log('Symbol.toPrimitive number:', +price)
+        console.log('Symbol.toPrimitive string:', `${price}`)
+      })
+    }
+
+    function runGenerator() {
+      r4.run(() => {
+        // 自定义迭代器
+        function createRange(start, end) {
+          let current = start
+          return {
+            [Symbol.iterator]() { return this },
+            next() {
+              return current <= end
+                ? { value: current++, done: false }
+                : { value: undefined, done: true }
+            }
+          }
+        }
+        console.log('自定义迭代器:', JSON.stringify([...createRange(1, 5)]))
+
+        // 生成器
+        function* fibonacci() {
+          let [a, b] = [0, 1]
+          while (true) { yield a; [a, b] = [b, a + b] }
+        }
+        const fib = fibonacci()
+        const first8 = Array.from({ length: 8 }, () => fib.next().value)
+        console.log('Fibonacci 前8项:', JSON.stringify(first8))
+
+        // 生成器实现无限序列
+        function* range(start, end, step = 1) {
+          for (let i = start; i <= end; i += step) yield i
+        }
+        console.log('range(1,10,2):', JSON.stringify([...range(1, 10, 2)]))
+
+        // yield* 委托
+        function* concat(...iters) { for (const iter of iters) yield* iter }
+        console.log('yield* concat:', JSON.stringify([...concat([1,2], [3,4], [5])]))
+
+        // 生成器双向通信
+        function* calculator() {
+          let result = 0
+          while (true) {
+            const input = yield result
+            if (input === null) break
+            result += input
+          }
+          return result
+        }
+        const calc = calculator()
+        calc.next()      // 启动
+        calc.next(10)    // result = 10
+        calc.next(20)    // result = 30
+        const final = calc.next(5)  // result = 35
+        console.log('生成器双向通信 result:', final.value)
+      })
+    }
+
+    function runProxy() {
+      r5.run(() => {
+        // 数据验证
+        const validator = {
+          set(target, key, value) {
+            if (key === 'age' && (typeof value !== 'number' || value < 0))
+              throw new TypeError('age 必须是非负数字')
+            target[key] = value
+            return true
+          }
+        }
+        const person = new Proxy({}, validator)
+        person.age = 25
+        console.log('Proxy 验证通过 age:', person.age)
+        try { person.age = -1 } catch(e) { console.warn('Proxy 验证失败:', e.message) }
+
+        // 响应式代理
+        const logs = []
+        function reactive(obj) {
+          return new Proxy(obj, {
+            get(target, key) { logs.push(`get:${key}`); return Reflect.get(target, key) },
+            set(target, key, value) { logs.push(`set:${key}=${value}`); return Reflect.set(target, key, value) }
+          })
+        }
+        const state = reactive({ count: 0, name: 'Alice' })
+        state.count++
+        const _ = state.name
+        console.log('Proxy 响应式日志:', JSON.stringify(logs))
+
+        // 函数调用追踪
+        function traceFunction(fn, name) {
+          return new Proxy(fn, {
+            apply(target, thisArg, args) {
+              console.log(`调用 ${name}(${args.join(',')})`)
+              const result = Reflect.apply(target, thisArg, args)
+              console.log(`${name} 返回:`, result)
+              return result
+            }
+          })
+        }
+        const tracedAdd = traceFunction((a, b) => a + b, 'add')
+        tracedAdd(3, 4)
+      })
+    }
+
+    function runModern() {
+      r6.run(() => {
+        // 可选链
+        const user = { profile: { avatar: 'avatar.png' }, getName() { return 'Alice' } }
+        console.log('可选链 profile.avatar:', user?.profile?.avatar)
+        console.log('可选链 address.city:', user?.address?.city)
+        console.log('可选链方法:', user?.getName?.())
+        console.log('可选链不存在方法:', user?.greet?.())
+
+        // 空值合并
+        console.log('null ?? "default":', null ?? 'default')
+        console.log('0 ?? "default":', 0 ?? 'default')
+        console.log('"" ?? "default":', '' ?? 'default')
+        console.log('0 || "default":', 0 || 'default')  // 对比 ||
+
+        // 逻辑赋值
+        let a = null; a ??= 'hello'; console.log('??= 赋值:', a)
+        let b = 0; b ||= 42; console.log('||= 赋值:', b)
+        let c = 1; c &&= 99; console.log('&&= 赋值:', c)
+
+        // Object.fromEntries
+        const map = new Map([['a', 1], ['b', 2]])
+        console.log('fromEntries(Map):', JSON.stringify(Object.fromEntries(map)))
+        const doubled = Object.fromEntries(Object.entries({ x: 1, y: 2 }).map(([k, v]) => [k, v * 2]))
+        console.log('fromEntries 变换:', JSON.stringify(doubled))
+
+        // Array 新方法
+        console.log('at(-1):', [1, 2, 3].at(-1))
+        console.log('toReversed:', JSON.stringify([1, 2, 3].toReversed()))
+        console.log('toSorted:', JSON.stringify([3, 1, 2].toSorted()))
+        console.log('with(1,99):', JSON.stringify([1, 2, 3].with(1, 99)))
+
+        // structuredClone（ES2022）
+        const original = { a: 1, b: { c: 2 }, d: [1, 2, 3] }
+        const clone = structuredClone(original)
+        clone.b.c = 999
+        console.log('structuredClone 深拷贝 original.b.c:', original.b.c)
+        console.log('structuredClone 深拷贝 clone.b.c:', clone.b.c)
+      })
+    }
+  </script>
+</body>
+</html>

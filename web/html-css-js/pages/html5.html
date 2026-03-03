@@ -1,0 +1,456 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML5 语义化与新特性</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    .semantic-demo {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      overflow: hidden;
+      font-size: 0.85rem;
+    }
+    .semantic-demo > * { padding: 0.5rem 1rem; border-bottom: 1px solid var(--color-border); }
+    .semantic-demo > *:last-child { border-bottom: none; }
+    .s-header { background: rgba(108,99,255,0.15); color: var(--color-primary-light); }
+    .s-nav    { background: rgba(0,212,170,0.1);  color: var(--color-secondary); }
+    .s-main   { background: rgba(255,255,255,0.03); }
+    .s-aside  { background: rgba(255,209,102,0.08); color: var(--color-warning); }
+    .s-footer { background: rgba(255,101,132,0.08); color: var(--color-accent); }
+    .form-demo input, .form-demo select, .form-demo textarea {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      padding: 0.5rem 0.75rem;
+      font-size: 0.875rem;
+      width: 100%;
+      margin-bottom: 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .form-demo input:focus, .form-demo select:focus, .form-demo textarea:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+    .form-demo label { font-size: 0.85rem; color: var(--color-text-muted); display: block; margin-bottom: 0.25rem; }
+    .storage-demo { display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; }
+    .storage-demo input { flex: 1; min-width: 120px; }
+    canvas#demoCanvas {
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      display: block;
+      cursor: crosshair;
+    }
+    .drag-zone {
+      border: 2px dashed var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.5rem;
+      text-align: center;
+      color: var(--color-text-muted);
+      transition: all var(--transition);
+      min-height: 80px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .drag-zone.over { border-color: var(--color-primary); background: rgba(108,99,255,0.08); color: var(--color-primary-light); }
+    .drag-item {
+      display: inline-block;
+      padding: 0.4rem 0.9rem;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: grab;
+      font-size: 0.875rem;
+      margin: 0.25rem;
+      transition: all var(--transition);
+    }
+    .drag-item:active { cursor: grabbing; opacity: 0.6; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html" class="active">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="css-animation.html">CSS 动画</a></li>
+      <li><a href="css-interview.html">CSS 面试</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">HTML5 语义化与新特性</h1>
+    <p class="page-subtitle">语义化标签 · 表单增强 · Canvas · Web Storage · 拖拽 API · 自定义数据属性</p>
+
+    <!-- 1. 语义化标签 -->
+    <section class="section">
+      <h2 class="section-title">1. 语义化标签 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <p class="card-title">为什么要语义化？</p>
+        <div class="callout info">
+          <strong>核心价值</strong>
+          ① 利于 SEO（搜索引擎更好理解内容结构）&nbsp;&nbsp;
+          ② 提升可访问性（屏幕阅读器）&nbsp;&nbsp;
+          ③ 代码可读性强，便于维护
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="demo-label">❌ 非语义化（div 地狱）</div>
+            <div class="code-block"><span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"header"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"nav"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"main"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"sidebar"</span><span class="tag">&gt;</span>...
+<span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"footer"</span><span class="tag">&gt;</span>...</div>
+          </div>
+          <div>
+            <div class="demo-label">✅ 语义化</div>
+            <div class="code-block"><span class="tag">&lt;header&gt;</span>页头<span class="tag">&lt;/header&gt;</span>
+<span class="tag">&lt;nav&gt;</span>导航<span class="tag">&lt;/nav&gt;</span>
+<span class="tag">&lt;main&gt;</span>
+  <span class="tag">&lt;article&gt;</span>文章<span class="tag">&lt;/article&gt;</span>
+  <span class="tag">&lt;aside&gt;</span>侧边栏<span class="tag">&lt;/aside&gt;</span>
+<span class="tag">&lt;/main&gt;</span>
+<span class="tag">&lt;footer&gt;</span>页脚<span class="tag">&lt;/footer&gt;</span></div>
+          </div>
+        </div>
+        <div class="demo-box">
+          <div class="demo-label">页面结构可视化</div>
+          <div class="semantic-demo">
+            <div class="s-header">📌 &lt;header&gt; — 页头，包含 logo、标题</div>
+            <div class="s-nav">🧭 &lt;nav&gt; — 主导航链接</div>
+            <div class="s-main">
+              📄 &lt;main&gt; — 主体内容（每页唯一）
+              <div style="margin-top:0.5rem;padding-left:1rem;border-left:2px solid var(--color-border)">
+                <div>📰 &lt;article&gt; — 独立可复用内容（文章、帖子）</div>
+                <div>📦 &lt;section&gt; — 章节，有标题的内容块</div>
+              </div>
+            </div>
+            <div class="s-aside">📎 &lt;aside&gt; — 侧边栏、相关内容</div>
+            <div class="s-footer">🔻 &lt;footer&gt; — 页脚、版权信息</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">其他常用语义化标签</p>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>标签</th><th>语义</th><th>使用场景</th></tr></thead>
+            <tbody>
+              <tr><td><code>&lt;figure&gt; / &lt;figcaption&gt;</code></td><td>图文组合</td><td>图片 + 说明文字</td></tr>
+              <tr><td><code>&lt;time datetime="..."&gt;</code></td><td>时间</td><td>发布时间、日期</td></tr>
+              <tr><td><code>&lt;mark&gt;</code></td><td>高亮文本</td><td>搜索结果高亮</td></tr>
+              <tr><td><code>&lt;details&gt; / &lt;summary&gt;</code></td><td>折叠内容</td><td>FAQ、折叠面板</td></tr>
+              <tr><td><code>&lt;dialog&gt;</code></td><td>对话框</td><td>模态框（原生支持）</td></tr>
+              <tr><td><code>&lt;progress&gt;</code></td><td>进度条</td><td>任务进度</td></tr>
+              <tr><td><code>&lt;meter&gt;</code></td><td>度量值</td><td>磁盘用量、评分</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 自定义数据属性 -->
+    <section class="section">
+      <h2 class="section-title">2. 自定义数据属性 data-*</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">&lt;!-- HTML --&gt;</span>
+<span class="tag">&lt;button</span> <span class="atr">data-id</span>=<span class="val">"42"</span> <span class="atr">data-action</span>=<span class="val">"delete"</span> <span class="atr">data-label</span>=<span class="val">"删除用户"</span><span class="tag">&gt;</span>删除<span class="tag">&lt;/button&gt;</span>
+
+<span class="cmt">// JavaScript</span>
+<span class="kw">const</span> btn = document.<span class="fn">querySelector</span>(<span class="str">'button'</span>)
+btn.dataset.id      <span class="cmt">// "42"</span>
+btn.dataset.action  <span class="cmt">// "delete"</span>
+btn.dataset.label   <span class="cmt">// "删除用户"</span>
+
+<span class="cmt">// 也可用 getAttribute</span>
+btn.<span class="fn">getAttribute</span>(<span class="str">'data-id'</span>) <span class="cmt">// "42"</span></div>
+        <div class="demo-box">
+          <div class="demo-label">交互演示</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
+            <button class="btn btn-outline btn-sm" data-id="1" data-role="admin" onclick="showDataAttr(this)">用户 1（admin）</button>
+            <button class="btn btn-outline btn-sm" data-id="2" data-role="editor" onclick="showDataAttr(this)">用户 2（editor）</button>
+            <button class="btn btn-outline btn-sm" data-id="3" data-role="viewer" onclick="showDataAttr(this)">用户 3（viewer）</button>
+          </div>
+          <div class="console-output" id="dataAttrOutput"><span class="info">点击按钮查看 dataset</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 表单增强 -->
+    <section class="section">
+      <h2 class="section-title">3. HTML5 表单增强 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <p class="card-title">新增 input type</p>
+        <div class="form-demo grid-2">
+          <div>
+            <label>email（自动验证格式）</label>
+            <input type="email" placeholder="user@example.com">
+            <label>number（数字输入）</label>
+            <input type="number" min="0" max="100" step="5" value="50">
+            <label>range（滑块）</label>
+            <input type="range" min="0" max="100" value="60" id="rangeInput" oninput="document.getElementById('rangeVal').textContent=this.value">
+            <span id="rangeVal" style="color:var(--color-secondary)">60</span>
+            <label>color（颜色选择器）</label>
+            <input type="color" value="#6c63ff" style="width:60px;height:36px;padding:2px">
+          </div>
+          <div>
+            <label>date（日期）</label>
+            <input type="date">
+            <label>search（搜索框，带清除按钮）</label>
+            <input type="search" placeholder="搜索...">
+            <label>tel（电话）</label>
+            <input type="tel" placeholder="138 0000 0000">
+            <label>url（URL 验证）</label>
+            <input type="url" placeholder="https://example.com">
+          </div>
+        </div>
+        <div class="callout tip">
+          <strong>新增属性</strong>
+          <code>placeholder</code> 占位文本 &nbsp;|&nbsp;
+          <code>required</code> 必填 &nbsp;|&nbsp;
+          <code>pattern</code> 正则验证 &nbsp;|&nbsp;
+          <code>autofocus</code> 自动聚焦 &nbsp;|&nbsp;
+          <code>autocomplete</code> 自动完成 &nbsp;|&nbsp;
+          <code>multiple</code> 多选
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. Canvas -->
+    <section class="section">
+      <h2 class="section-title">4. Canvas 画布</h2>
+      <div class="card">
+        <div class="code-block"><span class="kw">const</span> canvas = document.<span class="fn">getElementById</span>(<span class="str">'canvas'</span>)
+<span class="kw">const</span> ctx = canvas.<span class="fn">getContext</span>(<span class="str">'2d'</span>)
+
+ctx.fillStyle = <span class="str">'#6c63ff'</span>
+ctx.<span class="fn">fillRect</span>(<span class="num">10</span>, <span class="num">10</span>, <span class="num">100</span>, <span class="num">80</span>)    <span class="cmt">// 填充矩形</span>
+ctx.<span class="fn">strokeStyle</span> = <span class="str">'#00d4aa'</span>
+ctx.<span class="fn">arc</span>(<span class="num">200</span>, <span class="num">50</span>, <span class="num">40</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>) <span class="cmt">// 圆形路径</span>
+ctx.<span class="fn">stroke</span>()</div>
+        <div class="demo-box">
+          <div class="demo-label">在画布上绘制（可点击）</div>
+          <canvas id="demoCanvas" width="500" height="160"></canvas>
+          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
+            <button class="btn btn-primary btn-sm" onclick="drawShapes()">绘制图形</button>
+            <button class="btn btn-outline btn-sm" onclick="clearCanvas()">清空</button>
+            <button class="btn btn-outline btn-sm" onclick="drawText()">绘制文字</button>
+            <button class="btn btn-outline btn-sm" onclick="drawGradient()">渐变填充</button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. Web Storage -->
+    <section class="section">
+      <h2 class="section-title">5. Web Storage <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>localStorage vs sessionStorage vs Cookie</strong>
+          <div class="table-wrap" style="margin-top:0.5rem">
+            <table>
+              <thead><tr><th>特性</th><th>localStorage</th><th>sessionStorage</th><th>Cookie</th></tr></thead>
+              <tbody>
+                <tr><td>容量</td><td>5MB</td><td>5MB</td><td>4KB</td></tr>
+                <tr><td>生命周期</td><td>永久（手动清除）</td><td>标签页关闭即清除</td><td>可设置过期时间</td></tr>
+                <tr><td>随请求发送</td><td>❌</td><td>❌</td><td>✅ 自动携带</td></tr>
+                <tr><td>跨标签页共享</td><td>✅</td><td>❌</td><td>✅</td></tr>
+                <tr><td>服务端访问</td><td>❌</td><td>❌</td><td>✅</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="demo-box">
+          <div class="demo-label">localStorage 交互演示</div>
+          <div class="storage-demo">
+            <input type="text" id="storageKey" placeholder="key" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:120px">
+            <input type="text" id="storageVal" placeholder="value" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:150px">
+            <button class="btn btn-primary btn-sm" onclick="storageSave()">setItem</button>
+            <button class="btn btn-outline btn-sm" onclick="storageGet()">getItem</button>
+            <button class="btn btn-outline btn-sm" onclick="storageRemove()">removeItem</button>
+            <button class="btn btn-outline btn-sm" onclick="storageClear()">clear</button>
+          </div>
+          <div class="console-output" id="storageOutput"><span class="info">操作 localStorage</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 拖拽 API -->
+    <section class="section">
+      <h2 class="section-title">6. 拖拽 API（Drag and Drop）</h2>
+      <div class="card">
+        <div class="demo-box">
+          <div class="demo-label">拖拽演示</div>
+          <div style="margin-bottom:0.75rem">
+            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍎 苹果</span>
+            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍊 橙子</span>
+            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍇 葡萄</span>
+          </div>
+          <div class="drag-zone" id="dropZone"
+            ondragover="event.preventDefault();this.classList.add('over')"
+            ondragleave="this.classList.remove('over')"
+            ondrop="onDrop(event)">
+            拖拽水果到这里 🎯
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. details/dialog -->
+    <section class="section">
+      <h2 class="section-title">7. 原生折叠与对话框</h2>
+      <div class="card grid-2">
+        <div>
+          <p class="card-title">&lt;details&gt; 原生折叠</p>
+          <details style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:0.75rem">
+            <summary style="cursor:pointer;font-weight:600;color:var(--color-primary-light)">什么是 BFC？</summary>
+            <div style="margin-top:0.75rem;color:var(--color-text-muted);font-size:0.875rem">
+              BFC（Block Formatting Context）块级格式化上下文，是页面中一块独立的渲染区域，内部元素的布局不会影响外部。
+            </div>
+          </details>
+          <details style="border:1px solid var(--color-border);border-radius:var(--radius-sm);padding:0.75rem;margin-top:0.5rem">
+            <summary style="cursor:pointer;font-weight:600;color:var(--color-primary-light)">什么是闭包？</summary>
+            <div style="margin-top:0.75rem;color:var(--color-text-muted);font-size:0.875rem">
+              闭包是函数与其词法环境的组合，使函数可以访问其外部作用域的变量，即使外部函数已经执行完毕。
+            </div>
+          </details>
+        </div>
+        <div>
+          <p class="card-title">&lt;dialog&gt; 原生对话框</p>
+          <button class="btn btn-primary btn-sm" onclick="document.getElementById('nativeDialog').showModal()">打开对话框</button>
+          <dialog id="nativeDialog" style="background:var(--color-surface);border:1px solid var(--color-border);border-radius:var(--radius);color:var(--color-text);padding:1.5rem;min-width:280px">
+            <h3 style="margin-bottom:0.75rem;color:var(--color-primary-light)">原生 Dialog</h3>
+            <p style="color:var(--color-text-muted);font-size:0.875rem;margin-bottom:1rem">HTML5 原生对话框，无需 JS 框架，支持 ESC 关闭、::backdrop 遮罩。</p>
+            <button class="btn btn-outline btn-sm" onclick="document.getElementById('nativeDialog').close()">关闭</button>
+          </dialog>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // data-* 演示
+    function showDataAttr(btn) {
+      const out = document.getElementById('dataAttrOutput')
+      out.innerHTML = `<span class="result">dataset.id = "${btn.dataset.id}"</span>\n<span class="result">dataset.role = "${btn.dataset.role}"</span>`
+    }
+
+    // Canvas 演示
+    const canvas = document.getElementById('demoCanvas')
+    const ctx = canvas.getContext('2d')
+
+    function drawShapes() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height)
+      // 矩形
+      ctx.fillStyle = '#6c63ff'
+      ctx.fillRect(20, 30, 100, 80)
+      // 圆形
+      ctx.beginPath()
+      ctx.arc(200, 70, 50, 0, Math.PI * 2)
+      ctx.fillStyle = '#00d4aa'
+      ctx.fill()
+      // 三角形
+      ctx.beginPath()
+      ctx.moveTo(320, 20); ctx.lineTo(380, 120); ctx.lineTo(260, 120)
+      ctx.closePath()
+      ctx.fillStyle = '#ff6584'
+      ctx.fill()
+      // 线段
+      ctx.beginPath()
+      ctx.moveTo(420, 20); ctx.lineTo(480, 120)
+      ctx.strokeStyle = '#ffd166'
+      ctx.lineWidth = 3
+      ctx.stroke()
+    }
+
+    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height) }
+
+    function drawText() {
+      ctx.font = 'bold 28px Inter, sans-serif'
+      ctx.fillStyle = '#e2e8f0'
+      ctx.textAlign = 'center'
+      ctx.fillText('Hello Canvas!', canvas.width / 2, canvas.height / 2)
+      ctx.font = '14px Inter'
+      ctx.fillStyle = '#8892b0'
+      ctx.fillText('HTML5 Canvas API', canvas.width / 2, canvas.height / 2 + 30)
+    }
+
+    function drawGradient() {
+      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+      grad.addColorStop(0, '#6c63ff')
+      grad.addColorStop(0.5, '#00d4aa')
+      grad.addColorStop(1, '#ff6584')
+      ctx.fillStyle = grad
+      ctx.fillRect(0, 0, canvas.width, canvas.height)
+    }
+
+    // Canvas 鼠标绘制
+    let drawing = false
+    canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY) })
+    canvas.addEventListener('mousemove', e => {
+      if (!drawing) return
+      ctx.lineTo(e.offsetX, e.offsetY)
+      ctx.strokeStyle = '#6c63ff'; ctx.lineWidth = 2; ctx.stroke()
+    })
+    canvas.addEventListener('mouseup', () => drawing = false)
+    canvas.addEventListener('mouseleave', () => drawing = false)
+
+    // Web Storage 演示
+    function log(id, msg, type = 'log') {
+      const el = document.getElementById(id)
+      el.innerHTML += `<span class="${type}">${msg}</span>\n`
+      el.scrollTop = el.scrollHeight
+    }
+    function storageSave() {
+      const k = document.getElementById('storageKey').value
+      const v = document.getElementById('storageVal').value
+      if (!k) return
+      localStorage.setItem(k, v)
+      log('storageOutput', `setItem("${k}", "${v}") ✓`, 'info')
+    }
+    function storageGet() {
+      const k = document.getElementById('storageKey').value
+      const v = localStorage.getItem(k)
+      log('storageOutput', `getItem("${k}") → ${v === null ? 'null（不存在）' : '"' + v + '"'}`, 'result')
+    }
+    function storageRemove() {
+      const k = document.getElementById('storageKey').value
+      localStorage.removeItem(k)
+      log('storageOutput', `removeItem("${k}") ✓`, 'warn')
+    }
+    function storageClear() {
+      localStorage.clear()
+      log('storageOutput', 'clear() — 已清空所有 localStorage', 'warn')
+    }
+
+    // 拖拽 API
+    let dragData = ''
+    function onDragStart(e, el) {
+      dragData = el.textContent
+      e.dataTransfer.setData('text/plain', dragData)
+      e.dataTransfer.effectAllowed = 'move'
+    }
+    function onDrop(e) {
+      e.preventDefault()
+      const zone = document.getElementById('dropZone')
+      zone.classList.remove('over')
+      const data = e.dataTransfer.getData('text/plain')
+      zone.innerHTML = `<span style="font-size:1.5rem">${data}</span> 放置成功！`
+    }
+
+    // 初始绘制
+    drawShapes()
+  </script>
+</body>
+</html>

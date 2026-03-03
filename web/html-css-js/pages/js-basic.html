@@ -1,0 +1,454 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JavaScript 核心基础</title>
+  <link rel="stylesheet" href="../css/common.css">
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="css-animation.html">CSS 动画</a></li>
+      <li><a href="css-interview.html">CSS 面试</a></li>
+      <li><a href="js-basic.html" class="active">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">JavaScript 核心基础</h1>
+    <p class="page-subtitle">数据类型 · 变量提升 · 作用域链 · 闭包 · this 绑定 · 原型链 · 继承</p>
+
+    <!-- 1. 数据类型 -->
+    <section class="section">
+      <h2 class="section-title">1. 数据类型与类型判断 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>7 种原始类型 + 1 种引用类型</strong>
+          原始（值类型）：<code>string number boolean null undefined symbol bigint</code><br>
+          引用类型：<code>object</code>（包含 Array、Function、Date、RegExp 等）
+        </div>
+        <div class="code-block"><span class="cmt">// typeof 返回值</span>
+<span class="kw">typeof</span> <span class="str">'hello'</span>     <span class="cmt">// "string"</span>
+<span class="kw">typeof</span> <span class="num">42</span>         <span class="cmt">// "number"</span>
+<span class="kw">typeof</span> <span class="kw">true</span>       <span class="cmt">// "boolean"</span>
+<span class="kw">typeof</span> <span class="kw">undefined</span>  <span class="cmt">// "undefined"</span>
+<span class="kw">typeof</span> <span class="kw">null</span>       <span class="cmt">// "object" ← 历史遗留 Bug！</span>
+<span class="kw">typeof</span> {}         <span class="cmt">// "object"</span>
+<span class="kw">typeof</span> []         <span class="cmt">// "object" ← 数组也是 object</span>
+<span class="kw">typeof</span> <span class="fn">function</span>(){} <span class="cmt">// "function"</span>
+<span class="kw">typeof</span> Symbol()   <span class="cmt">// "symbol"</span>
+<span class="kw">typeof</span> <span class="num">1n</span>         <span class="cmt">// "bigint"</span>
+
+<span class="cmt">// 精确类型判断：Object.prototype.toString</span>
+Object.prototype.toString.<span class="fn">call</span>([])    <span class="cmt">// "[object Array]"</span>
+Object.prototype.toString.<span class="fn">call</span>(<span class="kw">null</span>) <span class="cmt">// "[object Null]"</span>
+Object.prototype.toString.<span class="fn">call</span>(<span class="kw">new</span> Date()) <span class="cmt">// "[object Date]"</span>
+
+<span class="cmt">// instanceof（检查原型链）</span>
+[] <span class="kw">instanceof</span> Array  <span class="cmt">// true</span>
+[] <span class="kw">instanceof</span> Object <span class="cmt">// true（Array 继承自 Object）</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runTypes()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r1.clear()">清空</button>
+          <div class="console-output" id="out1"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">== vs === 与隐式类型转换 <span class="tag-badge interview">面试必考</span></p>
+        <div class="code-block"><span class="cmt">// == 会进行隐式类型转换</span>
+<span class="num">0</span> == <span class="str">''</span>        <span class="cmt">// true</span>
+<span class="num">0</span> == <span class="str">'0'</span>       <span class="cmt">// true</span>
+<span class="str">''</span> == <span class="str">'0'</span>      <span class="cmt">// false</span>
+<span class="kw">null</span> == <span class="kw">undefined</span> <span class="cmt">// true</span>
+<span class="kw">null</span> == <span class="num">0</span>     <span class="cmt">// false</span>
+<span class="kw">NaN</span> == <span class="kw">NaN</span>    <span class="cmt">// false（NaN 不等于任何值）</span>
+[] == ![]      <span class="cmt">// true（经典题）</span>
+
+<span class="cmt">// === 严格相等，不转换类型</span>
+<span class="num">1</span> === <span class="str">'1'</span>     <span class="cmt">// false</span>
+
+<span class="cmt">// 判断 NaN</span>
+<span class="fn">isNaN</span>(<span class="kw">NaN</span>)          <span class="cmt">// true</span>
+Number.<span class="fn">isNaN</span>(<span class="kw">NaN</span>)   <span class="cmt">// true（更严格，不转换类型）</span>
+Number.<span class="fn">isNaN</span>(<span class="str">'NaN'</span>) <span class="cmt">// false（isNaN('NaN') 是 true！）</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runCoercion()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r1b.clear()">清空</button>
+          <div class="console-output" id="out1b"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. var/let/const 与提升 -->
+    <section class="section">
+      <h2 class="section-title">2. var / let / const 与变量提升 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>特性</th><th>var</th><th>let</th><th>const</th></tr></thead>
+            <tbody>
+              <tr><td>作用域</td><td>函数作用域</td><td>块级作用域</td><td>块级作用域</td></tr>
+              <tr><td>变量提升</td><td>✅ 提升（值为 undefined）</td><td>✅ 提升但不初始化（TDZ）</td><td>✅ 提升但不初始化（TDZ）</td></tr>
+              <tr><td>重复声明</td><td>✅ 允许</td><td>❌ 报错</td><td>❌ 报错</td></tr>
+              <tr><td>重新赋值</td><td>✅</td><td>✅</td><td>❌（基本类型）</td></tr>
+              <tr><td>全局属性</td><td>成为 window 属性</td><td>不成为 window 属性</td><td>不成为 window 属性</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block"><span class="cmt">// 变量提升（Hoisting）</span>
+console.<span class="fn">log</span>(a) <span class="cmt">// undefined（var 提升）</span>
+<span class="kw">var</span> a = <span class="num">1</span>
+
+console.<span class="fn">log</span>(b) <span class="cmt">// ReferenceError: TDZ（暂时性死区）</span>
+<span class="kw">let</span> b = <span class="num">2</span>
+
+<span class="cmt">// 函数声明整体提升（优先级高于 var）</span>
+<span class="fn">sayHi</span>()          <span class="cmt">// "Hi!"（函数声明可在定义前调用）</span>
+<span class="kw">function</span> <span class="fn">sayHi</span>() { console.<span class="fn">log</span>(<span class="str">'Hi!'</span>) }
+
+<span class="fn">sayBye</span>()         <span class="cmt">// TypeError: sayBye is not a function</span>
+<span class="kw">var</span> <span class="fn">sayBye</span> = <span class="kw">function</span>() { console.<span class="fn">log</span>(<span class="str">'Bye!'</span>) }</div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runHoisting()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r2.clear()">清空</button>
+          <div class="console-output" id="out2"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 作用域与闭包 -->
+    <section class="section">
+      <h2 class="section-title">3. 作用域链与闭包 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 作用域链：从内向外查找变量</span>
+<span class="kw">const</span> x = <span class="str">'global'</span>
+<span class="kw">function</span> <span class="fn">outer</span>() {
+  <span class="kw">const</span> x = <span class="str">'outer'</span>
+  <span class="kw">function</span> <span class="fn">inner</span>() {
+    <span class="kw">const</span> x = <span class="str">'inner'</span>
+    console.<span class="fn">log</span>(x) <span class="cmt">// "inner"（就近原则）</span>
+  }
+  <span class="fn">inner</span>()
+  console.<span class="fn">log</span>(x) <span class="cmt">// "outer"</span>
+}
+
+<span class="cmt">// 闭包：函数 + 其词法环境</span>
+<span class="kw">function</span> <span class="fn">makeCounter</span>(start = <span class="num">0</span>) {
+  <span class="kw">let</span> count = start
+  <span class="kw">return</span> {
+    increment: () => ++count,
+    decrement: () => --count,
+    getCount:  () => count,
+  }
+}
+<span class="kw">const</span> counter = <span class="fn">makeCounter</span>(<span class="num">10</span>)
+counter.<span class="fn">increment</span>() <span class="cmt">// 11</span>
+counter.<span class="fn">increment</span>() <span class="cmt">// 12</span>
+counter.<span class="fn">decrement</span>() <span class="cmt">// 11</span>
+counter.<span class="fn">getCount</span>()  <span class="cmt">// 11</span>
+
+<span class="cmt">// 经典面试题：循环中的闭包</span>
+<span class="kw">for</span> (<span class="kw">var</span> i = <span class="num">0</span>; i < <span class="num">3</span>; i++) {
+  setTimeout(() => console.<span class="fn">log</span>(i), <span class="num">0</span>) <span class="cmt">// 3 3 3（var 共享同一个 i）</span>
+}
+<span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i < <span class="num">3</span>; i++) {
+  setTimeout(() => console.<span class="fn">log</span>(i), <span class="num">0</span>) <span class="cmt">// 0 1 2（let 每次迭代新作用域）</span>
+}</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runClosure()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r3.clear()">清空</button>
+          <div class="console-output" id="out3"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. this 绑定 -->
+    <section class="section">
+      <h2 class="section-title">4. this 绑定规则 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>this 的四种绑定规则（优先级从高到低）</strong><br>
+          ① new 绑定 &gt; ② 显式绑定（call/apply/bind）&gt; ③ 隐式绑定（对象方法）&gt; ④ 默认绑定（全局/undefined）
+        </div>
+        <div class="code-block"><span class="cmt">// ① 默认绑定：非严格模式 → window，严格模式 → undefined</span>
+<span class="kw">function</span> <span class="fn">foo</span>() { console.<span class="fn">log</span>(<span class="kw">this</span>) }
+<span class="fn">foo</span>() <span class="cmt">// window（浏览器）</span>
+
+<span class="cmt">// ② 隐式绑定：谁调用，this 指向谁</span>
+<span class="kw">const</span> obj = { name: <span class="str">'Alice'</span>, <span class="fn">greet</span>() { <span class="kw">return</span> <span class="kw">this</span>.name } }
+obj.<span class="fn">greet</span>() <span class="cmt">// "Alice"</span>
+
+<span class="cmt">// 隐式丢失：赋值给变量后 this 丢失</span>
+<span class="kw">const</span> fn = obj.greet
+<span class="fn">fn</span>() <span class="cmt">// undefined（this 变成 window）</span>
+
+<span class="cmt">// ③ 显式绑定</span>
+<span class="fn">fn</span>.<span class="fn">call</span>(obj)        <span class="cmt">// "Alice"</span>
+<span class="fn">fn</span>.<span class="fn">apply</span>(obj)       <span class="cmt">// "Alice"</span>
+<span class="kw">const</span> bound = <span class="fn">fn</span>.<span class="fn">bind</span>(obj)
+<span class="fn">bound</span>()             <span class="cmt">// "Alice"</span>
+
+<span class="cmt">// ④ new 绑定：this 指向新创建的实例</span>
+<span class="kw">function</span> <span class="cls">Person</span>(name) { <span class="kw">this</span>.name = name }
+<span class="kw">const</span> p = <span class="kw">new</span> <span class="cls">Person</span>(<span class="str">'Bob'</span>)
+p.name <span class="cmt">// "Bob"</span>
+
+<span class="cmt">// 箭头函数：没有自己的 this，继承外层词法 this</span>
+<span class="kw">const</span> timer = {
+  count: <span class="num">0</span>,
+  start() {
+    setInterval(() => { <span class="kw">this</span>.count++ }, <span class="num">100</span>) <span class="cmt">// this = timer ✅</span>
+  }
+}</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runThis()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r4.clear()">清空</button>
+          <div class="console-output" id="out4"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 原型链 -->
+    <section class="section">
+      <h2 class="section-title">5. 原型链与继承 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// 原型链查找：obj → obj.__proto__ → ... → Object.prototype → null</span>
+<span class="kw">function</span> <span class="cls">Animal</span>(name) {
+  <span class="kw">this</span>.name = name
+}
+<span class="cls">Animal</span>.prototype.speak = <span class="kw">function</span>() {
+  <span class="kw">return</span> <span class="str">`${this.name} 发出声音`</span>
+}
+
+<span class="kw">function</span> <span class="cls">Dog</span>(name, breed) {
+  <span class="cls">Animal</span>.<span class="fn">call</span>(<span class="kw">this</span>, name) <span class="cmt">// 借用构造函数</span>
+  <span class="kw">this</span>.breed = breed
+}
+<span class="cmt">// 原型链继承</span>
+<span class="cls">Dog</span>.prototype = Object.<span class="fn">create</span>(<span class="cls">Animal</span>.prototype)
+<span class="cls">Dog</span>.prototype.constructor = <span class="cls">Dog</span>
+<span class="cls">Dog</span>.prototype.bark = <span class="kw">function</span>() { <span class="kw">return</span> <span class="str">`${this.name}: 汪汪！`</span> }
+
+<span class="kw">const</span> dog = <span class="kw">new</span> <span class="cls">Dog</span>(<span class="str">'Rex'</span>, <span class="str">'Labrador'</span>)
+dog.<span class="fn">speak</span>()  <span class="cmt">// "Rex 发出声音"（继承自 Animal）</span>
+dog.<span class="fn">bark</span>()   <span class="cmt">// "Rex: 汪汪！"</span>
+dog <span class="kw">instanceof</span> <span class="cls">Dog</span>    <span class="cmt">// true</span>
+dog <span class="kw">instanceof</span> <span class="cls">Animal</span> <span class="cmt">// true</span>
+
+<span class="cmt">// ES6 class 语法糖（本质相同）</span>
+<span class="kw">class</span> <span class="cls">Cat</span> <span class="kw">extends</span> <span class="cls">Animal</span> {
+  <span class="fn">constructor</span>(name, color) {
+    <span class="kw">super</span>(name)
+    <span class="kw">this</span>.color = color
+  }
+  <span class="fn">meow</span>() { <span class="kw">return</span> <span class="str">`${this.name}: 喵喵！`</span> }
+}</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runProto()">▶ 运行</button>
+          <button class="btn btn-outline btn-sm" onclick="r5.clear()">清空</button>
+          <div class="console-output" id="out5"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../js/runner.js"></script>
+  <script>
+    const r1  = createRunner('out1')
+    const r1b = createRunner('out1b')
+    const r2  = createRunner('out2')
+    const r3  = createRunner('out3')
+    const r4  = createRunner('out4')
+    const r5  = createRunner('out5')
+
+    function runTypes() {
+      r1.run(() => {
+        console.log('typeof "hello":', typeof 'hello')
+        console.log('typeof 42:', typeof 42)
+        console.log('typeof null:', typeof null, '← 历史 Bug！')
+        console.log('typeof []:', typeof [])
+        console.log('typeof function(){}:', typeof function(){})
+        console.log('Array.isArray([]):', Array.isArray([]))
+        console.log('toString null:', Object.prototype.toString.call(null))
+        console.log('toString []:', Object.prototype.toString.call([]))
+        console.log('toString Date:', Object.prototype.toString.call(new Date()))
+        console.log('[] instanceof Array:', [] instanceof Array)
+        console.log('[] instanceof Object:', [] instanceof Object)
+      })
+    }
+
+    function runCoercion() {
+      r1b.run(() => {
+        console.log('0 == "":', 0 == '')
+        console.log('0 == "0":', 0 == '0')
+        console.log('"" == "0":', '' == '0')
+        console.log('null == undefined:', null == undefined)
+        console.log('null == 0:', null == 0)
+        console.log('NaN == NaN:', NaN == NaN)
+        console.log('[] == ![]:', [] == ![])
+        console.log('1 === "1":', 1 === '1')
+        console.log('isNaN("NaN"):', isNaN('NaN'), '← 会先转换类型！')
+        console.log('Number.isNaN("NaN"):', Number.isNaN('NaN'), '← 不转换，更严格')
+      })
+    }
+
+    function runHoisting() {
+      r2.run(() => {
+        // var 提升
+        console.log('var a before declare:', typeof a_var) // undefined
+        var a_var = 1
+        console.log('var a after declare:', a_var)
+
+        // 函数声明提升
+        console.log('sayHi() before declare:', sayHi())
+        function sayHi() { return 'Hi! 函数声明整体提升' }
+
+        // let TDZ
+        try {
+          console.log(b_let)
+        } catch(e) {
+          console.warn('let TDZ:', e.message)
+        }
+        let b_let = 2
+
+        // 函数表达式不提升
+        try {
+          sayBye()
+        } catch(e) {
+          console.warn('函数表达式不提升:', e.message)
+        }
+        var sayBye = function() { return 'Bye!' }
+      })
+    }
+
+    function runClosure() {
+      r3.run(() => {
+        // 作用域链
+        const x = 'global'
+        function outer() {
+          const x = 'outer'
+          function inner() {
+            const x = 'inner'
+            console.log('inner x:', x)
+          }
+          inner()
+          console.log('outer x:', x)
+        }
+        outer()
+        console.log('global x:', x)
+
+        // 闭包计数器
+        function makeCounter(start = 0) {
+          let count = start
+          return {
+            increment: () => ++count,
+            decrement: () => --count,
+            getCount:  () => count,
+          }
+        }
+        const c = makeCounter(10)
+        console.log('counter increment:', c.increment())
+        console.log('counter increment:', c.increment())
+        console.log('counter decrement:', c.decrement())
+        console.log('counter getCount:', c.getCount())
+
+        // 闭包实现私有变量
+        function createPerson(name) {
+          let _age = 0
+          return {
+            getName: () => name,
+            getAge: () => _age,
+            birthday: () => { _age++; return `${name} 现在 ${_age} 岁` }
+          }
+        }
+        const person = createPerson('Alice')
+        console.log(person.birthday())
+        console.log(person.birthday())
+        console.log('私有 _age 无法直接访问:', person._age)
+      })
+    }
+
+    function runThis() {
+      r4.run(() => {
+        // 隐式绑定
+        const obj = { name: 'Alice', greet() { return this.name } }
+        console.log('隐式绑定:', obj.greet())
+
+        // 隐式丢失
+        const fn = obj.greet
+        console.log('隐式丢失（严格模式下 undefined）:', fn.call(window))
+
+        // 显式绑定
+        console.log('call 绑定:', fn.call(obj))
+        console.log('apply 绑定:', fn.apply({ name: 'Bob' }))
+        const bound = fn.bind({ name: 'Charlie' })
+        console.log('bind 绑定:', bound())
+
+        // new 绑定
+        function Person(name) { this.name = name }
+        const p = new Person('Dave')
+        console.log('new 绑定:', p.name)
+
+        // 箭头函数 this
+        const timer = {
+          name: 'Timer',
+          start() {
+            const arrow = () => this.name
+            console.log('箭头函数 this:', arrow())
+          }
+        }
+        timer.start()
+      })
+    }
+
+    function runProto() {
+      r5.run(() => {
+        function Animal(name) { this.name = name }
+        Animal.prototype.speak = function() { return `${this.name} 发出声音` }
+
+        function Dog(name, breed) {
+          Animal.call(this, name)
+          this.breed = breed
+        }
+        Dog.prototype = Object.create(Animal.prototype)
+        Dog.prototype.constructor = Dog
+        Dog.prototype.bark = function() { return `${this.name}: 汪汪！` }
+
+        const dog = new Dog('Rex', 'Labrador')
+        console.log('dog.speak():', dog.speak())
+        console.log('dog.bark():', dog.bark())
+        console.log('dog instanceof Dog:', dog instanceof Dog)
+        console.log('dog instanceof Animal:', dog instanceof Animal)
+        console.log('dog.hasOwnProperty("name"):', dog.hasOwnProperty('name'))
+        console.log('dog.hasOwnProperty("speak"):', dog.hasOwnProperty('speak'))
+
+        // ES6 class
+        class Cat extends Animal {
+          constructor(name, color) { super(name); this.color = color }
+          meow() { return `${this.name}(${this.color}): 喵喵！` }
+        }
+        const cat = new Cat('Kitty', '白色')
+        console.log('cat.speak():', cat.speak())
+        console.log('cat.meow():', cat.meow())
+        console.log('cat instanceof Cat:', cat instanceof Cat)
+        console.log('cat instanceof Animal:', cat instanceof Animal)
+
+        // 原型链查找
+        console.log('Object.getPrototypeOf(dog) === Dog.prototype:', Object.getPrototypeOf(dog) === Dog.prototype)
+        console.log('Object.getPrototypeOf(Dog.prototype) === Animal.prototype:', Object.getPrototypeOf(Dog.prototype) === Animal.prototype)
+      })
+    }
+  </script>
+</body>
+</html>

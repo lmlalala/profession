@@ -1,0 +1,673 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vue2 原理实现</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    .demo-app {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-top: 0.75rem;
+    }
+    .demo-app h3 { font-size: 0.9rem; color: var(--color-secondary); margin-bottom: 0.75rem; }
+    .demo-app input {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      padding: 0.4rem 0.75rem;
+      font-size: 0.875rem;
+      width: 200px;
+      margin-right: 0.5rem;
+    }
+    .demo-app input:focus { outline: none; border-color: var(--color-primary); }
+    .demo-output {
+      margin-top: 0.75rem;
+      padding: 0.75rem;
+      background: var(--color-surface);
+      border-radius: 4px;
+      font-size: 0.875rem;
+      min-height: 40px;
+    }
+    .reactive-badge {
+      display: inline-block;
+      padding: 0.15rem 0.5rem;
+      background: rgba(108,99,255,0.2);
+      color: var(--color-primary-light);
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-family: var(--font-mono);
+    }
+    .vdom-tree {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      line-height: 1.8;
+    }
+    .vdom-node { color: var(--color-secondary); }
+    .vdom-prop { color: var(--color-warning); }
+    .vdom-text { color: var(--color-text-muted); }
+    .diff-old { background: rgba(255,101,132,0.15); border-left: 3px solid var(--color-accent); padding: 0.2rem 0.5rem; margin: 0.15rem 0; }
+    .diff-new { background: rgba(0,212,170,0.12); border-left: 3px solid var(--color-secondary); padding: 0.2rem 0.5rem; margin: 0.15rem 0; }
+    .diff-same { padding: 0.2rem 0.5rem; margin: 0.15rem 0; color: var(--color-text-muted); }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html" class="active">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">Vue2 原理实现</h1>
+    <p class="page-subtitle">响应式系统（Object.defineProperty）· 依赖收集 · 虚拟 DOM · diff 算法 · 指令 · 组件系统</p>
+
+    <!-- 1. 响应式原理 -->
+    <section class="section">
+      <h2 class="section-title">1. 响应式原理：Object.defineProperty <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>核心思路</strong>：遍历 data 的每个属性，用 <code>Object.defineProperty</code> 将其转为 getter/setter。
+          getter 中收集依赖（Dep.depend），setter 中通知更新（Dep.notify）。
+        </div>
+        <div class="code-block"><span class="cmt">// Dep：依赖收集器（每个响应式属性对应一个 Dep）</span>
+<span class="kw">class</span> <span class="cls">Dep</span> {
+  <span class="fn">constructor</span>() { <span class="kw">this</span>.subs = [] }
+  <span class="fn">depend</span>()  { <span class="kw">if</span> (Dep.target) <span class="kw">this</span>.subs.<span class="fn">push</span>(Dep.target) }
+  <span class="fn">notify</span>()  { <span class="kw">this</span>.subs.<span class="fn">forEach</span>(watcher => watcher.<span class="fn">update</span>()) }
+}
+Dep.target = <span class="kw">null</span>  <span class="cmt">// 当前正在计算的 Watcher</span>
+
+<span class="cmt">// Watcher：观察者，封装更新逻辑</span>
+<span class="kw">class</span> <span class="cls">Watcher</span> {
+  <span class="fn">constructor</span>(vm, expOrFn, cb) {
+    <span class="kw">this</span>.vm = vm; <span class="kw">this</span>.cb = cb
+    <span class="kw">this</span>.getter = <span class="kw">typeof</span> expOrFn === <span class="str">'function'</span> ? expOrFn : () => vm[expOrFn]
+    <span class="kw">this</span>.value = <span class="kw">this</span>.<span class="fn">get</span>()  <span class="cmt">// 初始化时触发 getter，完成依赖收集</span>
+  }
+  <span class="fn">get</span>() {
+    Dep.target = <span class="kw">this</span>           <span class="cmt">// 标记当前 Watcher</span>
+    <span class="kw">const</span> value = <span class="kw">this</span>.getter()  <span class="cmt">// 触发 getter → dep.depend()</span>
+    Dep.target = <span class="kw">null</span>
+    <span class="kw">return</span> value
+  }
+  <span class="fn">update</span>() {
+    <span class="kw">const</span> newVal = <span class="kw">this</span>.<span class="fn">get</span>()
+    <span class="kw">this</span>.<span class="fn">cb</span>(newVal, <span class="kw">this</span>.value)
+    <span class="kw">this</span>.value = newVal
+  }
+}
+
+<span class="cmt">// observe：将对象属性转为响应式</span>
+<span class="kw">function</span> <span class="fn">defineReactive</span>(obj, key, val) {
+  <span class="kw">const</span> dep = <span class="kw">new</span> <span class="cls">Dep</span>()
+  <span class="kw">if</span> (val && <span class="kw">typeof</span> val === <span class="str">'object'</span>) <span class="fn">observe</span>(val)  <span class="cmt">// 递归</span>
+  Object.<span class="fn">defineProperty</span>(obj, key, {
+    <span class="fn">get</span>() { dep.<span class="fn">depend</span>(); <span class="kw">return</span> val },
+    <span class="fn">set</span>(newVal) {
+      <span class="kw">if</span> (newVal === val) <span class="kw">return</span>
+      val = newVal
+      <span class="kw">if</span> (<span class="kw">typeof</span> newVal === <span class="str">'object'</span>) <span class="fn">observe</span>(newVal)
+      dep.<span class="fn">notify</span>()  <span class="cmt">// 通知所有 Watcher 更新</span>
+    }
+  })
+}</span></div>
+        <div class="demo-box">
+          <div class="demo-label">响应式演示：修改数据自动触发回调</div>
+          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem">
+            <input type="text" id="reactiveInput" placeholder="输入姓名" value="Alice">
+            <button class="btn btn-primary btn-sm" onclick="setReactiveData()">设置数据</button>
+            <button class="btn btn-outline btn-sm" onclick="triggerNested()">修改嵌套属性</button>
+          </div>
+          <div class="demo-output" id="reactiveOutput">等待数据变化...</div>
+          <div class="console-output" id="reactiveLog" style="margin-top:0.5rem"><span class="info">响应式日志</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. Vue2 局限性 -->
+    <section class="section">
+      <h2 class="section-title">2. Vue2 响应式局限性 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout warn">
+          <strong>Object.defineProperty 的缺陷</strong>：只能劫持已存在的属性，无法检测属性的新增和删除，也无法检测数组下标直接赋值。
+        </div>
+        <div class="code-block"><span class="cmt">// ❌ 无法检测的操作</span>
+vm.data.newProp = <span class="str">'new'</span>      <span class="cmt">// 新增属性 → 不响应</span>
+<span class="kw">delete</span> vm.data.name           <span class="cmt">// 删除属性 → 不响应</span>
+vm.list[<span class="num">0</span>] = <span class="str">'changed'</span>        <span class="cmt">// 数组下标赋值 → 不响应</span>
+vm.list.length = <span class="num">0</span>            <span class="cmt">// 修改 length → 不响应</span>
+
+<span class="cmt">// ✅ Vue2 的解决方案</span>
+Vue.<span class="fn">set</span>(vm.data, <span class="str">'newProp'</span>, <span class="str">'new'</span>)  <span class="cmt">// 新增属性</span>
+vm.$<span class="fn">set</span>(vm.data, <span class="str">'newProp'</span>, <span class="str">'new'</span>) <span class="cmt">// 同上</span>
+Vue.<span class="fn">delete</span>(vm.data, <span class="str">'name'</span>)       <span class="cmt">// 删除属性</span>
+
+<span class="cmt">// 数组：Vue2 重写了 7 个变异方法</span>
+<span class="cmt">// push/pop/shift/unshift/splice/sort/reverse</span>
+vm.list.<span class="fn">push</span>(<span class="str">'new item'</span>)  <span class="cmt">// ✅ 响应式</span>
+vm.list.<span class="fn">splice</span>(<span class="num">0</span>, <span class="num">1</span>, <span class="str">'changed'</span>) <span class="cmt">// ✅ 响应式</span></div>
+        <div class="demo-box">
+          <button class="btn btn-primary btn-sm" onclick="runLimitations()">▶ 运行演示</button>
+          <button class="btn btn-outline btn-sm" onclick="limLog.clear()">清空</button>
+          <div class="console-output" id="limOut"><span class="info">点击运行</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 虚拟 DOM -->
+    <section class="section">
+      <h2 class="section-title">3. 虚拟 DOM（Virtual DOM）<span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>核心思想</strong>：用 JS 对象描述 DOM 结构（VNode），数据变化时先对比新旧 VNode（diff），再将最小差异更新到真实 DOM。
+        </div>
+        <div class="code-block"><span class="cmt">// VNode 结构</span>
+<span class="kw">function</span> <span class="fn">h</span>(tag, props, ...children) {
+  <span class="kw">return</span> { tag, props: props || {}, children: children.<span class="fn">flat</span>() }
+}
+
+<span class="cmt">// 示例 VNode 树</span>
+<span class="kw">const</span> vnode = <span class="fn">h</span>(<span class="str">'div'</span>, { id: <span class="str">'app'</span>, class: <span class="str">'container'</span> },
+  <span class="fn">h</span>(<span class="str">'h1'</span>, <span class="kw">null</span>, <span class="str">'Hello Vue'</span>),
+  <span class="fn">h</span>(<span class="str">'ul'</span>, <span class="kw">null</span>,
+    <span class="fn">h</span>(<span class="str">'li'</span>, { key: <span class="str">'a'</span> }, <span class="str">'Item A'</span>),
+    <span class="fn">h</span>(<span class="str">'li'</span>, { key: <span class="str">'b'</span> }, <span class="str">'Item B'</span>),
+  )
+)
+
+<span class="cmt">// mount：VNode → 真实 DOM</span>
+<span class="kw">function</span> <span class="fn">mount</span>(vnode, container) {
+  <span class="kw">if</span> (<span class="kw">typeof</span> vnode === <span class="str">'string'</span>) {
+    container.<span class="fn">appendChild</span>(document.<span class="fn">createTextNode</span>(vnode))
+    <span class="kw">return</span>
+  }
+  <span class="kw">const</span> el = vnode._el = document.<span class="fn">createElement</span>(vnode.tag)
+  Object.<span class="fn">entries</span>(vnode.props).<span class="fn">forEach</span>(([k, v]) => el.<span class="fn">setAttribute</span>(k, v))
+  vnode.children.<span class="fn">forEach</span>(child => <span class="fn">mount</span>(child, el))
+  container.<span class="fn">appendChild</span>(el)
+}</span></div>
+        <div class="demo-box">
+          <div class="demo-label">VNode 树可视化</div>
+          <div id="vnodeTree" class="vdom-tree" style="padding:0.75rem;background:var(--color-code-bg);border-radius:4px"></div>
+          <div style="margin-top:0.75rem;display:flex;gap:0.5rem">
+            <button class="btn btn-primary btn-sm" onclick="renderVnodeTree()">生成 VNode 树</button>
+            <button class="btn btn-outline btn-sm" onclick="mountVnode()">挂载到 DOM</button>
+          </div>
+          <div id="mountOutput" style="margin-top:0.75rem;padding:0.75rem;background:var(--color-surface);border-radius:4px;font-size:0.85rem;min-height:40px"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. diff 算法 -->
+    <section class="section">
+      <h2 class="section-title">4. diff 算法（同层对比）<span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>Vue2 diff 策略</strong>：同层比较，不跨层。使用双端指针（头头/尾尾/头尾/尾头）对比，再用 key 建立映射表。
+          时间复杂度 O(n)。
+        </div>
+        <div class="code-block"><span class="cmt">// 简化版 patch（同层 diff）</span>
+<span class="kw">function</span> <span class="fn">patch</span>(oldVnode, newVnode) {
+  <span class="cmt">// tag 不同 → 直接替换</span>
+  <span class="kw">if</span> (oldVnode.tag !== newVnode.tag) {
+    oldVnode._el.<span class="fn">replaceWith</span>(<span class="fn">createEl</span>(newVnode)); <span class="kw">return</span>
+  }
+  <span class="cmt">// 更新 props</span>
+  <span class="fn">patchProps</span>(oldVnode._el, oldVnode.props, newVnode.props)
+  <span class="cmt">// 对比子节点（核心 diff）</span>
+  <span class="fn">patchChildren</span>(oldVnode._el, oldVnode.children, newVnode.children)
+}
+
+<span class="cmt">// 有 key：建立 key→index 映射，O(1) 查找复用节点</span>
+<span class="cmt">// 无 key：双端指针逐一比较</span>
+<span class="cmt">// 双端指针策略（Vue2 核心）：</span>
+<span class="cmt">// oldStart↔newStart  oldEnd↔newEnd</span>
+<span class="cmt">// oldStart↔newEnd    oldEnd↔newStart</span></div>
+        <div class="demo-box">
+          <div class="demo-label">diff 可视化演示</div>
+          <div class="grid-2" style="margin-bottom:0.75rem">
+            <div>
+              <div style="font-size:0.75rem;color:var(--color-text-muted);margin-bottom:0.25rem">旧列表（逗号分隔）</div>
+              <input type="text" id="diffOld" value="A,B,C,D,E" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:4px;color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:100%">
+            </div>
+            <div>
+              <div style="font-size:0.75rem;color:var(--color-text-muted);margin-bottom:0.25rem">新列表（逗号分隔）</div>
+              <input type="text" id="diffNew" value="A,C,E,B,D" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:4px;color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:100%">
+            </div>
+          </div>
+          <button class="btn btn-primary btn-sm" onclick="runDiff()">▶ 运行 diff</button>
+          <div id="diffOutput" style="margin-top:0.75rem;font-size:0.82rem;font-family:var(--font-mono)"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 完整 Mini Vue2 -->
+    <section class="section">
+      <h2 class="section-title">5. Mini Vue2 完整实现</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">// Mini Vue2：响应式 + 模板编译 + 虚拟 DOM</span>
+<span class="kw">class</span> <span class="cls">MiniVue</span> {
+  <span class="fn">constructor</span>(options) {
+    <span class="kw">this</span>.$options = options
+    <span class="kw">this</span>.$data = options.data()
+    <span class="kw">this</span>.$el = document.<span class="fn">querySelector</span>(options.el)
+    <span class="fn">observe</span>(<span class="kw">this</span>.$data)
+    <span class="fn">proxy</span>(<span class="kw">this</span>, <span class="kw">this</span>.$data)   <span class="cmt">// this.name → this.$data.name</span>
+    <span class="kw">if</span> (options.methods) <span class="fn">bindMethods</span>(<span class="kw">this</span>, options.methods)
+    <span class="kw">if</span> (options.computed) <span class="fn">initComputed</span>(<span class="kw">this</span>, options.computed)
+    <span class="kw">if</span> (options.watch) <span class="fn">initWatch</span>(<span class="kw">this</span>, options.watch)
+    options.created?.call(<span class="kw">this</span>)
+    <span class="kw">this</span>.<span class="fn">_update</span>()  <span class="cmt">// 初次渲染</span>
+  }
+  <span class="fn">_update</span>() {
+    <span class="kw">const</span> vnode = <span class="kw">this</span>.$options.render.<span class="fn">call</span>(<span class="kw">this</span>, h)
+    <span class="kw">if</span> (<span class="kw">this</span>._vnode) <span class="fn">patch</span>(<span class="kw">this</span>._vnode, vnode)
+    <span class="kw">else</span> <span class="fn">mount</span>(vnode, <span class="kw">this</span>.$el)
+    <span class="kw">this</span>._vnode = vnode
+  }
+}</span></div>
+        <div class="demo-box">
+          <div class="demo-label">Mini Vue2 运行效果</div>
+          <div id="miniVue2App"></div>
+          <div class="console-output" id="miniVue2Log" style="margin-top:0.75rem"><span class="info">Mini Vue2 运行日志</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script src="../js/runner.js"></script>
+  <script>
+    // ============================================================
+    // 核心：Dep / Watcher / observe
+    // ============================================================
+    class Dep {
+      constructor() { this.subs = new Set() }
+      depend()  { if (Dep.target) this.subs.add(Dep.target) }
+      notify()  { this.subs.forEach(w => w.update()) }
+    }
+    Dep.target = null
+    const targetStack = []
+
+    class Watcher {
+      constructor(vm, expOrFn, cb, options = {}) {
+        this.vm = vm; this.cb = cb; this.deps = new Set(); this.lazy = options.lazy || false
+        this.dirty = this.lazy
+        this.getter = typeof expOrFn === 'function' ? expOrFn : () => {
+          return expOrFn.split('.').reduce((obj, k) => obj?.[k], vm)
+        }
+        this.value = this.lazy ? undefined : this.get()
+      }
+      get() {
+        targetStack.push(this); Dep.target = this
+        const value = this.getter.call(this.vm)
+        targetStack.pop(); Dep.target = targetStack[targetStack.length - 1] ?? null
+        return value
+      }
+      addDep(dep) { this.deps.add(dep); dep.subs.add(this) }
+      update() {
+        if (this.lazy) { this.dirty = true; return }
+        const newVal = this.get()
+        if (newVal !== this.value) { this.cb.call(this.vm, newVal, this.value); this.value = newVal }
+      }
+      evaluate() { this.value = this.get(); this.dirty = false }
+    }
+
+    function defineReactive(obj, key, val) {
+      const dep = new Dep()
+      if (val && typeof val === 'object') observe(val)
+      Object.defineProperty(obj, key, {
+        enumerable: true, configurable: true,
+        get() { dep.depend(); return val },
+        set(newVal) {
+          if (newVal === val) return
+          val = newVal
+          if (typeof newVal === 'object' && newVal !== null) observe(newVal)
+          dep.notify()
+        }
+      })
+    }
+
+    function observe(obj) {
+      if (!obj || typeof obj !== 'object') return
+      if (obj.__ob__) return
+      Object.defineProperty(obj, '__ob__', { value: true, enumerable: false })
+      if (Array.isArray(obj)) {
+        patchArrayMethods(obj)
+        obj.forEach(item => observe(item))
+      } else {
+        Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
+      }
+    }
+
+    // 数组方法重写
+    const arrayProto = Array.prototype
+    const arrayMethods = Object.create(arrayProto)
+    ;['push','pop','shift','unshift','splice','sort','reverse'].forEach(method => {
+      Object.defineProperty(arrayMethods, method, {
+        value: function(...args) {
+          const result = arrayProto[method].apply(this, args)
+          this.__dep__?.notify()
+          return result
+        }
+      })
+    })
+    function patchArrayMethods(arr) { Object.setPrototypeOf(arr, arrayMethods) }
+
+    // ============================================================
+    // 演示 1：响应式
+    // ============================================================
+    const reactiveData = { name: 'Alice', age: 25, address: { city: 'Beijing' } }
+    observe(reactiveData)
+    const logEl = document.getElementById('reactiveLog')
+    const outEl = document.getElementById('reactiveOutput')
+    function reactLog(msg, type='log') {
+      const d = document.createElement('div'); d.className = type
+      d.textContent = msg; logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight
+    }
+    new Watcher({ ...reactiveData }, () => reactiveData.name, (newVal, oldVal) => {
+      outEl.innerHTML = `<span style="color:var(--color-secondary)">name 变化：</span> ${oldVal} → <strong style="color:var(--color-primary-light)">${newVal}</strong>`
+      reactLog(`[Watcher] name: "${oldVal}" → "${newVal}"`, 'result')
+    })
+    new Watcher({ ...reactiveData }, () => reactiveData.age, (newVal, oldVal) => {
+      reactLog(`[Watcher] age: ${oldVal} → ${newVal}`, 'result')
+    })
+    new Watcher({ ...reactiveData }, () => reactiveData.address.city, (newVal, oldVal) => {
+      reactLog(`[Watcher] address.city: "${oldVal}" → "${newVal}"`, 'result')
+    })
+    function setReactiveData() {
+      const val = document.getElementById('reactiveInput').value
+      reactLog(`[SET] name = "${val}"`)
+      reactiveData.name = val
+    }
+    function triggerNested() {
+      const cities = ['Shanghai', 'Guangzhou', 'Shenzhen', 'Hangzhou', 'Chengdu']
+      const city = cities[Math.floor(Math.random() * cities.length)]
+      reactLog(`[SET] address.city = "${city}"`)
+      reactiveData.address.city = city
+    }
+
+    // ============================================================
+    // 演示 2：局限性
+    // ============================================================
+    const limLog = createRunner('limOut')
+    function runLimitations() {
+      limLog.run(() => {
+        const data = { name: 'Alice', list: [1, 2, 3] }
+        observe(data)
+        const changes = []
+        new Watcher(data, () => data.name, (n, o) => changes.push(`name: ${o}→${n}`))
+
+        // 正常响应
+        data.name = 'Bob'
+        console.log('✅ 修改已有属性 name=Bob → 响应:', changes.join(', '))
+
+        // 无法检测新增
+        const before = changes.length
+        data.newProp = 'new'
+        console.log('❌ 新增属性 newProp → 无响应（changes 未增加）:', changes.length === before)
+
+        // 无法检测删除
+        const before2 = changes.length
+        delete data.name
+        console.log('❌ 删除属性 name → 无响应:', changes.length === before2)
+
+        // 数组下标赋值无法检测
+        const arrChanges = []
+        observe(data.list)
+        console.log('❌ data.list[0] = 99 → 无响应（Vue2 缺陷）')
+        data.list[0] = 99
+
+        // 重写方法可以检测
+        console.log('✅ 重写的 push/splice 方法可检测')
+        console.log('  data.list.push(4):', data.list.push(4), '→ list:', JSON.stringify(data.list))
+        console.log('  data.list.splice(0,1,99):', data.list.splice(0, 1, 99), '→ list:', JSON.stringify(data.list))
+
+        console.log('\n💡 Vue2 解决方案：Vue.set(obj, key, val) / vm.$set')
+        console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')
+      })
+    }
+
+    // ============================================================
+    // 虚拟 DOM
+    // ============================================================
+    function h(tag, props, ...children) {
+      return { tag, props: props || {}, children: children.flat().filter(c => c != null) }
+    }
+    function createEl(vnode) {
+      if (typeof vnode === 'string' || typeof vnode === 'number') return document.createTextNode(vnode)
+      const el = vnode._el = document.createElement(vnode.tag)
+      Object.entries(vnode.props).forEach(([k, v]) => {
+        if (k === 'class') el.className = v
+        else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v)
+        else el.setAttribute(k, v)
+      })
+      vnode.children.forEach(child => el.appendChild(createEl(child)))
+      return el
+    }
+
+    function renderVnodeTree() {
+      const vnode = h('div', { id: 'app', class: 'container' },
+        h('h1', { style: { color: '#6c63ff' } }, 'Hello Vue2'),
+        h('ul', { class: 'list' },
+          h('li', { key: 'a', class: 'item' }, 'Item A'),
+          h('li', { key: 'b', class: 'item' }, 'Item B'),
+          h('li', { key: 'c', class: 'item' }, 'Item C'),
+        ),
+        h('p', { class: 'desc' }, '虚拟 DOM 示例')
+      )
+      const tree = document.getElementById('vnodeTree')
+      tree.innerHTML = renderTreeHtml(vnode, 0)
+      tree._vnode = vnode
+    }
+
+    function renderTreeHtml(node, depth) {
+      const indent = '  '.repeat(depth)
+      if (typeof node === 'string' || typeof node === 'number') {
+        return `<span class="vdom-text">${indent}"${node}"</span>\n`
+      }
+      const propsStr = Object.entries(node.props).map(([k,v]) =>
+        ` <span class="vdom-prop">${k}</span>="<span class="vdom-text">${typeof v === 'object' ? JSON.stringify(v) : v}</span>"`).join('')
+      let html = `${indent}<span class="vdom-node">&lt;${node.tag}${propsStr}&gt;</span>\n`
+      node.children.forEach(c => { html += renderTreeHtml(c, depth + 1) })
+      html += `${indent}<span class="vdom-node">&lt;/${node.tag}&gt;</span>\n`
+      return html
+    }
+
+    function mountVnode() {
+      const out = document.getElementById('mountOutput')
+      out.innerHTML = ''
+      const vnode = h('div', { style: 'border:1px solid #2e3350;border-radius:6px;padding:0.75rem;font-size:0.85rem' },
+        h('h3', { style: 'color:#6c63ff;margin-bottom:0.5rem' }, 'VNode → 真实 DOM'),
+        h('ul', { style: 'list-style:none;padding:0' },
+          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item A'),
+          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item B'),
+          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item C'),
+        )
+      )
+      out.appendChild(createEl(vnode))
+    }
+
+    // ============================================================
+    // diff 演示
+    // ============================================================
+    function runDiff() {
+      const oldList = document.getElementById('diffOld').value.split(',').map(s => s.trim()).filter(Boolean)
+      const newList = document.getElementById('diffNew').value.split(',').map(s => s.trim()).filter(Boolean)
+      const out = document.getElementById('diffOutput')
+
+      // 简单 LCS diff（用于可视化）
+      const ops = []
+      const oldMap = new Map(oldList.map((v, i) => [v, i]))
+      const newMap = new Map(newList.map((v, i) => [v, i]))
+
+      // 分析操作
+      const removed = oldList.filter(v => !newMap.has(v))
+      const added   = newList.filter(v => !oldMap.has(v))
+      const moved   = newList.filter(v => oldMap.has(v) && newMap.get(v) !== oldMap.get(v))
+      const same    = newList.filter(v => oldMap.has(v) && newMap.get(v) === oldMap.get(v))
+
+      let html = '<div style="margin-bottom:0.5rem;color:var(--color-text-muted);font-size:0.75rem">diff 分析结果：</div>'
+      html += `<div class="diff-same">旧列表：[${oldList.join(', ')}]</div>`
+      html += `<div class="diff-same">新列表：[${newList.join(', ')}]</div>`
+      html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">'
+      if (same.length)    html += `<div class="diff-same">♻️ 复用（位置不变）：${same.join(', ')}</div>`
+      if (moved.length)   html += `<div class="diff-same" style="color:var(--color-warning)">↕️ 移动（key 相同位置变）：${moved.join(', ')}</div>`
+      if (removed.length) html += `<div class="diff-old">➖ 删除（旧有新无）：${removed.join(', ')}</div>`
+      if (added.length)   html += `<div class="diff-new">➕ 新增（旧无新有）：${added.join(', ')}</div>`
+
+      // 操作步骤
+      html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">'
+      html += '<div style="color:var(--color-text-muted);font-size:0.75rem;margin-bottom:0.25rem">DOM 操作步骤（有 key 优化）：</div>'
+      removed.forEach(v => { html += `<div class="diff-old">removeChild(${v})</div>` })
+      added.forEach(v   => { html += `<div class="diff-new">appendChild(${v})</div>` })
+      moved.forEach(v   => { html += `<div class="diff-same" style="color:var(--color-warning)">insertBefore(${v}, ...)</div>` })
+      if (!removed.length && !added.length && !moved.length) {
+        html += '<div class="diff-same" style="color:var(--color-secondary)">✅ 无需 DOM 操作，完全复用</div>'
+      }
+      out.innerHTML = html
+    }
+
+    // ============================================================
+    // Mini Vue2 完整实现
+    // ============================================================
+    function proxy(vm, data) {
+      Object.keys(data).forEach(key => {
+        Object.defineProperty(vm, key, {
+          get() { return data[key] },
+          set(v) { data[key] = v }
+        })
+      })
+    }
+
+    class MiniVue2 {
+      constructor(options) {
+        this.$options = options
+        this.$data = typeof options.data === 'function' ? options.data() : options.data
+        observe(this.$data)
+        proxy(this, this.$data)
+
+        // methods
+        if (options.methods) {
+          Object.keys(options.methods).forEach(k => { this[k] = options.methods[k].bind(this) })
+        }
+        // computed
+        if (options.computed) {
+          Object.keys(options.computed).forEach(key => {
+            const watcher = new Watcher(this, options.computed[key].bind(this), () => {}, { lazy: true })
+            Object.defineProperty(this, key, {
+              get() { if (watcher.dirty) watcher.evaluate(); return watcher.value }
+            })
+          })
+        }
+        // watch
+        if (options.watch) {
+          Object.keys(options.watch).forEach(key => {
+            new Watcher(this, key, options.watch[key].bind(this))
+          })
+        }
+
+        options.created?.call(this)
+        this._renderWatcher = new Watcher(this, () => {
+          const vnode = options.render.call(this, h)
+          return vnode
+        }, (newVnode, oldVnode) => {
+          this._patch(oldVnode, newVnode)
+          this._vnode = newVnode
+        })
+        this._vnode = this._renderWatcher.value
+        this._mount()
+      }
+      _mount() {
+        const container = document.getElementById(this.$options.el.replace('#',''))
+        if (container) { container.innerHTML = ''; container.appendChild(createEl(this._vnode)) }
+      }
+      _patch(oldVnode, newVnode) {
+        if (!oldVnode._el) return
+        if (oldVnode.tag !== newVnode.tag) {
+          oldVnode._el.replaceWith(createEl(newVnode)); return
+        }
+        newVnode._el = oldVnode._el
+        // 更新文本子节点
+        if (newVnode.children.length === 1 && typeof newVnode.children[0] === 'string') {
+          oldVnode._el.textContent = newVnode.children[0]
+        }
+      }
+    }
+
+    // 启动 Mini Vue2
+    const app = new MiniVue2({
+      el: '#miniVue2App',
+      data() {
+        return { count: 0, message: 'Hello Mini Vue2!', items: ['苹果', '香蕉', '橙子'] }
+      },
+      computed: {
+        doubleCount() { return this.count * 2 }
+      },
+      watch: {
+        count(newVal, oldVal) {
+          const d = document.createElement('div'); d.className = 'result'
+          d.textContent = `[Watch] count: ${oldVal} → ${newVal}`
+          document.getElementById('miniVue2Log').appendChild(d)
+        }
+      },
+      methods: {
+        increment() { this.count++ },
+        decrement() { this.count-- },
+        addItem() {
+          const fruits = ['葡萄','西瓜','草莓','芒果','菠萝']
+          this.items.push(fruits[Math.floor(Math.random() * fruits.length)])
+        }
+      },
+      created() {
+        const d = document.createElement('div'); d.className = 'info'
+        d.textContent = '[created] Mini Vue2 实例已创建'
+        document.getElementById('miniVue2Log').appendChild(d)
+      },
+      render(h) {
+        return h('div', { style: 'font-size:0.875rem' },
+          h('div', { style: 'margin-bottom:0.75rem;color:#8892b0' }, this.message),
+          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
+            h('button', {
+              onclick: this.increment.bind(this),
+              style: 'background:#6c63ff;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem'
+            }, '+1'),
+            h('span', { style: 'color:#e2e8f0;font-weight:700;font-size:1.1rem;min-width:30px;text-align:center' }, String(this.count)),
+            h('button', {
+              onclick: this.decrement.bind(this),
+              style: 'background:#ff6584;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem'
+            }, '-1'),
+            h('span', { style: 'color:#ffd166;font-size:0.8rem' }, `computed doubleCount = ${this.doubleCount}`),
+          ),
+          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap' },
+            h('span', { style: 'color:#8892b0;font-size:0.8rem' }, '水果列表:'),
+            ...this.items.map(item => h('span', {
+              style: 'background:rgba(0,212,170,0.15);color:#00d4aa;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.75rem'
+            }, item)),
+            h('button', {
+              onclick: this.addItem.bind(this),
+              style: 'background:rgba(0,212,170,0.2);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.75rem'
+            }, '+ 添加')
+          )
+        )
+      }
+    })
+
+    // 初始化演示
+    renderVnodeTree()
+  </script>
+</body>
+</html>

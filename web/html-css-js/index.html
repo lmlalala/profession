@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HTML5 + CSS3 + JS 渐进式学习</title>
+  <link rel="stylesheet" href="css/common.css">
+  <style>
+    .hero {
+      min-height: calc(100vh - 60px);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background:
+        radial-gradient(ellipse 60% 50% at 20% 40%, rgba(108,99,255,0.15) 0%, transparent 60%),
+        radial-gradient(ellipse 50% 40% at 80% 60%, rgba(0,212,170,0.1) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .hero-title {
+      font-size: clamp(2rem, 5vw, 3.5rem);
+      font-weight: 900;
+      line-height: 1.15;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #fff 0%, var(--color-primary-light) 50%, var(--color-secondary) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 1.1rem;
+      color: var(--color-text-muted);
+      max-width: 600px;
+      margin-bottom: 2.5rem;
+    }
+    .chapter-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 1.25rem;
+      width: 100%;
+      max-width: 1100px;
+      padding: 80px 2rem 4rem;
+      margin: 0 auto;
+    }
+    .chapter-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .chapter-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+    .chapter-card.html::before { background: linear-gradient(90deg, #e44d26, #f16529); }
+    .chapter-card.css::before  { background: linear-gradient(90deg, #264de4, #2965f1); }
+    .chapter-card.js::before   { background: linear-gradient(90deg, #f7df1e, #f0c000); }
+    .chapter-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.2);
+    }
+    .chapter-icon { font-size: 2rem; }
+    .chapter-num  { font-size: 0.75rem; color: var(--color-text-muted); }
+    .chapter-name { font-size: 1.05rem; font-weight: 700; }
+    .chapter-desc { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; }
+    .chapter-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.25rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="pages/html5.html">HTML5</a></li>
+      <li><a href="pages/css-layout.html">CSS 布局</a></li>
+      <li><a href="pages/css-animation.html">CSS 动画</a></li>
+      <li><a href="pages/css-interview.html">CSS 面试</a></li>
+      <li><a href="pages/js-basic.html">JS 基础</a></li>
+      <li><a href="pages/js-es6.html">JS ES6+</a></li>
+      <li><a href="pages/js-async.html">JS 异步</a></li>
+      <li><a href="pages/js-advanced.html">JS 高级</a></li>
+    </ul>
+  </nav>
+
+  <section class="hero">
+    <h1 class="hero-title">HTML5 · CSS3 · JavaScript</h1>
+    <p class="hero-desc">渐进式学习路径，从基础到高级，覆盖面试高频考点，每个知识点都有可运行的交互示例。</p>
+  </section>
+
+  <div class="chapter-grid">
+    <a href="pages/html5.html" class="chapter-card html">
+      <span class="chapter-icon">🏗️</span>
+      <span class="chapter-num">第一章</span>
+      <span class="chapter-name">HTML5 语义化与新特性</span>
+      <span class="chapter-desc">语义化标签、表单增强、媒体元素、Canvas、Web Storage、拖拽 API</span>
+      <div class="chapter-tags">
+        <span class="tag-badge html">HTML5</span>
+        <span class="tag-badge interview">面试高频</span>
+      </div>
+    </a>
+
+    <a href="pages/css-layout.html" class="chapter-card css">
+      <span class="chapter-icon">📐</span>
+      <span class="chapter-num">第二章</span>
+      <span class="chapter-name">CSS3 选择器与布局</span>
+      <span class="chapter-desc">选择器优先级、盒模型、Flexbox 完整指南、Grid 布局、定位</span>
+      <div class="chapter-tags">
+        <span class="tag-badge css">CSS3</span>
+        <span class="tag-badge interview">面试高频</span>
+      </div>
+    </a>
+
+    <a href="pages/css-animation.html" class="chapter-card css">
+      <span class="chapter-icon">✨</span>
+      <span class="chapter-num">第三章</span>
+      <span class="chapter-name">CSS3 动画与视觉效果</span>
+      <span class="chapter-desc">transition 过渡、transform 变换、animation 关键帧、滤镜、渐变</span>
+      <div class="chapter-tags">
+        <span class="tag-badge css">CSS3</span>
+        <span class="tag-badge tip">交互演示</span>
+      </div>
+    </a>
+
+    <a href="pages/css-interview.html" class="chapter-card css">
+      <span class="chapter-icon">🎯</span>
+      <span class="chapter-num">第四章</span>
+      <span class="chapter-name">CSS 面试高频考点</span>
+      <span class="chapter-desc">BFC、层叠上下文、响应式设计、居中方案、CSS 变量、性能优化</span>
+      <div class="chapter-tags">
+        <span class="tag-badge css">CSS3</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/js-basic.html" class="chapter-card js">
+      <span class="chapter-icon">⚙️</span>
+      <span class="chapter-num">第五章</span>
+      <span class="chapter-name">JavaScript 核心基础</span>
+      <span class="chapter-desc">数据类型、变量提升、作用域链、闭包、this 绑定、原型链、继承</span>
+      <div class="chapter-tags">
+        <span class="tag-badge js">JavaScript</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/js-es6.html" class="chapter-card js">
+      <span class="chapter-icon">🚀</span>
+      <span class="chapter-num">第六章</span>
+      <span class="chapter-name">ES6+ 现代语法</span>
+      <span class="chapter-desc">解构、展开、箭头函数、类、模块、Symbol、迭代器、生成器、Proxy</span>
+      <div class="chapter-tags">
+        <span class="tag-badge js">ES6+</span>
+        <span class="tag-badge tip">交互演示</span>
+      </div>
+    </a>
+
+    <a href="pages/js-async.html" class="chapter-card js">
+      <span class="chapter-icon">⏳</span>
+      <span class="chapter-num">第七章</span>
+      <span class="chapter-name">异步编程全解</span>
+      <span class="chapter-desc">回调地狱、Promise 原理、async/await、事件循环、宏任务/微任务</span>
+      <div class="chapter-tags">
+        <span class="tag-badge js">异步</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/js-advanced.html" class="chapter-card js">
+      <span class="chapter-icon">🧠</span>
+      <span class="chapter-num">第八章</span>
+      <span class="chapter-name">JS 高级特性与设计模式</span>
+      <span class="chapter-desc">手写 call/apply/bind/new、深拷贝、防抖节流、设计模式、错误处理</span>
+      <div class="chapter-tags">
+        <span class="tag-badge js">高级</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/vue2-principle.html" class="chapter-card" style="--card-color:#42b883">
+      <style>.chapter-card[href*='vue2']::before{background:linear-gradient(90deg,#42b883,#35495e)}</style>
+      <span class="chapter-icon">🟢</span>
+      <span class="chapter-num">第九章</span>
+      <span class="chapter-name">Vue2 原理实现</span>
+      <span class="chapter-desc">Object.defineProperty 响应式、Dep/Watcher 依赖收集、虚拟 DOM、diff 双端指针、Mini Vue2</span>
+      <div class="chapter-tags">
+        <span class="tag-badge tip">Vue2</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/vue3-principle.html" class="chapter-card" style="--card-color:#42b883">
+      <style>.chapter-card[href*='vue3']::before{background:linear-gradient(90deg,#42b883,#6c63ff)}</style>
+      <span class="chapter-icon">💚</span>
+      <span class="chapter-num">第十章</span>
+      <span class="chapter-name">Vue3 原理实现</span>
+      <span class="chapter-desc">Proxy 响应式、effect/track/trigger、ref/reactive/computed、Composition API、编译优化</span>
+      <div class="chapter-tags">
+        <span class="tag-badge tip">Vue3</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+
+    <a href="pages/react-principle.html" class="chapter-card" style="--card-color:#61dafb">
+      <style>.chapter-card[href*='react']::before{background:linear-gradient(90deg,#61dafb,#0088cc)}</style>
+      <span class="chapter-icon">⚛️</span>
+      <span class="chapter-num">第十一章</span>
+      <span class="chapter-name">React 原理实现</span>
+      <span class="chapter-desc">JSX/createElement、Fiber 架构、可中断渲染、diff 算法、Hooks 链表实现、Mini React</span>
+      <div class="chapter-tags">
+        <span class="tag-badge js">React</span>
+        <span class="tag-badge interview">面试必备</span>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

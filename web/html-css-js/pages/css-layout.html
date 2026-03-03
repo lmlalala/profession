@@ -1,0 +1,397 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS3 选择器与布局</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    /* ── 选择器演示 ── */
+    .sel-demo p:first-child { color: var(--color-secondary); }
+    .sel-demo p:last-child  { color: var(--color-accent); }
+    .sel-demo p:nth-child(2){ color: var(--color-warning); }
+    .sel-demo li:not(.skip) { color: var(--color-primary-light); }
+    .sel-demo li.skip       { color: var(--color-text-muted); text-decoration: line-through; }
+    .sel-demo a[href^="https"] { color: var(--color-secondary); }
+    .sel-demo a[href$=".pdf"]  { color: var(--color-warning); }
+    .sel-demo input:focus + label { color: var(--color-primary-light); font-weight: 600; }
+
+    /* ── 盒模型演示 ── */
+    .box-model-demo {
+      position: relative;
+      width: 280px;
+      margin: 0 auto;
+    }
+    .bm-margin  { background: rgba(255,209,102,0.15); border: 2px dashed var(--color-warning); padding: 20px; border-radius: 8px; }
+    .bm-border  { background: rgba(108,99,255,0.15);  border: 8px solid var(--color-primary);  padding: 20px; border-radius: 4px; }
+    .bm-padding { background: rgba(0,212,170,0.15);   padding: 20px; }
+    .bm-content { background: rgba(255,101,132,0.2);  padding: 1rem; text-align: center; font-size: 0.85rem; border-radius: 2px; }
+    .bm-label   { position: absolute; font-size: 0.7rem; color: var(--color-text-muted); }
+
+    /* ── Flexbox 演示 ── */
+    .flex-container {
+      display: flex;
+      background: var(--color-surface-2);
+      border-radius: var(--radius-sm);
+      padding: 0.5rem;
+      gap: 0.5rem;
+      min-height: 80px;
+      transition: all 0.3s;
+    }
+    .flex-item {
+      background: var(--color-primary);
+      color: #fff;
+      padding: 0.5rem 0.75rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 40px;
+      transition: all 0.3s;
+    }
+    .flex-item:nth-child(2) { background: var(--color-secondary); color: #0f1117; }
+    .flex-item:nth-child(3) { background: var(--color-accent); }
+    .flex-item:nth-child(4) { background: var(--color-warning); color: #0f1117; }
+    .flex-controls { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-bottom: 0.75rem; }
+    .flex-controls select {
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      color: var(--color-text);
+      padding: 0.3rem 0.6rem;
+      border-radius: var(--radius-sm);
+      font-size: 0.8rem;
+    }
+    .flex-controls label { font-size: 0.8rem; color: var(--color-text-muted); display: flex; align-items: center; gap: 0.3rem; }
+
+    /* ── Grid 演示 ── */
+    .grid-demo {
+      display: grid;
+      gap: 0.5rem;
+      background: var(--color-surface-2);
+      padding: 0.5rem;
+      border-radius: var(--radius-sm);
+    }
+    .grid-cell {
+      background: var(--color-primary);
+      color: #fff;
+      padding: 0.75rem;
+      border-radius: 4px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      text-align: center;
+    }
+    .grid-cell:nth-child(2) { background: var(--color-secondary); color: #0f1117; }
+    .grid-cell:nth-child(3) { background: var(--color-accent); }
+    .grid-cell:nth-child(4) { background: var(--color-warning); color: #0f1117; }
+    .grid-cell:nth-child(5) { background: #61afef; color: #0f1117; }
+    .grid-cell:nth-child(6) { background: #c678dd; }
+    .grid-cell.span-2 { grid-column: span 2; }
+    .grid-cell.span-row { grid-row: span 2; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html" class="active">CSS 布局</a></li>
+      <li><a href="css-animation.html">CSS 动画</a></li>
+      <li><a href="css-interview.html">CSS 面试</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">CSS3 选择器与布局</h1>
+    <p class="page-subtitle">选择器优先级 · 盒模型 · Flexbox · Grid · 定位</p>
+
+    <!-- 1. 选择器优先级 -->
+    <section class="section">
+      <h2 class="section-title">1. 选择器优先级 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>优先级计算规则（权重）</strong>
+          <code>!important</code> &gt; 内联样式(1000) &gt; ID(100) &gt; 类/伪类/属性(10) &gt; 标签/伪元素(1) &gt; 通配符(0)
+        </div>
+        <div class="code-block"><span class="cmt">/* 权重示例 */</span>
+<span class="fn">#app</span> .list <span class="fn">li</span>:hover  <span class="cmt">/* 100 + 10 + 1 + 10 = 121 */</span>
+<span class="fn">.nav</span> > <span class="fn">a</span>.<span class="fn">active</span>        <span class="cmt">/* 10 + 1 + 10 = 21 */</span>
+<span class="fn">div</span> + <span class="fn">p</span>                  <span class="cmt">/* 1 + 1 = 2 */</span>
+<span class="fn">*</span>                         <span class="cmt">/* 0 */</span>
+
+<span class="cmt">/* 同权重：后写的覆盖先写的 */</span>
+<span class="cmt">/* !important 最高，但会破坏样式级联，慎用 */</span></div>
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>选择器类型</th><th>示例</th><th>权重</th></tr></thead>
+            <tbody>
+              <tr><td>内联样式</td><td><code>style="color:red"</code></td><td>1,0,0,0</td></tr>
+              <tr><td>ID 选择器</td><td><code>#header</code></td><td>0,1,0,0</td></tr>
+              <tr><td>类 / 伪类 / 属性</td><td><code>.active</code> <code>:hover</code> <code>[type]</code></td><td>0,0,1,0</td></tr>
+              <tr><td>标签 / 伪元素</td><td><code>div</code> <code>::before</code></td><td>0,0,0,1</td></tr>
+              <tr><td>通配符 / 关系符</td><td><code>*</code> <code>></code> <code>+</code> <code>~</code></td><td>0,0,0,0</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">常用伪类与属性选择器</p>
+        <div class="sel-demo demo-box">
+          <div class="demo-label">:first-child / :last-child / :nth-child / :not()</div>
+          <p>第一个段落（:first-child → 绿色）</p>
+          <p>第二个段落（:nth-child(2) → 黄色）</p>
+          <p>最后一个段落（:last-child → 粉色）</p>
+          <ul style="margin-top:0.5rem;list-style:none">
+            <li>列表项 1（:not(.skip) → 紫色）</li>
+            <li class="skip">列表项 2（.skip → 灰色删除线）</li>
+            <li>列表项 3（:not(.skip) → 紫色）</li>
+          </ul>
+          <div style="margin-top:0.5rem">
+            <a href="https://example.com">https 链接（[href^="https"] → 绿色）</a><br>
+            <a href="doc.pdf">PDF 文件（[href$=".pdf"] → 黄色）</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 盒模型 -->
+    <section class="section">
+      <h2 class="section-title">2. 盒模型 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout warn">
+          <strong>box-sizing 的区别</strong>
+          <code>content-box</code>（默认）：width = 内容宽，总宽 = width + padding + border<br>
+          <code>border-box</code>（推荐）：width = 内容 + padding + border，总宽 = width
+        </div>
+        <div class="grid-2">
+          <div>
+            <div class="code-block"><span class="cmt">/* 推荐全局设置 */</span>
+*, *::before, *::after {
+  <span class="kw">box-sizing</span>: border-box;
+}
+
+<span class="cmt">/* content-box（默认）*/</span>
+.box {
+  width: <span class="num">200px</span>;
+  padding: <span class="num">20px</span>;
+  border: <span class="num">5px</span> solid;
+  <span class="cmt">/* 实际占宽 = 200+40+10 = 250px */</span>
+}
+
+<span class="cmt">/* border-box */</span>
+.box {
+  box-sizing: border-box;
+  width: <span class="num">200px</span>;
+  padding: <span class="num">20px</span>;
+  border: <span class="num">5px</span> solid;
+  <span class="cmt">/* 实际占宽 = 200px（不变）*/</span>
+}</div>
+          </div>
+          <div>
+            <div class="demo-label">盒模型结构</div>
+            <div class="bm-margin">
+              <div style="font-size:0.7rem;color:var(--color-warning);margin-bottom:4px">margin（外边距）</div>
+              <div class="bm-border">
+                <div style="font-size:0.7rem;color:var(--color-primary-light);margin-bottom:4px">border（边框）</div>
+                <div class="bm-padding">
+                  <div style="font-size:0.7rem;color:var(--color-secondary);margin-bottom:4px">padding（内边距）</div>
+                  <div class="bm-content">content（内容区）</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. Flexbox -->
+    <section class="section">
+      <h2 class="section-title">3. Flexbox 弹性布局 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout tip">
+          <strong>核心概念</strong>
+          父元素设 <code>display: flex</code>，子元素自动成为 flex item。主轴（main axis）默认水平，交叉轴（cross axis）垂直。
+        </div>
+        <div class="demo-box">
+          <div class="demo-label">交互演示 — 调整属性实时预览</div>
+          <div class="flex-controls">
+            <label>flex-direction:
+              <select onchange="updateFlex('direction', this.value)">
+                <option>row</option><option>row-reverse</option>
+                <option>column</option><option>column-reverse</option>
+              </select>
+            </label>
+            <label>justify-content:
+              <select onchange="updateFlex('justify', this.value)">
+                <option>flex-start</option><option>flex-end</option><option>center</option>
+                <option>space-between</option><option>space-around</option><option>space-evenly</option>
+              </select>
+            </label>
+            <label>align-items:
+              <select onchange="updateFlex('align', this.value)">
+                <option>stretch</option><option>flex-start</option><option>flex-end</option>
+                <option>center</option><option>baseline</option>
+              </select>
+            </label>
+            <label>flex-wrap:
+              <select onchange="updateFlex('wrap', this.value)">
+                <option>nowrap</option><option>wrap</option><option>wrap-reverse</option>
+              </select>
+            </label>
+          </div>
+          <div class="flex-container" id="flexDemo" style="min-height:100px">
+            <div class="flex-item">1</div>
+            <div class="flex-item" style="height:60px">2</div>
+            <div class="flex-item">3</div>
+            <div class="flex-item" style="height:40px">4</div>
+          </div>
+          <div class="code-block" id="flexCode" style="margin-top:0.75rem">display: flex;</div>
+        </div>
+        <div class="table-wrap" style="margin-top:1rem">
+          <table>
+            <thead><tr><th>父容器属性</th><th>值</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>flex-direction</td><td>row | column | row-reverse | column-reverse</td><td>主轴方向</td></tr>
+              <tr><td>justify-content</td><td>flex-start | center | space-between | space-around | space-evenly</td><td>主轴对齐</td></tr>
+              <tr><td>align-items</td><td>stretch | flex-start | flex-end | center | baseline</td><td>交叉轴对齐</td></tr>
+              <tr><td>flex-wrap</td><td>nowrap | wrap | wrap-reverse</td><td>换行</td></tr>
+              <tr><td>gap</td><td>长度值</td><td>子项间距</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="code-block" style="margin-top:0.75rem"><span class="cmt">/* 子项属性 */</span>
+.item {
+  flex: <span class="num">1</span>;         <span class="cmt">/* flex-grow:1 flex-shrink:1 flex-basis:0 */</span>
+  flex-grow: <span class="num">1</span>;    <span class="cmt">/* 剩余空间分配比例 */</span>
+  flex-shrink: <span class="num">1</span>;  <span class="cmt">/* 空间不足时收缩比例 */</span>
+  flex-basis: <span class="num">200px</span>;<span class="cmt">/* 初始大小 */</span>
+  align-self: center; <span class="cmt">/* 单独设置交叉轴对齐 */</span>
+  order: <span class="num">2</span>;         <span class="cmt">/* 排列顺序（默认0）*/</span>
+}</div>
+      </div>
+    </section>
+
+    <!-- 4. Grid -->
+    <section class="section">
+      <h2 class="section-title">4. CSS Grid 网格布局 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="demo-box">
+          <div class="demo-label">交互演示</div>
+          <div class="flex-controls">
+            <label>grid-template-columns:
+              <select onchange="updateGrid(this.value)">
+                <option value="repeat(3,1fr)">repeat(3, 1fr)</option>
+                <option value="repeat(2,1fr)">repeat(2, 1fr)</option>
+                <option value="200px 1fr 200px">200px 1fr 200px</option>
+                <option value="repeat(auto-fill,minmax(120px,1fr))">auto-fill minmax(120px,1fr)</option>
+              </select>
+            </label>
+          </div>
+          <div class="grid-demo" id="gridDemo" style="grid-template-columns:repeat(3,1fr)">
+            <div class="grid-cell">1</div>
+            <div class="grid-cell">2</div>
+            <div class="grid-cell">3</div>
+            <div class="grid-cell">4</div>
+            <div class="grid-cell">5</div>
+            <div class="grid-cell">6</div>
+          </div>
+        </div>
+        <div class="code-block" style="margin-top:0.75rem"><span class="cmt">/* Grid 核心属性 */</span>
+.container {
+  display: grid;
+  grid-template-columns: <span class="fn">repeat</span>(<span class="num">3</span>, <span class="num">1fr</span>); <span class="cmt">/* 3列等宽 */</span>
+  grid-template-rows: <span class="num">100px</span> auto;       <span class="cmt">/* 行高 */</span>
+  gap: <span class="num">1rem</span>;                          <span class="cmt">/* 行列间距 */</span>
+  grid-template-areas:                   <span class="cmt">/* 命名区域 */</span>
+    <span class="str">"header header header"</span>
+    <span class="str">"sidebar main main"</span>
+    <span class="str">"footer footer footer"</span>;
+}
+.header { grid-area: header; }
+.sidebar { grid-area: sidebar; }
+
+<span class="cmt">/* 子项跨行列 */</span>
+.item {
+  grid-column: <span class="num">1</span> / <span class="num">3</span>;  <span class="cmt">/* 从第1列线到第3列线 */</span>
+  grid-row: span <span class="num">2</span>;    <span class="cmt">/* 跨2行 */</span>
+}</div>
+        <div class="demo-box" style="margin-top:0.75rem">
+          <div class="demo-label">grid-template-areas 布局示例</div>
+          <div style="display:grid;grid-template-columns:150px 1fr;grid-template-rows:50px 1fr 40px;gap:0.5rem;grid-template-areas:'h h' 's m' 'f f';height:200px">
+            <div style="grid-area:h;background:rgba(108,99,255,0.3);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--color-primary-light)">header</div>
+            <div style="grid-area:s;background:rgba(0,212,170,0.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--color-secondary)">sidebar</div>
+            <div style="grid-area:m;background:rgba(255,255,255,0.05);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--color-text-muted)">main</div>
+            <div style="grid-area:f;background:rgba(255,101,132,0.2);border-radius:4px;display:flex;align-items:center;justify-content:center;font-size:0.8rem;color:var(--color-accent)">footer</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 定位 -->
+    <section class="section">
+      <h2 class="section-title">5. 定位（Position）<span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>值</th><th>说明</th><th>参照物</th><th>脱离文档流</th></tr></thead>
+            <tbody>
+              <tr><td><code>static</code></td><td>默认，正常文档流</td><td>—</td><td>❌</td></tr>
+              <tr><td><code>relative</code></td><td>相对自身原位置偏移</td><td>自身原位置</td><td>❌（占位）</td></tr>
+              <tr><td><code>absolute</code></td><td>绝对定位</td><td>最近的非static祖先</td><td>✅</td></tr>
+              <tr><td><code>fixed</code></td><td>固定在视口</td><td>视口（viewport）</td><td>✅</td></tr>
+              <tr><td><code>sticky</code></td><td>滚动到阈值时固定</td><td>最近滚动容器</td><td>❌（混合）</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout warn">
+          <strong>常见面试题：absolute 的包含块</strong>
+          absolute 元素会找最近的 <code>position</code> 不为 <code>static</code> 的祖先元素作为包含块。
+          所以父元素通常设 <code>position: relative</code> 来"包住"子元素的绝对定位。
+        </div>
+        <div class="demo-box">
+          <div class="demo-label">sticky 吸顶演示（向下滚动）</div>
+          <div style="height:150px;overflow-y:auto;border:1px solid var(--color-border);border-radius:4px">
+            <div style="position:sticky;top:0;background:var(--color-primary);color:#fff;padding:0.4rem 0.75rem;font-size:0.8rem;font-weight:600;z-index:1">
+              📌 sticky 吸顶标题
+            </div>
+            <div style="padding:0.75rem;font-size:0.85rem;color:var(--color-text-muted)">
+              <p>内容行 1</p><p>内容行 2</p><p>内容行 3</p><p>内容行 4</p>
+              <p>内容行 5</p><p>内容行 6</p><p>内容行 7</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    // Flexbox 交互
+    let flexState = { direction: 'row', justify: 'flex-start', align: 'stretch', wrap: 'nowrap' }
+    function updateFlex(prop, val) {
+      const map = { direction: 'flex-direction', justify: 'justify-content', align: 'align-items', wrap: 'flex-wrap' }
+      flexState[prop] = val
+      const el = document.getElementById('flexDemo')
+      el.style.flexDirection = flexState.direction
+      el.style.justifyContent = flexState.justify
+      el.style.alignItems = flexState.align
+      el.style.flexWrap = flexState.wrap
+      document.getElementById('flexCode').textContent =
+        `display: flex;\nflex-direction: ${flexState.direction};\njustify-content: ${flexState.justify};\nalign-items: ${flexState.align};\nflex-wrap: ${flexState.wrap};`
+    }
+
+    // Grid 交互
+    function updateGrid(val) {
+      document.getElementById('gridDemo').style.gridTemplateColumns = val
+    }
+  </script>
+</body>
+</html>

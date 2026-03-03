@@ -1,0 +1,65 @@
+{
+  "name": "format-n",
+  "version": "0.0.1",
+  "description": "前端格式化 JS/TS 工具库，提供数字、金额、百分比、日期等格式化能力，依赖 bignumber.js、dayjs、lodash 等三方库",
+  "keywords": [
+    "format",
+    "number",
+    "decimal",
+    "percent",
+    "money",
+    "date",
+    "bignumber",
+    "dayjs",
+    "lodash",
+    "typescript",
+    "javascript"
+  ],
+  "author": "",
+  "license": "MIT",
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "dev": "tsup --watch",
+    "build": "tsup",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . --fix",
+    "lint:check": "eslint .",
+    "format": "prettier --write \"src/**/*.ts\"",
+    "format:check": "prettier --check \"src/**/*.ts\"",
+    "prepublishOnly": "pnpm run build"
+  },
+  "dependencies": {
+    "bignumber.js": "9.3.1",
+    "dayjs": "1.11.13",
+    "lodash": "4.17.21"
+  },
+  "devDependencies": {
+    "@eslint/js": "^10.0.1",
+    "@types/lodash": "^4.17.24",
+    "eslint": "^10.0.2",
+    "eslint-config-prettier": "^10.1.8",
+    "prettier": "^3.8.1",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.56.1"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "esbuild"
+    ]
+  }
+}

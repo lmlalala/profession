@@ -1,0 +1,340 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CSS3 动画与视觉效果</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <style>
+    /* ── transition ── */
+    .trans-box {
+      width: 80px; height: 80px;
+      background: var(--color-primary);
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-size: 0.75rem; font-weight: 600;
+      cursor: pointer;
+    }
+    .trans-all     { transition: all 0.4s ease; }
+    .trans-all:hover { transform: scale(1.3) rotate(15deg); background: var(--color-secondary); border-radius: 50%; }
+    .trans-color   { transition: background-color 0.3s, color 0.3s; }
+    .trans-color:hover { background: var(--color-accent); }
+    .trans-cubic   { transition: transform 0.5s cubic-bezier(0.34, 1.56, 0.64, 1); }
+    .trans-cubic:hover { transform: translateX(60px); }
+    .trans-delay   { transition: transform 0.4s ease 0.2s; }
+    .trans-delay:hover { transform: translateY(-20px); }
+
+    /* ── transform ── */
+    .tf-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0.75rem; }
+    .tf-box {
+      width: 70px; height: 70px;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: var(--color-text-muted);
+      cursor: pointer;
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    .tf-translate:hover { transform: translate(10px, -10px); }
+    .tf-scale:hover     { transform: scale(1.4); }
+    .tf-rotate:hover    { transform: rotate(45deg); }
+    .tf-skew:hover      { transform: skew(15deg, 5deg); }
+    .tf-3d {
+      perspective: 400px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    .tf-3d-box {
+      width: 70px; height: 70px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; color: #fff;
+      cursor: pointer;
+      transition: transform 0.5s ease;
+    }
+    .tf-3d-box:hover { transform: rotateY(180deg); }
+    .tf-matrix:hover { transform: matrix(1.2, 0.2, -0.2, 1.2, 5, -5); }
+
+    /* ── animation ── */
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); animation-timing-function: ease-in; }
+      50%       { transform: translateY(-40px); animation-timing-function: ease-out; }
+    }
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+    @keyframes pulse {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50%       { transform: scale(1.15); opacity: 0.7; }
+    }
+    @keyframes shake {
+      0%, 100% { transform: translateX(0); }
+      20%       { transform: translateX(-8px); }
+      40%       { transform: translateX(8px); }
+      60%       { transform: translateX(-5px); }
+      80%       { transform: translateX(5px); }
+    }
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+    @keyframes gradientShift {
+      0%   { background-position: 0% 50%; }
+      50%  { background-position: 100% 50%; }
+      100% { background-position: 0% 50%; }
+    }
+    @keyframes typewriter {
+      from { width: 0; }
+      to   { width: 100%; }
+    }
+    @keyframes blink {
+      50% { border-color: transparent; }
+    }
+    .anim-box {
+      width: 70px; height: 70px;
+      border-radius: 8px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.7rem; font-weight: 600; color: #fff;
+      cursor: pointer;
+    }
+    .anim-bounce  { background: var(--color-primary); animation: bounce 1.2s infinite; }
+    .anim-spin    { background: var(--color-secondary); color: #0f1117; animation: spin 1s linear infinite; }
+    .anim-pulse   { background: var(--color-accent); animation: pulse 1.5s ease-in-out infinite; }
+    .anim-shake   { background: var(--color-warning); color: #0f1117; animation: shake 0.5s ease infinite; }
+    .anim-fadein  { background: #61afef; color: #0f1117; animation: fadeInUp 1s ease both; }
+    .anim-gradient {
+      width: 100%; height: 60px; border-radius: 8px;
+      background: linear-gradient(270deg, #6c63ff, #00d4aa, #ff6584, #ffd166);
+      background-size: 400% 400%;
+      animation: gradientShift 4s ease infinite;
+      display: flex; align-items: center; justify-content: center;
+      color: #fff; font-weight: 700; font-size: 0.9rem;
+    }
+    .anim-typewriter {
+      font-family: var(--font-mono);
+      font-size: 1rem;
+      color: var(--color-secondary);
+      overflow: hidden;
+      white-space: nowrap;
+      border-right: 2px solid var(--color-secondary);
+      width: 0;
+      animation: typewriter 2s steps(20) forwards, blink 0.75s step-end infinite;
+    }
+    .anim-paused { animation-play-state: paused; }
+
+    /* ── filter ── */
+    .filter-demo img, .filter-demo .filter-box {
+      width: 100px; height: 80px;
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border-radius: 6px;
+      transition: filter 0.3s;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.5rem;
+    }
+    .f-blur:hover     { filter: blur(4px); }
+    .f-bright:hover   { filter: brightness(1.8); }
+    .f-contrast:hover { filter: contrast(2); }
+    .f-gray:hover     { filter: grayscale(1); }
+    .f-sepia:hover    { filter: sepia(1); }
+    .f-hue:hover      { filter: hue-rotate(180deg); }
+    .f-shadow:hover   { filter: drop-shadow(0 0 12px var(--color-primary)); }
+    .f-invert:hover   { filter: invert(1); }
+
+    /* ── gradient ── */
+    .grad-box { height: 60px; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #fff; font-size: 0.8rem; font-weight: 600; margin-bottom: 0.5rem; }
+
+    /* ── will-change / GPU ── */
+    .gpu-tip { font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+  <nav class="nav">
+    <a href="../index.html" class="nav-brand">📚 前端学习</a>
+    <ul class="nav-links">
+      <li><a href="html5.html">HTML5</a></li>
+      <li><a href="css-layout.html">CSS 布局</a></li>
+      <li><a href="css-animation.html" class="active">CSS 动画</a></li>
+      <li><a href="css-interview.html">CSS 面试</a></li>
+      <li><a href="js-basic.html">JS 基础</a></li>
+      <li><a href="js-es6.html">JS ES6+</a></li>
+      <li><a href="js-async.html">JS 异步</a></li>
+      <li><a href="js-advanced.html">JS 高级</a></li>
+      <li><a href="vue2-principle.html">Vue2 原理</a></li>
+      <li><a href="vue3-principle.html">Vue3 原理</a></li>
+      <li><a href="react-principle.html">React 原理</a></li>
+    </ul>
+  </nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">CSS3 动画与视觉效果</h1>
+    <p class="page-subtitle">transition 过渡 · transform 变换 · animation 关键帧 · filter 滤镜 · 渐变</p>
+
+    <!-- 1. transition -->
+    <section class="section">
+      <h2 class="section-title">1. transition 过渡</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 语法 */</span>
+transition: [property] [duration] [timing-function] [delay];
+
+<span class="cmt">/* 示例 */</span>
+.btn { transition: all <span class="num">0.3s</span> ease; }
+.btn { transition: background-color <span class="num">0.3s</span>, transform <span class="num">0.4s</span> cubic-bezier(<span class="num">0.34</span>,<span class="num">1.56</span>,<span class="num">0.64</span>,<span class="num">1</span>); }
+
+<span class="cmt">/* timing-function 常用值 */</span>
+ease | ease-in | ease-out | ease-in-out | linear
+cubic-bezier(x1, y1, x2, y2)  <span class="cmt">/* 自定义贝塞尔曲线 */</span></div>
+        <div class="demo-box">
+          <div class="demo-label">hover 查看效果</div>
+          <div style="display:flex;gap:1rem;flex-wrap:wrap;align-items:center">
+            <div class="trans-box trans-all">all</div>
+            <div class="trans-box trans-color">color</div>
+            <div class="trans-box trans-cubic" style="background:var(--color-secondary);color:#0f1117">cubic</div>
+            <div class="trans-box trans-delay" style="background:var(--color-accent)">delay</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. transform -->
+    <section class="section">
+      <h2 class="section-title">2. transform 变换</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 2D 变换 */</span>
+transform: <span class="fn">translate</span>(<span class="num">50px</span>, <span class="num">-20px</span>);  <span class="cmt">/* 位移 */</span>
+transform: <span class="fn">scale</span>(<span class="num">1.5</span>);             <span class="cmt">/* 缩放 */</span>
+transform: <span class="fn">rotate</span>(<span class="num">45deg</span>);          <span class="cmt">/* 旋转 */</span>
+transform: <span class="fn">skew</span>(<span class="num">15deg</span>, <span class="num">5deg</span>);     <span class="cmt">/* 倾斜 */</span>
+
+<span class="cmt">/* 3D 变换（父元素需设 perspective）*/</span>
+.parent { perspective: <span class="num">400px</span>; }
+.child  { transform: <span class="fn">rotateY</span>(<span class="num">45deg</span>); transform-style: preserve-3d; }
+
+<span class="cmt">/* 组合变换（从右到左执行）*/</span>
+transform: <span class="fn">translateX</span>(<span class="num">50px</span>) <span class="fn">rotate</span>(<span class="num">30deg</span>) <span class="fn">scale</span>(<span class="num">1.2</span>);</div>
+        <div class="demo-box">
+          <div class="demo-label">hover 查看效果</div>
+          <div class="tf-grid">
+            <div class="tf-box tf-translate">translate</div>
+            <div class="tf-box tf-scale">scale</div>
+            <div class="tf-box tf-rotate">rotate</div>
+            <div class="tf-box tf-skew">skew</div>
+            <div class="tf-3d"><div class="tf-3d-box">3D Y轴</div></div>
+            <div class="tf-box tf-matrix">matrix</div>
+          </div>
+        </div>
+        <div class="callout warn">
+          <strong>性能提示</strong>
+          优先使用 <code>transform</code> 和 <code>opacity</code> 做动画，它们只触发合成（Composite），不触发重排（Reflow）或重绘（Repaint），性能最佳。
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. animation -->
+    <section class="section">
+      <h2 class="section-title">3. animation 关键帧动画</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 定义关键帧 */</span>
+<span class="kw">@keyframes</span> bounce {
+  <span class="num">0%</span>, <span class="num">100%</span> { transform: <span class="fn">translateY</span>(<span class="num">0</span>); }
+  <span class="num">50%</span>       { transform: <span class="fn">translateY</span>(<span class="num">-40px</span>); }
+}
+
+<span class="cmt">/* 使用动画 */</span>
+.ball {
+  animation: bounce <span class="num">1.2s</span> ease-in-out infinite;
+  <span class="cmt">/* name  duration  timing  delay  count  direction  fill-mode  play-state */</span>
+}
+
+<span class="cmt">/* animation-fill-mode */</span>
+forwards  <span class="cmt">/* 动画结束后保持最终状态 */</span>
+backwards <span class="cmt">/* 动画开始前应用第一帧 */</span>
+both      <span class="cmt">/* 同时应用 forwards + backwards */</span></div>
+        <div class="demo-box">
+          <div class="demo-label">动画示例（点击暂停/继续）</div>
+          <div style="display:flex;gap:1.5rem;flex-wrap:wrap;align-items:flex-end;min-height:120px">
+            <div class="anim-box anim-bounce" onclick="toggleAnim(this)" title="bounce">↕</div>
+            <div class="anim-box anim-spin"   onclick="toggleAnim(this)" title="spin">⟳</div>
+            <div class="anim-box anim-pulse"  onclick="toggleAnim(this)" title="pulse">❤</div>
+            <div class="anim-box anim-shake"  onclick="toggleAnim(this)" title="shake">⚡</div>
+            <div class="anim-box anim-fadein" onclick="toggleAnim(this)" title="fadeInUp">✨</div>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="anim-gradient">渐变流动背景</div>
+          </div>
+          <div style="margin-top:1rem">
+            <div class="anim-typewriter" id="typewriter">Hello, CSS Animation!</div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. filter -->
+    <section class="section">
+      <h2 class="section-title">4. filter 滤镜</h2>
+      <div class="card">
+        <div class="code-block">filter: <span class="fn">blur</span>(<span class="num">4px</span>);           <span class="cmt">/* 模糊 */</span>
+filter: <span class="fn">brightness</span>(<span class="num">1.5</span>);     <span class="cmt">/* 亮度 */</span>
+filter: <span class="fn">contrast</span>(<span class="num">2</span>);         <span class="cmt">/* 对比度 */</span>
+filter: <span class="fn">grayscale</span>(<span class="num">1</span>);        <span class="cmt">/* 灰度 */</span>
+filter: <span class="fn">hue-rotate</span>(<span class="num">180deg</span>);  <span class="cmt">/* 色相旋转 */</span>
+filter: <span class="fn">drop-shadow</span>(<span class="num">0 0 12px</span> #6c63ff); <span class="cmt">/* 投影（比box-shadow更强）*/</span>
+filter: <span class="fn">invert</span>(<span class="num">1</span>);           <span class="cmt">/* 反色 */</span></div>
+        <div class="demo-box filter-demo">
+          <div class="demo-label">hover 查看滤镜效果</div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap">
+            <div><div class="filter-box f-blur">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">blur</div></div>
+            <div><div class="filter-box f-bright">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">brightness</div></div>
+            <div><div class="filter-box f-contrast">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">contrast</div></div>
+            <div><div class="filter-box f-gray">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">grayscale</div></div>
+            <div><div class="filter-box f-hue">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">hue-rotate</div></div>
+            <div><div class="filter-box f-shadow">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">drop-shadow</div></div>
+            <div><div class="filter-box f-invert">😊</div><div style="font-size:0.7rem;text-align:center;margin-top:4px;color:var(--color-text-muted)">invert</div></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 渐变 -->
+    <section class="section">
+      <h2 class="section-title">5. 渐变（Gradient）</h2>
+      <div class="card">
+        <div class="code-block"><span class="cmt">/* 线性渐变 */</span>
+background: <span class="fn">linear-gradient</span>(135deg, #6c63ff, #00d4aa);
+background: <span class="fn">linear-gradient</span>(to right, red, yellow, green);
+
+<span class="cmt">/* 径向渐变 */</span>
+background: <span class="fn">radial-gradient</span>(circle at center, #6c63ff, transparent);
+
+<span class="cmt">/* 锥形渐变（饼图效果）*/</span>
+background: <span class="fn">conic-gradient</span>(#6c63ff 0deg 120deg, #00d4aa 120deg 240deg, #ff6584 240deg);
+
+<span class="cmt">/* 重复渐变（条纹）*/</span>
+background: <span class="fn">repeating-linear-gradient</span>(45deg, #6c63ff 0, #6c63ff 10px, transparent 10px, transparent 20px);</div>
+        <div class="demo-box">
+          <div class="grad-box" style="background:linear-gradient(135deg,#6c63ff,#00d4aa)">linear-gradient 135deg</div>
+          <div class="grad-box" style="background:linear-gradient(to right,#ff6584,#ffd166,#00d4aa)">linear-gradient 彩虹</div>
+          <div class="grad-box" style="background:radial-gradient(circle at 30% 50%, #6c63ff, #0f1117)">radial-gradient</div>
+          <div class="grad-box" style="background:conic-gradient(#6c63ff 0deg 120deg,#00d4aa 120deg 240deg,#ff6584 240deg)">conic-gradient 饼图</div>
+          <div class="grad-box" style="background:repeating-linear-gradient(45deg,rgba(108,99,255,0.3) 0,rgba(108,99,255,0.3) 10px,transparent 10px,transparent 20px)">repeating-linear-gradient 条纹</div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    function toggleAnim(el) {
+      el.classList.toggle('anim-paused')
+    }
+    // 打字机动画重播
+    const tw = document.getElementById('typewriter')
+    tw.addEventListener('animationend', () => {
+      setTimeout(() => {
+        tw.style.animation = 'none'
+        tw.offsetHeight // reflow
+        tw.style.animation = ''
+      }, 2000)
+    })
+  </script>
+</body>
+</html>
