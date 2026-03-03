@@ -324,10 +324,7 @@ export function formatNum2Percent(
   num: number | string,
   options: FormatNum2PercentOptions & { errValue: number },
 ): string | number
-export function formatNum2Percent(
-  num: number | string,
-  options?: FormatNum2PercentOptions,
-): string
+export function formatNum2Percent(num: number | string, options?: FormatNum2PercentOptions): string
 export function formatNum2Percent(
   num: number | string,
   options: FormatNum2PercentOptions = {},
@@ -369,7 +366,8 @@ export function formatNum2Percent(
  * @example
  * formatMoney(1234567.891) // '1,234,567.89'
  * formatMoney(100) // '100.00'
- * formatMoney('abc') // ''
+ * formatMoney('abc') // '0.00'
+ * formatMoney(0) // '0.00'
  */
 export const formatMoney = (amount: number | string): string => {
   return formatDecimal(amount, {
