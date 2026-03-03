@@ -2,12 +2,12 @@ export {
   formatDecimal,
   inputFormatDecimal,
   formatDecimalPlaces,
-  formatterPercentNum,
+  formatNum2Percent,
   formatMoney,
 } from './number'
 
 export type {
   FormatDecimalOptions,
   FormatDecimalPlacesOptions,
-  FormatterPercentNumOptions,
+  FormatNum2PercentOptions,
 } from './number'

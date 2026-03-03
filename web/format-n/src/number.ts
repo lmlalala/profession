@@ -296,8 +296,8 @@ export const formatDecimalPlaces = (
   })
 }
 
-/** formatterPercentNum 配置项 */
-export interface FormatterPercentNumOptions {
+/** formatNum2Percent 配置项 */
+export interface FormatNum2PercentOptions {
   /** 保留小数位，默认 2 */
   decimal?: number
   /** 是否按小数位补零，默认 true */
@@ -315,22 +315,22 @@ export interface FormatterPercentNumOptions {
  * @returns 百分比字符串，如 '+12.50%'；非法数字返回 errValue（默认 '--'）
  *
  * @example
- * formatterPercentNum(0.125) // '+12.50%'
- * formatterPercentNum(-0.05, { plusSign: false }) // '-5.00%'
- * formatterPercentNum('abc') // '--'
- * formatterPercentNum('abc', { errValue: 0 }) // 0
+ * formatNum2Percent(0.125) // '+12.50%'
+ * formatNum2Percent(-0.05, { plusSign: false }) // '-5.00%'
+ * formatNum2Percent('abc') // '--'
+ * formatNum2Percent('abc', { errValue: 0 }) // 0
  */
-export function formatterPercentNum(
+export function formatNum2Percent(
   num: number | string,
-  options: FormatterPercentNumOptions & { errValue: number },
+  options: FormatNum2PercentOptions & { errValue: number },
 ): string | number
-export function formatterPercentNum(
+export function formatNum2Percent(
   num: number | string,
-  options?: FormatterPercentNumOptions,
+  options?: FormatNum2PercentOptions,
 ): string
-export function formatterPercentNum(
+export function formatNum2Percent(
   num: number | string,
-  options: FormatterPercentNumOptions = {},
+  options: FormatNum2PercentOptions = {},
 ): string | number {
   const { decimal = 2, forceZero = true, plusSign = true, errValue = '--' } = options
 
