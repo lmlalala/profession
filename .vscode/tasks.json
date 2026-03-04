@@ -1,0 +1,25 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "uvue格式化",
+      "type": "shell",
+      "command": "npm",
+      "args": ["run", "format:uts:current", "${file}"],
+      "group": "build",
+      "presentation": {
+        "echo": true,
+        "reveal": "silent",
+        "focus": false,
+        "panel": "shared",
+        "showReuseMessage": false,
+        "clear": false
+      },
+      "options": {
+        "cwd": "${workspaceFolder}"
+      },
+      "problemMatcher": [],
+      "detail": "格式化当前 uvue 文件的 uts 代码"
+    }
+  ]
+}

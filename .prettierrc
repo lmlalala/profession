@@ -1,0 +1,58 @@
+{
+  
+  "printWidth": 120,
+  
+  "tabWidth": 2,
+  
+  "useTabs": false,
+ 
+  "semi": true,
+
+  "singleQuote": true,
+
+  "quoteProps": "as-needed",
+
+  "jsxSingleQuote": false,
+
+  "trailingComma": "es5",
+
+  "bracketSpacing": true,
+  "bracketSameLine": false,
+  "arrowParens": "always",
+  "rangeStart": 0,
+  "rangeEnd": 999999999,
+  "requirePragma": false,
+  "insertPragma": false,
+  "proseWrap": "preserve",
+  "htmlWhitespaceSensitivity": "css",
+  "endOfLine": "lf",
+  "overrides": [
+    {
+      "files": "*.uvue",
+      "options": {
+        "parser": "vue",
+        "printWidth": 100,
+        "tabWidth": 2,
+        "useTabs": false,
+        "semi": true,
+        "singleQuote": true,
+        "trailingComma": "es5",
+        "bracketSpacing": true,
+        "arrowParens": "always",
+        "vueIndentScriptAndStyle": true,
+        "htmlWhitespaceSensitivity": "ignore"
+      }
+    },
+    {
+      "files": "*.uts",
+      "options": {
+        "parser": "typescript",
+        "singleQuote": true,
+        "semi": true,
+        "trailingComma": "es5",
+        "arrowParens": "always",
+        "bracketSpacing": true
+      }
+    }
+  ]
+}

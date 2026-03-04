@@ -1,0 +1,25 @@
+{
+  "name": "profession-study",
+  "version": "1.0.0",
+  "private": true,
+  "description": "前端技术栈学习项目 monorepo 根配置",
+  "scripts": {
+    "format": "prettier --config prettier.config.js --write \"**/*.{js,ts,jsx,tsx,vue,html,css,json}\" --ignore-path .gitignore",
+    "format:check": "prettier --config prettier.config.js --check \"**/*.{js,ts,jsx,tsx,vue,html,css,json}\" --ignore-path .gitignore",
+    "test:format-n": "pnpm --filter format-n test",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7",
+    "lint-staged": "^15.5.0",
+    "prettier": "^3.5.3"
+  },
+  "lint-staged": {
+    "**/*.{js,ts,jsx,tsx,vue,css,json,md}": [
+      "prettier --config prettier.config.js --write"
+    ]
+  },
+  "workspaces": [
+    "web/*"
+  ]
+}

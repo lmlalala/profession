@@ -1,0 +1,13 @@
+#!/usr/bin/env sh
+
+# 1. 对暂存文件执行 prettier 格式化
+npx lint-staged
+
+# 2. 运行有单元测试的子项目测试
+echo "Running unit tests for sub-projects..."
+
+# format-n 项目有 vitest 单元测试
+cd web/format-n && pnpm test
+cd ../..
+
+echo "All checks passed!"

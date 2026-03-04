@@ -1,0 +1,11 @@
+{
+  "recommendations": [
+    "esbenp.prettier-vscode",
+    "bradlc.vscode-tailwindcss",
+    "vue.volar",
+    "uni-helper.uni-app-schemas",
+    "uni-helper.uni-cloud-schemas",
+    "formulahendry.auto-rename-tag"
+  ],
+  "unwantedRecommendations": ["octref.vetur"]
+}
