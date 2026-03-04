@@ -526,6 +526,9 @@ async function initCodeBlock(codeBlockEl) {
     })
   }
 
+  // 非只读模式：初始化完成后自动运行一次，展示默认效果
+  if (!readonly) run()
+
   return { editor, run }
 }
 
