@@ -151,25 +151,44 @@
     <section class="section">
       <h2 class="section-title">2. 自定义数据属性 data-*</h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">&lt;!-- HTML --&gt;</span>
-<span class="tag">&lt;button</span> <span class="atr">data-id</span>=<span class="val">"42"</span> <span class="atr">data-action</span>=<span class="val">"delete"</span> <span class="atr">data-label</span>=<span class="val">"删除用户"</span><span class="tag">&gt;</span>删除<span class="tag">&lt;/button&gt;</span>
+        <div class="code-block" data-mode="console">// 创建带 data-* 属性的元素（模拟 DOM 操作）
+const btn = document.createElement('button')
+btn.dataset.id = '42'
+btn.dataset.action = 'delete'
+btn.dataset.label = '删除用户'
+// 驼峰命名自动转换为 kebab-case
+btn.dataset.userId = '100'  // → data-user-id
 
-<span class="cmt">// JavaScript</span>
-<span class="kw">const</span> btn = document.<span class="fn">querySelector</span>(<span class="str">'button'</span>)
-btn.dataset.id      <span class="cmt">// "42"</span>
-btn.dataset.action  <span class="cmt">// "delete"</span>
-btn.dataset.label   <span class="cmt">// "删除用户"</span>
+// 读取 dataset
+console.log('dataset.id:', btn.dataset.id)
+console.log('dataset.action:', btn.dataset.action)
+console.log('dataset.label:', btn.dataset.label)
+console.log('dataset.userId:', btn.dataset.userId)
 
-<span class="cmt">// 也可用 getAttribute</span>
-btn.<span class="fn">getAttribute</span>(<span class="str">'data-id'</span>) <span class="cmt">// "42"</span></div>
+// getAttribute 方式
+console.log('getAttribute:', btn.getAttribute('data-id'))
+console.log('getAttribute:', btn.getAttribute('data-user-id'))
+
+// 遍历所有 data-* 属性
+console.log('所有 dataset:', JSON.stringify(Object.fromEntries(
+  Object.entries(btn.dataset)
+)))
+
+// 实际应用：事件委托
+const list = [
+  { id: 1, name: '用户1', role: 'admin' },
+  { id: 2, name: '用户2', role: 'editor' },
+]
+list.forEach(user => {
+  const el = document.createElement('button')
+  el.dataset.id = user.id
+  el.dataset.role = user.role
+  el.textContent = user.name
+  // 通过 dataset 传递数据，避免闭包问题
+  console.log(`创建按钮: id=${el.dataset.id}, role=${el.dataset.role}`)
+})</div>
         <div class="demo-box">
-          <div class="demo-label">交互演示</div>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap">
-            <button class="btn btn-outline btn-sm" data-id="1" data-role="admin" onclick="showDataAttr(this)">用户 1（admin）</button>
-            <button class="btn btn-outline btn-sm" data-id="2" data-role="editor" onclick="showDataAttr(this)">用户 2（editor）</button>
-            <button class="btn btn-outline btn-sm" data-id="3" data-role="viewer" onclick="showDataAttr(this)">用户 3（viewer）</button>
-          </div>
-          <div class="console-output" id="dataAttrOutput"><span class="info">点击按钮查看 dataset</span></div>
+          <div class="console-output" id="dataAttrOutput"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -218,6 +237,7 @@ btn.<span class="fn">getAttribute</span>(<span class="str">'data-id'</span>) <sp
     <section class="section">
       <h2 class="section-title">4. Canvas 画布</h2>
       <div class="card">
+        <p class="card-title">绘制图形（可编辑运行）</p>
         <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
 ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -245,14 +265,87 @@ ctx.strokeStyle = '#ffd166'
 ctx.lineWidth = 3
 ctx.stroke()</div>
         <div class="demo-box">
-          <div class="demo-label">在画布上绘制（可点击）</div>
           <canvas id="demoCanvas" width="500" height="160"></canvas>
-          <div style="display:flex;gap:0.5rem;margin-top:0.75rem;flex-wrap:wrap">
-            <button class="btn btn-primary btn-sm" onclick="drawShapes()">绘制图形</button>
-            <button class="btn btn-outline btn-sm" onclick="clearCanvas()">清空</button>
-            <button class="btn btn-outline btn-sm" onclick="drawText()">绘制文字</button>
-            <button class="btn btn-outline btn-sm" onclick="drawGradient()">渐变填充</button>
-          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">绘制文字</p>
+        <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
+ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+// 大标题
+ctx.font = 'bold 28px Inter, sans-serif'
+ctx.fillStyle = '#e2e8f0'
+ctx.textAlign = 'center'
+ctx.fillText('Hello Canvas!', canvas.width / 2, canvas.height / 2 - 10)
+
+// 副标题
+ctx.font = '14px Inter, sans-serif'
+ctx.fillStyle = '#8892b0'
+ctx.fillText('HTML5 Canvas API', canvas.width / 2, canvas.height / 2 + 25)
+
+// 描边文字
+ctx.font = 'bold 20px Inter, sans-serif'
+ctx.strokeStyle = '#6c63ff'
+ctx.lineWidth = 1
+ctx.strokeText('strokeText 描边', canvas.width / 2, canvas.height / 2 + 60)</div>
+        <div class="demo-box">
+          <canvas id="demoCanvas2" width="500" height="160"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">渐变填充</p>
+        <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
+ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+// 线性渐变（左→右）
+const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
+grad.addColorStop(0, '#6c63ff')
+grad.addColorStop(0.5, '#00d4aa')
+grad.addColorStop(1, '#ff6584')
+ctx.fillStyle = grad
+ctx.fillRect(0, 0, canvas.width, canvas.height)
+
+// 径向渐变（圆形）
+const radial = ctx.createRadialGradient(250, 80, 10, 250, 80, 70)
+radial.addColorStop(0, 'rgba(255,255,255,0.8)')
+radial.addColorStop(1, 'rgba(255,255,255,0)')
+ctx.fillStyle = radial
+ctx.beginPath()
+ctx.arc(250, 80, 70, 0, Math.PI * 2)
+ctx.fill()</div>
+        <div class="demo-box">
+          <canvas id="demoCanvas3" width="500" height="160"></canvas>
+        </div>
+      </div>
+
+      <div class="card">
+        <p class="card-title">鼠标绘制（在画布上拖动）</p>
+        <div class="code-block" data-lang="javascript" data-readonly>// 鼠标绘制（监听 mousedown/mousemove/mouseup）
+const canvas = document.getElementById('demoCanvas')
+const ctx = canvas.getContext('2d')
+let drawing = false
+
+canvas.addEventListener('mousedown', e => {
+  drawing = true
+  ctx.beginPath()
+  ctx.moveTo(e.offsetX, e.offsetY)
+})
+canvas.addEventListener('mousemove', e => {
+  if (!drawing) return
+  ctx.lineTo(e.offsetX, e.offsetY)
+  ctx.strokeStyle = '#6c63ff'
+  ctx.lineWidth = 2
+  ctx.stroke()
+})
+canvas.addEventListener('mouseup', () => drawing = false)
+canvas.addEventListener('mouseleave', () => drawing = false)</div>
+        <div class="demo-box">
+          <div class="demo-label">在下方画布上拖动鼠标绘制</div>
+          <canvas id="drawCanvas" width="500" height="160" style="border:1px solid var(--color-border);border-radius:var(--radius-sm);display:block;cursor:crosshair"></canvas>
+          <button class="btn btn-outline btn-sm" style="margin-top:0.5rem" onclick="document.getElementById('drawCanvas').getContext('2d').clearRect(0,0,500,160)">清空</button>
         </div>
       </div>
     </section>
@@ -276,8 +369,42 @@ ctx.stroke()</div>
             </table>
           </div>
         </div>
+        <div class="code-block" data-mode="console">// localStorage API 演示
+localStorage.setItem('user', JSON.stringify({ name: 'Alice', age: 25 }))
+localStorage.setItem('theme', 'dark')
+localStorage.setItem('count', '42')
+
+// 读取
+const user = JSON.parse(localStorage.getItem('user'))
+console.log('getItem user:', user.name, user.age)
+console.log('getItem theme:', localStorage.getItem('theme'))
+
+// 遍历所有 key
+console.log('所有 key:')
+for (let i = 0; i &lt; localStorage.length; i++) {
+  const key = localStorage.key(i)
+  console.log(`  [${i}] ${key} = ${localStorage.getItem(key)}`)
+}
+
+// 删除
+localStorage.removeItem('count')
+console.log('removeItem count 后 length:', localStorage.length)
+
+// sessionStorage（同 API，但标签页关闭即清除）
+sessionStorage.setItem('temp', 'session data')
+console.log('sessionStorage temp:', sessionStorage.getItem('temp'))
+
+// 清理演示数据
+localStorage.removeItem('user')
+localStorage.removeItem('theme')
+console.log('✅ 演示完成，已清理测试数据')</div>
         <div class="demo-box">
-          <div class="demo-label">localStorage 交互演示</div>
+          <div class="console-output" id="storageCodeOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <p class="card-title">localStorage 交互演示</p>
+        <div class="demo-box">
           <div class="storage-demo">
             <input type="text" id="storageKey" placeholder="key" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:120px">
             <input type="text" id="storageVal" placeholder="value" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:150px">
@@ -295,20 +422,72 @@ ctx.stroke()</div>
     <section class="section">
       <h2 class="section-title">6. 拖拽 API（Drag and Drop）</h2>
       <div class="card">
-        <div class="demo-box">
-          <div class="demo-label">拖拽演示</div>
-          <div style="margin-bottom:0.75rem">
-            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍎 苹果</span>
-            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍊 橙子</span>
-            <span class="drag-item" draggable="true" ondragstart="onDragStart(event,this)">🍇 葡萄</span>
-          </div>
-          <div class="drag-zone" id="dropZone"
-            ondragover="event.preventDefault();this.classList.add('over')"
-            ondragleave="this.classList.remove('over')"
-            ondrop="onDrop(event)">
-            拖拽水果到这里 🎯
-          </div>
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+          <div data-tab="html">&lt;div class="drag-source"&gt;
+  &lt;span class="drag-item" draggable="true"&gt;🍎 苹果&lt;/span&gt;
+  &lt;span class="drag-item" draggable="true"&gt;🍊 橙子&lt;/span&gt;
+  &lt;span class="drag-item" draggable="true"&gt;🍇 葡萄&lt;/span&gt;
+&lt;/div&gt;
+&lt;div class="drop-zone" id="dropZone"&gt;
+  拖拽水果到这里 🎯
+&lt;/div&gt;</div>
+          <div data-tab="css">.drag-source {
+  margin-bottom: 0.75rem;
+}
+.drag-item {
+  display: inline-block;
+  padding: 0.4rem 0.9rem;
+  background: #1e2235;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  cursor: grab;
+  font-size: 0.875rem;
+  margin: 0.25rem;
+  transition: all 0.2s;
+  user-select: none;
+}
+.drag-item:active { cursor: grabbing; opacity: 0.6; }
+.drop-zone {
+  border: 2px dashed #2e3350;
+  border-radius: 6px;
+  padding: 1.5rem;
+  text-align: center;
+  color: #8892b0;
+  min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s;
+  font-size: 0.875rem;
+}
+.drop-zone.over {
+  border-color: #6c63ff;
+  background: rgba(108,99,255,0.08);
+  color: #8b85ff;
+}</div>
+          <div data-tab="js">const items = document.querySelectorAll('.drag-item')
+const zone = document.getElementById('dropZone')
+
+items.forEach(item => {
+  item.addEventListener('dragstart', e => {
+    e.dataTransfer.setData('text/plain', item.textContent)
+    e.dataTransfer.effectAllowed = 'move'
+  })
+})
+
+zone.addEventListener('dragover', e => {
+  e.preventDefault()
+  zone.classList.add('over')
+})
+zone.addEventListener('dragleave', () => zone.classList.remove('over'))
+zone.addEventListener('drop', e => {
+  e.preventDefault()
+  zone.classList.remove('over')
+  const data = e.dataTransfer.getData('text/plain')
+  zone.innerHTML = `&lt;span style="font-size:1.5rem"&gt;${data}&lt;/span&gt; 放置成功！`
+})</div>
         </div>
+        <div class="demo-box"></div>
       </div>
     </section>
 
@@ -345,73 +524,20 @@ ctx.stroke()</div>
   </div>
 
   <script>
-    // data-* 演示
-    function showDataAttr(btn) {
-      const out = document.getElementById('dataAttrOutput')
-      out.innerHTML = `<span class="result">dataset.id = "${btn.dataset.id}"</span>\n<span class="result">dataset.role = "${btn.dataset.role}"</span>`
-    }
-
-    // Canvas 演示
-    const canvas = document.getElementById('demoCanvas')
-    const ctx = canvas.getContext('2d')
-
-    function drawShapes() {
-      ctx.clearRect(0, 0, canvas.width, canvas.height)
-      // 矩形
-      ctx.fillStyle = '#6c63ff'
-      ctx.fillRect(20, 30, 100, 80)
-      // 圆形
-      ctx.beginPath()
-      ctx.arc(200, 70, 50, 0, Math.PI * 2)
-      ctx.fillStyle = '#00d4aa'
-      ctx.fill()
-      // 三角形
-      ctx.beginPath()
-      ctx.moveTo(320, 20); ctx.lineTo(380, 120); ctx.lineTo(260, 120)
-      ctx.closePath()
-      ctx.fillStyle = '#ff6584'
-      ctx.fill()
-      // 线段
-      ctx.beginPath()
-      ctx.moveTo(420, 20); ctx.lineTo(480, 120)
-      ctx.strokeStyle = '#ffd166'
-      ctx.lineWidth = 3
-      ctx.stroke()
-    }
-
-    function clearCanvas() { ctx.clearRect(0, 0, canvas.width, canvas.height) }
-
-    function drawText() {
-      ctx.font = 'bold 28px Inter, sans-serif'
-      ctx.fillStyle = '#e2e8f0'
-      ctx.textAlign = 'center'
-      ctx.fillText('Hello Canvas!', canvas.width / 2, canvas.height / 2)
-      ctx.font = '14px Inter'
-      ctx.fillStyle = '#8892b0'
-      ctx.fillText('HTML5 Canvas API', canvas.width / 2, canvas.height / 2 + 30)
-    }
-
-    function drawGradient() {
-      const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height)
-      grad.addColorStop(0, '#6c63ff')
-      grad.addColorStop(0.5, '#00d4aa')
-      grad.addColorStop(1, '#ff6584')
-      ctx.fillStyle = grad
-      ctx.fillRect(0, 0, canvas.width, canvas.height)
-    }
-
-    // Canvas 鼠标绘制
+    // 鼠标绘制 canvas
+    const drawCanvas = document.getElementById('drawCanvas')
+    const drawCtx = drawCanvas.getContext('2d')
     let drawing = false
-    canvas.addEventListener('mousedown', e => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY) })
-    canvas.addEventListener('mousemove', e => {
+    drawCanvas.addEventListener('mousedown', e => { drawing = true; drawCtx.beginPath(); drawCtx.moveTo(e.offsetX, e.offsetY) })
+    drawCanvas.addEventListener('mousemove', e => {
       if (!drawing) return
-      ctx.lineTo(e.offsetX, e.offsetY)
-      ctx.strokeStyle = '#6c63ff'; ctx.lineWidth = 2; ctx.stroke()
+      drawCtx.lineTo(e.offsetX, e.offsetY)
+      drawCtx.strokeStyle = '#6c63ff'; drawCtx.lineWidth = 2; drawCtx.stroke()
     })
-    canvas.addEventListener('mouseup', () => drawing = false)
-    canvas.addEventListener('mouseleave', () => drawing = false)
+    drawCanvas.addEventListener('mouseup', () => drawing = false)
+    drawCanvas.addEventListener('mouseleave', () => drawing = false)
 
-    // Web Storage 演示
+    // Web Storage 交互演示
     function log(id, msg, type = 'log') {
       const el = document.getElementById(id)
       el.innerHTML += `<span class="${type}">${msg}</span>\n`
@@ -438,24 +564,6 @@ ctx.stroke()</div>
       localStorage.clear()
       log('storageOutput', 'clear() — 已清空所有 localStorage', 'warn')
     }
-
-    // 拖拽 API
-    let dragData = ''
-    function onDragStart(e, el) {
-      dragData = el.textContent
-      e.dataTransfer.setData('text/plain', dragData)
-      e.dataTransfer.effectAllowed = 'move'
-    }
-    function onDrop(e) {
-      e.preventDefault()
-      const zone = document.getElementById('dropZone')
-      zone.classList.remove('over')
-      const data = e.dataTransfer.getData('text/plain')
-      zone.innerHTML = `<span style="font-size:1.5rem">${data}</span> 放置成功！`
-    }
-
-    // 初始绘制
-    drawShapes()
   </script>
 </body>
 </html>

@@ -70,49 +70,45 @@
             <div class="el-item macro">requestAnimationFrame</div>
           </div>
         </div>
-        <div class="code-block" data-readonly><span class="cmt">// 经典面试题：输出顺序</span>
-console.<span class="fn">log</span>(<span class="str">'1'</span>)                          <span class="cmt">// ① 同步</span>
+        <div class="code-block" data-mode="console">// 经典面试题：输出顺序是什么？
+// 运行后观察实际顺序，理解事件循环
+console.log('① 同步: 1')
 
-setTimeout(() => console.<span class="fn">log</span>(<span class="str">'2'</span>), <span class="num">0</span>)    <span class="cmt">// ⑤ 宏任务</span>
+setTimeout(() => console.log('⑤ 宏任务: setTimeout(0)'), 0)
 
-Promise.<span class="fn">resolve</span>()
-  .<span class="fn">then</span>(() => console.<span class="fn">log</span>(<span class="str">'3'</span>))          <span class="cmt">// ③ 微任务</span>
-  .<span class="fn">then</span>(() => console.<span class="fn">log</span>(<span class="str">'4'</span>))          <span class="cmt">// ④ 微任务</span>
+Promise.resolve()
+  .then(() => console.log('③ 微任务: Promise.then 1'))
+  .then(() => console.log('④ 微任务: Promise.then 2'))
 
-console.<span class="fn">log</span>(<span class="str">'5'</span>)                          <span class="cmt">// ② 同步</span>
-
-<span class="cmt">// 输出：1 5 3 4 2</span></div>
+console.log('② 同步: 5')
+// 预期输出：① ② ③ ④ ⑤</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runEventLoop()">▶ 运行（观察顺序）</button>
-          <button class="btn btn-outline btn-sm" onclick="r1.clear()">清空</button>
-          <div class="console-output" id="out1"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out1"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
 
       <div class="card">
         <p class="card-title">进阶：async/await 与事件循环 <span class="tag-badge interview">面试必考</span></p>
-        <div class="code-block" data-readonly><span class="kw">async function</span> <span class="fn">async1</span>() {
-  console.<span class="fn">log</span>(<span class="str">'async1 start'</span>)    <span class="cmt">// ② 同步（async 函数体同步执行到 await）</span>
-  <span class="kw">await</span> <span class="fn">async2</span>()
-  console.<span class="fn">log</span>(<span class="str">'async1 end'</span>)      <span class="cmt">// ⑥ 微任务（await 后的代码）</span>
+        <div class="code-block" data-mode="console">async function async1() {
+  console.log('② async1 start')    // 同步（async 函数体同步执行到 await）
+  await async2()
+  console.log('⑥ async1 end')      // 微任务（await 后的代码）
 }
-<span class="kw">async function</span> <span class="fn">async2</span>() {
-  console.<span class="fn">log</span>(<span class="str">'async2'</span>)          <span class="cmt">// ③ 同步</span>
+async function async2() {
+  console.log('③ async2')          // 同步
 }
 
-console.<span class="fn">log</span>(<span class="str">'script start'</span>)      <span class="cmt">// ① 同步</span>
-setTimeout(() => console.<span class="fn">log</span>(<span class="str">'setTimeout'</span>), <span class="num">0</span>) <span class="cmt">// ⑦ 宏任务</span>
-<span class="fn">async1</span>()
-<span class="kw">new</span> Promise(resolve => {
-  console.<span class="fn">log</span>(<span class="str">'promise'</span>)          <span class="cmt">// ④ 同步（Promise 构造函数同步）</span>
+console.log('① script start')
+setTimeout(() => console.log('⑦ setTimeout（宏任务）'), 0)
+async1()
+new Promise(resolve => {
+  console.log('④ promise executor（同步）')
   resolve()
-}).<span class="fn">then</span>(() => console.<span class="fn">log</span>(<span class="str">'then'</span>)) <span class="cmt">// ⑤ 微任务</span>
-console.<span class="fn">log</span>(<span class="str">'script end'</span>)        <span class="cmt">// ⑤ 同步</span>
-<span class="cmt">// 输出：script start → async1 start → async2 → promise → script end → async1 end → then → setTimeout</span></div>
+}).then(() => console.log('⑤ promise.then（微任务）'))
+console.log('⑤ script end')
+// 预期：① ② ③ ④ ⑤(script end) ⑥ ⑤(then) ⑦</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runAsyncLoop()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r1b.clear()">清空</button>
-          <div class="console-output" id="out1b"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out1b"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -121,27 +117,27 @@ console.<span class="fn">log</span>(<span class="str">'script end'</span>)      
     <section class="section">
       <h2 class="section-title">2. Promise 深入 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// Promise 三种状态：pending → fulfilled / rejected</span>
-<span class="kw">const</span> p = <span class="kw">new</span> Promise((resolve, reject) => {
-  <span class="cmt">// 异步操作...</span>
-  resolve(<span class="str">'成功'</span>)  <span class="cmt">// 或 reject(new Error('失败'))</span>
-})
+        <div class="code-block" data-mode="console">const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+const fail  = (ms, msg) => new Promise((_, r) => setTimeout(() => r(new Error(msg)), ms))
 
-<span class="cmt">// 链式调用（每个 .then 返回新 Promise）</span>
-p.<span class="fn">then</span>(v => v + <span class="str">'!'</span>)
- .<span class="fn">then</span>(v => console.<span class="fn">log</span>(v))  <span class="cmt">// "成功!"</span>
- .<span class="fn">catch</span>(e => console.<span class="fn">error</span>(e))
- .<span class="fn">finally</span>(() => console.<span class="fn">log</span>(<span class="str">'完成'</span>))
+// Promise.all：全部成功才 resolve，一个失败即 reject
+const [a, b, c] = await Promise.all([delay(30,'A'), delay(20,'B'), delay(10,'C')])
+console.log('Promise.all 结果:', a, b, c)
 
-<span class="cmt">// 并发方法</span>
-Promise.<span class="fn">all</span>([p1, p2, p3])        <span class="cmt">// 全部成功才 resolve，一个失败即 reject</span>
-Promise.<span class="fn">allSettled</span>([p1, p2, p3]) <span class="cmt">// 全部完成，收集所有结果</span>
-Promise.<span class="fn">race</span>([p1, p2, p3])       <span class="cmt">// 最先 settle 的结果</span>
-Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// 最先成功的结果（ES2021）</span></div>
+// Promise.allSettled：全部完成，收集所有结果（不管成败）
+const results = await Promise.allSettled([delay(10,'ok'), fail(10,'失败'), delay(10,'ok2')])
+results.forEach((r, i) =>
+  console.log(`allSettled[${i}]: ${r.status} =`, r.status === 'fulfilled' ? r.value : r.reason.message))
+
+// Promise.race：最先 settle 的结果
+const winner = await Promise.race([delay(50,'slow'), delay(10,'fast')])
+console.log('Promise.race 胜者:', winner)
+
+// Promise.any：最先成功的结果（ES2021）
+const first = await Promise.any([fail(10,'err1'), delay(20,'second'), delay(30,'third')])
+console.log('Promise.any 第一个成功:', first)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runPromise()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r2.clear()">清空</button>
-          <div class="console-output" id="out2"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -150,31 +146,37 @@ Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// �
     <section class="section">
       <h2 class="section-title">3. async / await <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// async 函数总是返回 Promise</span>
-<span class="kw">async function</span> <span class="fn">fetchUser</span>(id) {
-  <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">`/api/users/${id}`</span>)
-  <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> Error(<span class="str">`HTTP ${res.status}`</span>)
-  <span class="kw">return</span> res.<span class="fn">json</span>()
+        <div class="code-block" data-mode="console">const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+
+// 串行 vs 并发对比
+console.log('--- 串行执行（慢）---')
+const t1 = Date.now()
+const r1 = await delay(50, 'user1')
+const r2 = await delay(50, 'user2')
+console.log(`串行耗时: ~${Date.now()-t1}ms，结果: ${r1} ${r2}`)
+
+console.log('--- 并发执行（快）---')
+const t2 = Date.now()
+const [u1, u2] = await Promise.all([delay(50,'user1'), delay(50,'user2')])
+console.log(`并发耗时: ~${Date.now()-t2}ms，结果: ${u1} ${u2}`)
+
+// 错误处理
+async function riskyOp(shouldFail) {
+  if (shouldFail) throw new Error('操作失败')
+  return '操作成功'
+}
+try {
+  console.log(await riskyOp(false))
+  console.log(await riskyOp(true))
+} catch(e) {
+  console.error('try/catch 捕获:', e.message)
 }
 
-<span class="cmt">// 错误处理</span>
-<span class="kw">try</span> {
-  <span class="kw">const</span> user = <span class="kw">await</span> <span class="fn">fetchUser</span>(<span class="num">1</span>)
-} <span class="kw">catch</span> (e) {
-  console.<span class="fn">error</span>(<span class="str">'请求失败:'</span>, e.message)
-}
-
-<span class="cmt">// 并发执行（不要串行 await！）</span>
-<span class="cmt">// ❌ 串行（慢）</span>
-<span class="kw">const</span> u1 = <span class="kw">await</span> <span class="fn">fetchUser</span>(<span class="num">1</span>)
-<span class="kw">const</span> u2 = <span class="kw">await</span> <span class="fn">fetchUser</span>(<span class="num">2</span>)
-
-<span class="cmt">// ✅ 并发（快）</span>
-<span class="kw">const</span> [u1, u2] = <span class="kw">await</span> Promise.<span class="fn">all</span>([<span class="fn">fetchUser</span>(<span class="num">1</span>), <span class="fn">fetchUser</span>(<span class="num">2</span>)])</div>
+// async 函数总是返回 Promise
+const result = await (async () => 42)()
+console.log('async 函数返回 Promise，await 解包:', result)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runAsyncAwait()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r3.clear()">清空</button>
-          <div class="console-output" id="out3"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -183,211 +185,60 @@ Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// �
     <section class="section">
       <h2 class="section-title">4. 并发控制与实用模式</h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// 限制并发数量（p-limit 原理）</span>
-<span class="kw">async function</span> <span class="fn">pLimit</span>(tasks, limit) {
-  <span class="kw">const</span> results = []
-  <span class="kw">const</span> executing = <span class="kw">new</span> Set()
-  <span class="kw">for</span> (<span class="kw">const</span> [i, task] <span class="kw">of</span> tasks.<span class="fn">entries</span>()) {
-    <span class="kw">const</span> p = Promise.<span class="fn">resolve</span>().<span class="fn">then</span>(() => task())
+        <div class="code-block" data-mode="console">const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+
+// 限制并发数量（p-limit 原理）
+async function pLimit(tasks, limit) {
+  const results = []
+  const executing = new Set()
+  for (const [i, task] of tasks.entries()) {
+    const p = Promise.resolve().then(() => task())
     results[i] = p
-    executing.<span class="fn">add</span>(p)
-    p.<span class="fn">finally</span>(() => executing.<span class="fn">delete</span>(p))
-    <span class="kw">if</span> (executing.size >= limit) <span class="kw">await</span> Promise.<span class="fn">race</span>(executing)
+    executing.add(p)
+    p.finally(() => executing.delete(p))
+    if (executing.size >= limit) await Promise.race(executing)
   }
-  <span class="kw">return</span> Promise.<span class="fn">all</span>(results)
+  return Promise.all(results)
 }
+const tasks = Array.from({ length: 6 }, (_, i) => () => delay(30, `task${i+1}`))
+const t = Date.now()
+const res = await pLimit(tasks, 2)
+console.log('并发限制2，6个任务结果:', res.join(', '))
+console.log(`耗时约: ${Date.now()-t}ms（理论 ~90ms）`)
 
-<span class="cmt">// 超时控制</span>
-<span class="kw">function</span> <span class="fn">withTimeout</span>(promise, ms) {
-  <span class="kw">const</span> timeout = <span class="kw">new</span> Promise((_, reject) =>
-    setTimeout(() => reject(<span class="kw">new</span> Error(<span class="str">`超时 ${ms}ms`</span>)), ms))
-  <span class="kw">return</span> Promise.<span class="fn">race</span>([promise, timeout])
+// 超时控制
+function withTimeout(promise, ms) {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`超时 ${ms}ms`)), ms))
+  return Promise.race([promise, timeout])
 }
+try {
+  await withTimeout(delay(200, 'ok'), 50)
+} catch(e) {
+  console.warn('超时控制:', e.message)
+}
+const ok = await withTimeout(delay(10, '成功'), 100)
+console.log('超时控制（未超时）:', ok)
 
-<span class="cmt">// 重试机制</span>
-<span class="kw">async function</span> <span class="fn">retry</span>(fn, times = <span class="num">3</span>, delay = <span class="num">1000</span>) {
-  <span class="kw">for</span> (<span class="kw">let</span> i = <span class="num">0</span>; i &lt; times; i++) {
-    <span class="kw">try</span> { <span class="kw">return await</span> <span class="fn">fn</span>() }
-    <span class="kw">catch</span> (e) {
-      <span class="kw">if</span> (i === times - <span class="num">1</span>) <span class="kw">throw</span> e
-      <span class="kw">await new</span> Promise(r => setTimeout(r, delay * (<span class="num">2</span> ** i))) <span class="cmt">// 指数退避</span>
-    }
+// 重试机制（指数退避）
+let attempt = 0
+async function retry(fn, times = 3) {
+  for (let i = 0; i < times; i++) {
+    try { return await fn() }
+    catch(e) { if (i === times-1) throw e; console.warn(`第${i+1}次失败，重试...`) }
   }
-}</div>
+}
+const result = await retry(async () => {
+  attempt++
+  if (attempt < 3) throw new Error('暂时失败')
+  return `第${attempt}次成功`
+})
+console.log('重试机制:', result)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runConcurrency()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r4.clear()">清空</button>
-          <div class="console-output" id="out4"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
   </div>
-
-  <script src="../js/runner.js"></script>
-  <script>
-    const r1  = createRunner('out1')
-    const r1b = createRunner('out1b')
-    const r2  = createRunner('out2')
-    const r3  = createRunner('out3')
-    const r4  = createRunner('out4')
-
-    function runEventLoop() {
-      const el = document.getElementById('out1')
-      el.innerHTML = ''
-      const log = (msg, type='log') => {
-        const d = document.createElement('div'); d.className = type
-        d.textContent = msg; el.appendChild(d); el.scrollTop = el.scrollHeight
-      }
-      log('--- 开始执行 ---', 'info')
-      log('① 同步: 1')
-      setTimeout(() => log('⑤ 宏任务: setTimeout(0)', 'warn'), 0)
-      Promise.resolve()
-        .then(() => log('③ 微任务: Promise.then 1', 'result'))
-        .then(() => log('④ 微任务: Promise.then 2', 'result'))
-      log('② 同步: 5')
-      log('--- 同步执行完毕，开始清空微任务队列 ---', 'info')
-    }
-
-    function runAsyncLoop() {
-      const el = document.getElementById('out1b')
-      el.innerHTML = ''
-      const log = (msg, type='log') => {
-        const d = document.createElement('div'); d.className = type
-        d.textContent = msg; el.appendChild(d); el.scrollTop = el.scrollHeight
-      }
-      async function async1() {
-        log('② async1 start')
-        await async2()
-        log('⑥ async1 end（await后 = 微任务）', 'result')
-      }
-      async function async2() { log('③ async2') }
-      log('① script start')
-      setTimeout(() => log('⑦ setTimeout（宏任务）', 'warn'), 0)
-      async1()
-      new Promise(resolve => { log('④ promise executor（同步）'); resolve() })
-        .then(() => log('⑤ promise.then（微任务）', 'result'))
-      log('⑤ script end')
-    }
-
-    async function runPromise() {
-      const el = document.getElementById('out2'); el.innerHTML = ''
-      const log = (msg, type='log') => {
-        const d = document.createElement('div'); d.className = type
-        d.textContent = msg; el.appendChild(d)
-      }
-      const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
-      const fail  = (ms, msg) => new Promise((_, r) => setTimeout(() => r(new Error(msg)), ms))
-
-      // Promise.all
-      log('Promise.all 开始...', 'info')
-      const [a, b, c] = await Promise.all([delay(30,'A'), delay(20,'B'), delay(10,'C')])
-      log(`Promise.all 结果: ${a} ${b} ${c}`, 'result')
-
-      // Promise.allSettled
-      const results = await Promise.allSettled([delay(10,'ok'), fail(10,'失败'), delay(10,'ok2')])
-      results.forEach((r, i) => log(`allSettled[${i}]: ${r.status} = ${r.status==='fulfilled' ? r.value : r.reason.message}`, r.status==='fulfilled'?'result':'warn'))
-
-      // Promise.race
-      const winner = await Promise.race([delay(50,'slow'), delay(10,'fast')])
-      log(`Promise.race 胜者: ${winner}`, 'result')
-
-      // Promise.any
-      const first = await Promise.any([fail(10,'err1'), delay(20,'second'), delay(30,'third')])
-      log(`Promise.any 第一个成功: ${first}`, 'result')
-    }
-
-    async function runAsyncAwait() {
-      const el = document.getElementById('out3'); el.innerHTML = ''
-      const log = (msg, type='log') => {
-        const d = document.createElement('div'); d.className = type
-        d.textContent = msg; el.appendChild(d)
-      }
-      const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
-
-      // 串行 vs 并发
-      log('--- 串行执行 ---', 'info')
-      const t1 = Date.now()
-      const r1 = await delay(50, 'user1')
-      const r2 = await delay(50, 'user2')
-      log(`串行耗时: ~${Date.now()-t1}ms，结果: ${r1} ${r2}`, 'warn')
-
-      log('--- 并发执行 ---', 'info')
-      const t2 = Date.now()
-      const [u1, u2] = await Promise.all([delay(50,'user1'), delay(50,'user2')])
-      log(`并发耗时: ~${Date.now()-t2}ms，结果: ${u1} ${u2}`, 'result')
-
-      // 错误处理
-      async function riskyOp(fail) {
-        if (fail) throw new Error('操作失败')
-        return '操作成功'
-      }
-      try {
-        log(await riskyOp(false), 'result')
-        log(await riskyOp(true))
-      } catch(e) {
-        log(`try/catch 捕获: ${e.message}`, 'error')
-      }
-
-      // async 函数返回值
-      const result = await (async () => 42)()
-      log(`async 函数返回 Promise，await 解包: ${result}`, 'result')
-    }
-
-    async function runConcurrency() {
-      const el = document.getElementById('out4'); el.innerHTML = ''
-      const log = (msg, type='log') => {
-        const d = document.createElement('div'); d.className = type
-        d.textContent = msg; el.appendChild(d)
-      }
-      const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
-
-      // 限制并发
-      async function pLimit(tasks, limit) {
-        const results = []
-        const executing = new Set()
-        for (const [i, task] of tasks.entries()) {
-          const p = Promise.resolve().then(() => task())
-          results[i] = p
-          executing.add(p)
-          p.finally(() => executing.delete(p))
-          if (executing.size >= limit) await Promise.race(executing)
-        }
-        return Promise.all(results)
-      }
-      const tasks = Array.from({ length: 6 }, (_, i) => () => delay(30, `task${i+1}`))
-      const t = Date.now()
-      const res = await pLimit(tasks, 2)
-      log(`并发限制2，6个任务结果: ${res.join(', ')}`, 'result')
-      log(`耗时约: ${Date.now()-t}ms（理论 ~90ms）`, 'info')
-
-      // 超时控制
-      function withTimeout(promise, ms) {
-        const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`超时 ${ms}ms`)), ms))
-        return Promise.race([promise, timeout])
-      }
-      try {
-        await withTimeout(delay(200, 'ok'), 50)
-      } catch(e) {
-        log(`超时控制: ${e.message}`, 'warn')
-      }
-      const ok = await withTimeout(delay(10, '成功'), 100)
-      log(`超时控制（未超时）: ${ok}`, 'result')
-
-      // 重试
-      let attempt = 0
-      async function retry(fn, times = 3) {
-        for (let i = 0; i < times; i++) {
-          try { return await fn() }
-          catch(e) { if (i === times-1) throw e; log(`第${i+1}次失败，重试...`, 'warn') }
-        }
-      }
-      const result = await retry(async () => {
-        attempt++
-        if (attempt < 3) throw new Error('暂时失败')
-        return `第${attempt}次成功`
-      })
-      log(`重试机制: ${result}`, 'result')
-    }
-  </script>
 </body>
 </html>

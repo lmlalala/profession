@@ -13,69 +13,115 @@
 
   <div class="page-wrapper">
     <h1 class="page-title">JS 高级特性与设计模式</h1>
-    <p class="page-subtitle">手写实现 · 函数式编程 · 内存管理 · 错误处理 · 设计模式</p>
+    <p class="page-subtitle">手写实现 · 防抖节流 · 函数式编程 · 设计模式 · 内存管理 · 错误处理</p>
 
     <!-- 1. 手写系列 -->
     <section class="section">
       <h2 class="section-title">1. 手写核心方法 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <p class="card-title">手写 call / apply / bind</p>
-        <div class="code-block" data-readonly><span class="cmt">// 手写 call</span>
-Function.prototype.<span class="fn">myCall</span> = <span class="kw">function</span>(context, ...args) {
+        <p class="card-title">手写 call / apply / bind / new</p>
+        <div class="code-block" data-mode="console">// 手写 call
+Function.prototype.myCall = function(context, ...args) {
   context = context ?? globalThis
-  <span class="kw">const</span> key = Symbol()
-  context[key] = <span class="kw">this</span>
-  <span class="kw">const</span> result = context[key](...args)
-  <span class="kw">delete</span> context[key]
-  <span class="kw">return</span> result
+  const key = Symbol()
+  context[key] = this
+  const result = context[key](...args)
+  delete context[key]
+  return result
 }
 
-<span class="cmt">// 手写 bind</span>
-Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</span>(context, ...outerArgs) {
-  <span class="kw">const</span> fn = <span class="kw">this</span>
-  <span class="kw">return function</span> bound(...innerArgs) {
-    <span class="cmt">// new 调用时 this 指向新实例</span>
-    <span class="kw">if</span> (<span class="kw">this instanceof</span> bound) <span class="kw">return new</span> fn(...outerArgs, ...innerArgs)
-    <span class="kw">return</span> fn.<span class="fn">apply</span>(context, [...outerArgs, ...innerArgs])
+// 手写 apply
+Function.prototype.myApply = function(context, args = []) {
+  context = context ?? globalThis
+  const key = Symbol()
+  context[key] = this
+  const result = context[key](...args)
+  delete context[key]
+  return result
+}
+
+// 手写 bind（支持 new 调用）
+Function.prototype.myBind = function(context, ...outerArgs) {
+  const fn = this
+  return function bound(...innerArgs) {
+    if (this instanceof bound) return new fn(...outerArgs, ...innerArgs)
+    return fn.apply(context, [...outerArgs, ...innerArgs])
   }
 }
 
-<span class="cmt">// 手写 new</span>
-<span class="kw">function</span> <span class="fn">myNew</span>(Constructor, ...args) {
-  <span class="kw">const</span> obj = Object.<span class="fn">create</span>(Constructor.prototype)
-  <span class="kw">const</span> result = Constructor.<span class="fn">apply</span>(obj, args)
-  <span class="kw">return</span> result <span class="kw">instanceof</span> Object ? result : obj
-}</div>
+// 手写 new
+function myNew(Constructor, ...args) {
+  const obj = Object.create(Constructor.prototype)
+  const result = Constructor.apply(obj, args)
+  return result instanceof Object ? result : obj
+}
+
+// 测试
+function greet(greeting, punctuation) { return `${greeting}, ${this.name}${punctuation}` }
+const obj = { name: 'Alice' }
+console.log('myCall:', greet.myCall(obj, 'Hello', '!'))
+console.log('myApply:', greet.myApply(obj, ['Hi', '~']))
+const bound = greet.myBind(obj, 'Hey')
+console.log('myBind:', bound('?'))
+
+function Person(name, age) { this.name = name; this.age = age }
+Person.prototype.greet = function() { return `I'm ${this.name}, ${this.age}` }
+const p = myNew(Person, 'Bob', 30)
+console.log('myNew:', p.greet())
+console.log('myNew instanceof:', p instanceof Person)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runHandwritten()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r1.clear()">清空</button>
-          <div class="console-output" id="out1"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out1"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
 
       <div class="card">
         <p class="card-title">手写深拷贝 <span class="tag-badge interview">面试必考</span></p>
-        <div class="code-block" data-readonly><span class="kw">function</span> <span class="fn">deepClone</span>(value, map = <span class="kw">new</span> WeakMap()) {
-  <span class="cmt">// 处理 null 和基本类型</span>
-  <span class="kw">if</span> (value === <span class="kw">null</span> || <span class="kw">typeof</span> value !== <span class="str">'object'</span>) <span class="kw">return</span> value
-  <span class="cmt">// 处理特殊对象</span>
-  <span class="kw">if</span> (value <span class="kw">instanceof</span> Date)   <span class="kw">return new</span> Date(value)
-  <span class="kw">if</span> (value <span class="kw">instanceof</span> RegExp) <span class="kw">return new</span> RegExp(value)
-  <span class="kw">if</span> (value <span class="kw">instanceof</span> Map)    <span class="kw">return new</span> Map([...value].<span class="fn">map</span>(([k,v]) => [k, <span class="fn">deepClone</span>(v, map)]))
-  <span class="kw">if</span> (value <span class="kw">instanceof</span> Set)    <span class="kw">return new</span> Set([...value].<span class="fn">map</span>(v => <span class="fn">deepClone</span>(v, map)))
-  <span class="cmt">// 处理循环引用</span>
-  <span class="kw">if</span> (map.<span class="fn">has</span>(value)) <span class="kw">return</span> map.<span class="fn">get</span>(value)
-  <span class="kw">const</span> clone = Array.<span class="fn">isArray</span>(value) ? [] : Object.<span class="fn">create</span>(Object.<span class="fn">getPrototypeOf</span>(value))
-  map.<span class="fn">set</span>(value, clone)
-  <span class="kw">for</span> (<span class="kw">const</span> key <span class="kw">of</span> Reflect.<span class="fn">ownKeys</span>(value)) {
-    clone[key] = <span class="fn">deepClone</span>(value[key], map)
+        <div class="code-block" data-mode="console">function deepClone(value, map = new WeakMap()) {
+  // 处理 null 和基本类型
+  if (value === null || typeof value !== 'object') return value
+  // 处理特殊对象
+  if (value instanceof Date)   return new Date(value)
+  if (value instanceof RegExp) return new RegExp(value)
+  if (value instanceof Map)    return new Map([...value].map(([k,v]) => [k, deepClone(v, map)]))
+  if (value instanceof Set)    return new Set([...value].map(v => deepClone(v, map)))
+  // 处理循环引用
+  if (map.has(value)) return map.get(value)
+  const clone = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value))
+  map.set(value, clone)
+  for (const key of Reflect.ownKeys(value)) {
+    clone[key] = deepClone(value[key], map)
   }
-  <span class="kw">return</span> clone
-}</div>
+  return clone
+}
+
+// 测试
+const original = {
+  name: 'Alice',
+  scores: [1, 2, 3],
+  nested: { deep: { value: 42 } },
+  date: new Date('2024-01-01'),
+  regex: /hello/gi,
+  map: new Map([['key', 'value']]),
+  set: new Set([1, 2, 3]),
+}
+const clone = deepClone(original)
+clone.nested.deep.value = 999
+clone.scores.push(4)
+console.log('原始 nested.deep.value:', original.nested.deep.value)
+console.log('克隆 nested.deep.value:', clone.nested.deep.value)
+console.log('原始 scores:', JSON.stringify(original.scores))
+console.log('克隆 scores:', JSON.stringify(clone.scores))
+console.log('Date 克隆:', clone.date instanceof Date)
+console.log('RegExp 克隆:', clone.regex.source, clone.regex.flags)
+console.log('Map 克隆:', [...clone.map.entries()][0].join(':'))
+
+// 循环引用
+const circular = { name: 'circular' }
+circular.self = circular
+const clonedCircular = deepClone(circular)
+console.log('循环引用处理:', clonedCircular.self === clonedCircular)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runDeepClone()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r1b.clear()">清空</button>
-          <div class="console-output" id="out1b"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out1b"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -88,37 +134,54 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
           <strong>防抖</strong>：最后一次触发后等待 n ms 才执行（搜索框输入）<br>
           <strong>节流</strong>：每 n ms 最多执行一次（滚动、resize）
         </div>
-        <div class="code-block" data-readonly><span class="cmt">// 防抖（支持立即执行）</span>
-<span class="kw">function</span> <span class="fn">debounce</span>(fn, delay, immediate = <span class="kw">false</span>) {
-  <span class="kw">let</span> timer = <span class="kw">null</span>
-  <span class="kw">return function</span>(...args) {
-    <span class="kw">if</span> (timer) clearTimeout(timer)
-    <span class="kw">if</span> (immediate && !timer) fn.<span class="fn">apply</span>(<span class="kw">this</span>, args)
+        <div class="code-block" data-mode="console">// 防抖（支持立即执行）
+function debounce(fn, delay, immediate = false) {
+  let timer = null
+  return function(...args) {
+    if (timer) clearTimeout(timer)
+    if (immediate && !timer) fn.apply(this, args)
     timer = setTimeout(() => {
-      <span class="kw">if</span> (!immediate) fn.<span class="fn">apply</span>(<span class="kw">this</span>, args)
-      timer = <span class="kw">null</span>
+      if (!immediate) fn.apply(this, args)
+      timer = null
     }, delay)
   }
 }
 
-<span class="cmt">// 节流（时间戳版）</span>
-<span class="kw">function</span> <span class="fn">throttle</span>(fn, interval) {
-  <span class="kw">let</span> last = <span class="num">0</span>
-  <span class="kw">return function</span>(...args) {
-    <span class="kw">const</span> now = Date.<span class="fn">now</span>()
-    <span class="kw">if</span> (now - last >= interval) {
+// 节流（时间戳版）
+function throttle(fn, interval) {
+  let last = 0
+  return function(...args) {
+    const now = Date.now()
+    if (now - last >= interval) {
       last = now
-      <span class="kw">return</span> fn.<span class="fn">apply</span>(<span class="kw">this</span>, args)
+      return fn.apply(this, args)
     }
   }
-}</div>
+}
+
+// 模拟测试
+const logs = []
+const debouncedFn = debounce(v => logs.push(`防抖执行: ${v}`), 100)
+const throttledFn = throttle(v => logs.push(`节流执行: ${v}`), 100)
+
+// 模拟快速触发 5 次
+for (let i = 1; i <= 5; i++) {
+  debouncedFn(`input${i}`)
+  throttledFn(`click${i}`)
+}
+
+// 等待防抖完成
+await new Promise(r => setTimeout(r, 150))
+console.log('防抖结果（只执行最后一次）:', logs.filter(l => l.includes('防抖')))
+console.log('节流结果（只执行第一次）:', logs.filter(l => l.includes('节流')))</div>
         <div class="demo-box">
-          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem">
+          <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div style="display:flex;gap:0.75rem;flex-wrap:wrap;align-items:center;margin-top:0.75rem">
             <input type="text" id="debounceInput" placeholder="输入文字（防抖 500ms）"
               style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:var(--radius-sm);color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:220px">
             <button class="btn btn-outline btn-sm" id="throttleBtn">快速点击（节流 500ms）</button>
           </div>
-          <div class="console-output" id="out2"><span class="info">输入或点击按钮</span></div>
+          <div class="console-output" id="out2b" style="margin-top:0.5rem"><span class="info">在上方输入或点击按钮</span></div>
         </div>
       </div>
     </section>
@@ -127,34 +190,53 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
     <section class="section">
       <h2 class="section-title">3. 函数式编程</h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// 纯函数：相同输入 → 相同输出，无副作用</span>
-<span class="kw">const</span> <span class="fn">add</span> = (a, b) => a + b  <span class="cmt">// ✅ 纯函数</span>
-
-<span class="cmt">// 柯里化（Currying）</span>
-<span class="kw">function</span> <span class="fn">curry</span>(fn) {
-  <span class="kw">return function</span> <span class="fn">curried</span>(...args) {
-    <span class="kw">if</span> (args.length >= fn.length) <span class="kw">return</span> fn.<span class="fn">apply</span>(<span class="kw">this</span>, args)
-    <span class="kw">return</span> (...more) => <span class="fn">curried</span>(...args, ...more)
+        <div class="code-block" data-mode="console">// 柯里化（Currying）
+function curry(fn) {
+  return function curried(...args) {
+    if (args.length >= fn.length) return fn.apply(this, args)
+    return (...more) => curried(...args, ...more)
   }
 }
-<span class="kw">const</span> curriedAdd = <span class="fn">curry</span>((a, b, c) => a + b + c)
-<span class="fn">curriedAdd</span>(<span class="num">1</span>)(<span class="num">2</span>)(<span class="num">3</span>)  <span class="cmt">// 6</span>
-<span class="fn">curriedAdd</span>(<span class="num">1</span>, <span class="num">2</span>)(<span class="num">3</span>) <span class="cmt">// 6</span>
+const add = curry((a, b, c) => a + b + c)
+console.log('curry(1)(2)(3):', add(1)(2)(3))
+console.log('curry(1,2)(3):', add(1, 2)(3))
+console.log('curry(1)(2,3):', add(1)(2, 3))
 
-<span class="cmt">// 函数组合（compose / pipe）</span>
-<span class="kw">const</span> <span class="fn">compose</span> = (...fns) => x => fns.<span class="fn">reduceRight</span>((v, f) => <span class="fn">f</span>(v), x)
-<span class="kw">const</span> <span class="fn">pipe</span>    = (...fns) => x => fns.<span class="fn">reduce</span>((v, f) => <span class="fn">f</span>(v), x)
+// 偏函数
+function partial(fn, ...preArgs) {
+  return (...laterArgs) => fn(...preArgs, ...laterArgs)
+}
+const multiply = (a, b, c) => a * b * c
+const double = partial(multiply, 2)
+console.log('偏函数 double(3,4):', double(3, 4))
 
-<span class="kw">const</span> double = x => x * <span class="num">2</span>
-<span class="kw">const</span> addOne = x => x + <span class="num">1</span>
-<span class="kw">const</span> square = x => x * x
+// 函数组合
+const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x)
+const pipe    = (...fns) => x => fns.reduce((v, f) => f(v), x)
+const double2 = x => x * 2
+const addOne  = x => x + 1
+const square  = x => x * x
+console.log('pipe(double,addOne,square)(3):', pipe(double2, addOne, square)(3))
+console.log('compose(square,addOne,double)(3):', compose(square, addOne, double2)(3))
 
-<span class="kw">const</span> transform = <span class="fn">pipe</span>(double, addOne, square)
-<span class="fn">transform</span>(<span class="num">3</span>)  <span class="cmt">// pipe: (3*2+1)^2 = 49</span></div>
+// Memoize（记忆化）
+function memoize(fn) {
+  const cache = new Map()
+  return function(...args) {
+    const key = JSON.stringify(args)
+    if (cache.has(key)) { console.log(`缓存命中 key=${key}`); return cache.get(key) }
+    const result = fn.apply(this, args)
+    cache.set(key, result)
+    return result
+  }
+}
+const expensiveFib = memoize(function fib(n) {
+  return n <= 1 ? n : expensiveFib(n-1) + expensiveFib(n-2)
+})
+console.log('memoize fib(10):', expensiveFib(10))
+console.log('memoize fib(10) 再次（命中缓存）:', expensiveFib(10))</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runFunctional()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r3.clear()">清空</button>
-          <div class="console-output" id="out3"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -163,55 +245,67 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
     <section class="section">
       <h2 class="section-title">4. 常用设计模式 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// 单例模式（Singleton）</span>
-<span class="kw">class</span> <span class="cls">Singleton</span> {
-  <span class="kw">static</span> #instance = <span class="kw">null</span>
-  <span class="kw">static</span> <span class="fn">getInstance</span>() {
-    <span class="kw">if</span> (!<span class="cls">Singleton</span>.#instance) <span class="cls">Singleton</span>.#instance = <span class="kw">new</span> <span class="cls">Singleton</span>()
-    <span class="kw">return</span> <span class="cls">Singleton</span>.#instance
+        <div class="code-block" data-mode="console">// 单例模式（Singleton）
+class Singleton {
+  static #instance = null
+  constructor() { this.id = Math.random().toFixed(4) }
+  static getInstance() {
+    if (!Singleton.#instance) Singleton.#instance = new Singleton()
+    return Singleton.#instance
   }
 }
+const s1 = Singleton.getInstance()
+const s2 = Singleton.getInstance()
+console.log('单例 s1===s2:', s1 === s2, 's1.id:', s1.id)
 
-<span class="cmt">// 观察者模式（EventEmitter）</span>
-<span class="kw">class</span> <span class="cls">EventEmitter</span> {
-  #events = <span class="kw">new</span> Map()
-  <span class="fn">on</span>(event, listener) {
-    <span class="kw">if</span> (!<span class="kw">this</span>.#events.<span class="fn">has</span>(event)) <span class="kw">this</span>.#events.<span class="fn">set</span>(event, [])
-    <span class="kw">this</span>.#events.<span class="fn">get</span>(event).<span class="fn">push</span>(listener)
-    <span class="kw">return</span> <span class="kw">this</span>
-  }
-  <span class="fn">off</span>(event, listener) {
-    <span class="kw">const</span> listeners = <span class="kw">this</span>.#events.<span class="fn">get</span>(event) ?? []
-    <span class="kw">this</span>.#events.<span class="fn">set</span>(event, listeners.<span class="fn">filter</span>(l => l !== listener))
-    <span class="kw">return</span> <span class="kw">this</span>
-  }
-  <span class="fn">emit</span>(event, ...args) {
-    (<span class="kw">this</span>.#events.<span class="fn">get</span>(event) ?? []).<span class="fn">forEach</span>(l => <span class="fn">l</span>(...args))
-    <span class="kw">return</span> <span class="kw">this</span>
-  }
-  <span class="fn">once</span>(event, listener) {
-    <span class="kw">const</span> wrapper = (...args) => { <span class="fn">listener</span>(...args); <span class="kw">this</span>.<span class="fn">off</span>(event, wrapper) }
-    <span class="kw">return</span> <span class="kw">this</span>.<span class="fn">on</span>(event, wrapper)
-  }
+// 观察者模式（EventEmitter）
+class EventEmitter {
+  #events = new Map()
+  on(e, l) { if (!this.#events.has(e)) this.#events.set(e, []); this.#events.get(e).push(l); return this }
+  off(e, l) { this.#events.set(e, (this.#events.get(e)??[]).filter(x => x !== l)); return this }
+  emit(e, ...a) { (this.#events.get(e)??[]).forEach(l => l(...a)); return this }
+  once(e, l) { const w = (...a) => { l(...a); this.off(e, w) }; return this.on(e, w) }
 }
+const emitter = new EventEmitter()
+const logs = []
+emitter.on('data', v => logs.push(`on: ${v}`))
+emitter.once('data', v => logs.push(`once: ${v}`))
+emitter.emit('data', 'first')
+emitter.emit('data', 'second')
+console.log('EventEmitter logs:', JSON.stringify(logs))
 
-<span class="cmt">// 策略模式</span>
-<span class="kw">const</span> validators = {
-  required: v => !!v || <span class="str">'必填'</span>,
-  email:    v => /\S+@\S+\.\S+/.<span class="fn">test</span>(v) || <span class="str">'邮箱格式错误'</span>,
-  minLen:   n => v => v.length >= n || <span class="str">`最少 ${n} 个字符`</span>,
+// 策略模式
+const validators = {
+  required: v => !!v || '必填',
+  email: v => /\S+@\S+\.\S+/.test(v) || '邮箱格式错误',
+  minLen: n => v => v.length >= n || `最少 ${n} 个字符`,
 }
-<span class="kw">function</span> <span class="fn">validate</span>(value, rules) {
-  <span class="kw">for</span> (<span class="kw">const</span> rule <span class="kw">of</span> rules) {
-    <span class="kw">const</span> result = <span class="fn">rule</span>(value)
-    <span class="kw">if</span> (result !== <span class="kw">true</span>) <span class="kw">return</span> result
+function validate(value, rules) {
+  for (const rule of rules) { const r = rule(value); if (r !== true) return r }
+  return true
+}
+console.log('策略验证 "":', validate('', [validators.required]))
+console.log('策略验证 "bad":', validate('bad', [validators.required, validators.email]))
+console.log('策略验证 "a@b.com":', validate('a@b.com', [validators.required, validators.email]))
+
+// 发布订阅（与观察者区别：有中间调度层）
+class PubSub {
+  #topics = new Map()
+  subscribe(topic, fn) {
+    if (!this.#topics.has(topic)) this.#topics.set(topic, new Set())
+    this.#topics.get(topic).add(fn)
+    return () => this.#topics.get(topic).delete(fn)
   }
-  <span class="kw">return</span> <span class="kw">true</span>
-}</div>
+  publish(topic, data) { (this.#topics.get(topic)??new Set()).forEach(fn => fn(data)) }
+}
+const ps = new PubSub()
+const unsub = ps.subscribe('news', d => console.log('订阅者1:', d))
+ps.subscribe('news', d => console.log('订阅者2:', d))
+ps.publish('news', '头条新闻')
+unsub()
+ps.publish('news', '第二条（订阅者1已退订）')</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runPatterns()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r4.clear()">清空</button>
-          <div class="console-output" id="out4"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -224,40 +318,39 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
           <strong>V8 垃圾回收算法</strong>：标记-清除（Mark-Sweep）+ 标记-整理（Mark-Compact）+ 增量标记。
           新生代（Scavenge）处理短期对象，老生代处理长期存活对象。
         </div>
-        <div class="code-block" data-readonly><span class="cmt">// 常见内存泄漏场景</span>
-
-<span class="cmt">// ① 意外的全局变量</span>
-<span class="kw">function</span> <span class="fn">leak</span>() {
-  leaked = <span class="str">'全局变量'</span>  <span class="cmt">// 忘记 var/let/const → 挂到 window</span>
+        <div class="code-block" data-mode="console">// WeakMap：弱引用，不阻止 GC，适合缓存
+const cache = new WeakMap()
+function process(obj) {
+  if (cache.has(obj)) { console.log('缓存命中'); return cache.get(obj) }
+  const result = obj.value * 2
+  cache.set(obj, result)
+  return result
 }
+const obj = { value: 21 }
+console.log('WeakMap 缓存 first:', process(obj))
+console.log('WeakMap 缓存 second:', process(obj))
 
-<span class="cmt">// ② 未清除的定时器</span>
-<span class="kw">const</span> timer = setInterval(() => { <span class="cmt">/* 持有外部引用 */</span> }, <span class="num">1000</span>)
-clearInterval(timer)  <span class="cmt">// 组件卸载时必须清除</span>
+// WeakRef（ES2021）：弱引用，GC 后返回 undefined
+let bigObj = { data: new Array(100).fill('x') }
+const ref = new WeakRef(bigObj)
+console.log('WeakRef.deref():', ref.deref()?.data.length, '个元素')
 
-<span class="cmt">// ③ 闭包持有大对象</span>
-<span class="kw">function</span> <span class="fn">createHeavy</span>() {
-  <span class="kw">const</span> bigData = <span class="kw">new</span> Array(<span class="num">1000000</span>).<span class="fn">fill</span>(<span class="num">0</span>)
-  <span class="kw">return</span> () => bigData[<span class="num">0</span>]  <span class="cmt">// 闭包持有 bigData 引用</span>
-}
+// FinalizationRegistry（ES2021）
+const registry = new FinalizationRegistry(key => {
+  console.log(`对象 ${key} 已被 GC 回收`)
+})
+let temp = { name: 'temp' }
+registry.register(temp, 'temp-object')
+console.log('FinalizationRegistry 已注册')
 
-<span class="cmt">// ④ 未移除的事件监听</span>
-<span class="kw">const</span> handler = () => {}
-element.<span class="fn">addEventListener</span>(<span class="str">'click'</span>, handler)
-element.<span class="fn">removeEventListener</span>(<span class="str">'click'</span>, handler)  <span class="cmt">// 必须移除</span>
-
-<span class="cmt">// WeakMap/WeakSet：弱引用，不阻止 GC</span>
-<span class="kw">const</span> cache = <span class="kw">new</span> WeakMap()
-<span class="kw">function</span> <span class="fn">process</span>(obj) {
-  <span class="kw">if</span> (cache.<span class="fn">has</span>(obj)) <span class="kw">return</span> cache.<span class="fn">get</span>(obj)
-  <span class="kw">const</span> result = <span class="cmt">/* 计算 */</span> obj.value * <span class="num">2</span>
-  cache.<span class="fn">set</span>(obj, result)
-  <span class="kw">return</span> result
-}</div>
+// 常见内存泄漏场景
+console.log('\n常见内存泄漏：')
+console.log('① 意外全局变量：function leak() { leaked = "全局" }')
+console.log('② 未清除定时器：clearInterval(timer) 在组件卸载时调用')
+console.log('③ 未移除事件监听：removeEventListener 配对使用')
+console.log('④ 闭包持有大对象：注意闭包引用的变量生命周期')</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runMemory()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r5.clear()">清空</button>
-          <div class="console-output" id="out5"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -266,144 +359,54 @@ element.<span class="fn">removeEventListener</span>(<span class="str">'click'</s
     <section class="section">
       <h2 class="section-title">6. 错误处理最佳实践</h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// 自定义错误类型</span>
-<span class="kw">class</span> <span class="cls">AppError</span> <span class="kw">extends</span> Error {
-  <span class="fn">constructor</span>(message, code, data) {
-    <span class="kw">super</span>(message)
-    <span class="kw">this</span>.name = <span class="str">'AppError'</span>
-    <span class="kw">this</span>.code = code
-    <span class="kw">this</span>.data = data
-    Error.<span class="fn">captureStackTrace</span>(<span class="kw">this</span>, <span class="cls">AppError</span>)
+        <div class="code-block" data-mode="console">// 自定义错误类型
+class AppError extends Error {
+  constructor(message, code, data) {
+    super(message)
+    this.name = 'AppError'
+    this.code = code
+    this.data = data
   }
 }
-<span class="kw">class</span> <span class="cls">NetworkError</span> <span class="kw">extends</span> <span class="cls">AppError</span> {}
-<span class="kw">class</span> <span class="cls">ValidationError</span> <span class="kw">extends</span> <span class="cls">AppError</span> {}
+class NetworkError extends AppError {}
+class ValidationError extends AppError {}
 
-<span class="cmt">// Result 模式（避免 try/catch 地狱）</span>
-<span class="kw">async function</span> <span class="fn">safeAsync</span>(promise) {
-  <span class="kw">try</span> { <span class="kw">return</span> [<span class="kw">null</span>, <span class="kw">await</span> promise] }
-  <span class="kw">catch</span> (e) { <span class="kw">return</span> [e, <span class="kw">null</span>] }
+try {
+  throw new NetworkError('连接超时', 'TIMEOUT', { url: '/api/users' })
+} catch(e) {
+  console.log('错误类型:', e.name)
+  console.log('错误消息:', e.message)
+  console.log('错误代码:', e.code)
+  console.log('是 NetworkError:', e instanceof NetworkError)
+  console.log('是 AppError:', e instanceof AppError)
+  console.log('是 Error:', e instanceof Error)
 }
-<span class="kw">const</span> [err, data] = <span class="kw">await</span> <span class="fn">safeAsync</span>(<span class="fn">fetchUser</span>(<span class="num">1</span>))
-<span class="kw">if</span> (err) { <span class="cmt">/* 处理错误 */</span> }
-<span class="kw">else</span> { <span class="cmt">/* 使用 data */</span> }</div>
+
+// Result 模式（避免 try/catch 地狱）
+async function safeAsync(promise) {
+  try { return [null, await promise] }
+  catch(e) { return [e, null] }
+}
+const delay = (ms, val, fail=false) => new Promise((res, rej) =>
+  setTimeout(() => fail ? rej(new Error(val)) : res(val), ms))
+
+const [err1, data1] = await safeAsync(delay(10, 'success'))
+console.log('Result 成功:', err1, data1)
+
+const [err2, data2] = await safeAsync(delay(10, '请求失败', true))
+console.log('Result 失败:', err2?.message, data2)</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runErrors()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="r6.clear()">清空</button>
-          <div class="console-output" id="out6"><span class="info">点击运行</span></div>
+          <div class="console-output" id="out6"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
   </div>
 
-  <script src="../js/runner.js"></script>
   <script>
-    const r1  = createRunner('out1')
-    const r1b = createRunner('out1b')
-    const r2  = createRunner('out2')
-    const r3  = createRunner('out3')
-    const r4  = createRunner('out4')
-    const r5  = createRunner('out5')
-    const r6  = createRunner('out6')
-
-    function runHandwritten() {
-      r1.run(() => {
-        Function.prototype.myCall = function(context, ...args) {
-          context = context ?? globalThis
-          const key = Symbol()
-          context[key] = this
-          const result = context[key](...args)
-          delete context[key]
-          return result
-        }
-        Function.prototype.myApply = function(context, args = []) {
-          context = context ?? globalThis
-          const key = Symbol()
-          context[key] = this
-          const result = context[key](...args)
-          delete context[key]
-          return result
-        }
-        Function.prototype.myBind = function(context, ...outerArgs) {
-          const fn = this
-          return function bound(...innerArgs) {
-            if (this instanceof bound) return new fn(...outerArgs, ...innerArgs)
-            return fn.apply(context, [...outerArgs, ...innerArgs])
-          }
-        }
-
-        function greet(greeting, punctuation) { return `${greeting}, ${this.name}${punctuation}` }
-        const obj = { name: 'Alice' }
-        console.log('myCall:', greet.myCall(obj, 'Hello', '!'))
-        console.log('myApply:', greet.myApply(obj, ['Hi', '~']))
-        const bound = greet.myBind(obj, 'Hey')
-        console.log('myBind:', bound('?'))
-
-        // 手写 new
-        function myNew(Constructor, ...args) {
-          const obj = Object.create(Constructor.prototype)
-          const result = Constructor.apply(obj, args)
-          return result instanceof Object ? result : obj
-        }
-        function Person(name, age) { this.name = name; this.age = age }
-        Person.prototype.greet = function() { return `I'm ${this.name}, ${this.age}` }
-        const p = myNew(Person, 'Bob', 30)
-        console.log('myNew:', p.greet())
-        console.log('myNew instanceof:', p instanceof Person)
-      })
-    }
-
-    function runDeepClone() {
-      r1b.run(() => {
-        function deepClone(value, map = new WeakMap()) {
-          if (value === null || typeof value !== 'object') return value
-          if (value instanceof Date)   return new Date(value)
-          if (value instanceof RegExp) return new RegExp(value)
-          if (value instanceof Map)    return new Map([...value].map(([k,v]) => [k, deepClone(v, map)]))
-          if (value instanceof Set)    return new Set([...value].map(v => deepClone(v, map)))
-          if (map.has(value)) return map.get(value)
-          const clone = Array.isArray(value) ? [] : Object.create(Object.getPrototypeOf(value))
-          map.set(value, clone)
-          for (const key of Reflect.ownKeys(value)) clone[key] = deepClone(value[key], map)
-          return clone
-        }
-
-        const original = {
-          name: 'Alice',
-          scores: [1, 2, 3],
-          nested: { deep: { value: 42 } },
-          date: new Date('2024-01-01'),
-          regex: /hello/gi,
-          map: new Map([['key', 'value']]),
-          set: new Set([1, 2, 3]),
-        }
-        const clone = deepClone(original)
-        clone.nested.deep.value = 999
-        clone.scores.push(4)
-        console.log('原始 nested.deep.value:', original.nested.deep.value)
-        console.log('克隆 nested.deep.value:', clone.nested.deep.value)
-        console.log('原始 scores:', JSON.stringify(original.scores))
-        console.log('克隆 scores:', JSON.stringify(clone.scores))
-        console.log('Date 克隆:', clone.date instanceof Date, clone.date.toISOString().slice(0,10))
-        console.log('RegExp 克隆:', clone.regex.source, clone.regex.flags)
-        console.log('Map 克隆:', [...clone.map.entries()][0].join(':'))
-        console.log('Set 克隆:', JSON.stringify([...clone.set]))
-
-        // 循环引用
-        const circular = { name: 'circular' }
-        circular.self = circular
-        const clonedCircular = deepClone(circular)
-        console.log('循环引用处理:', clonedCircular.self === clonedCircular)
-      })
-    }
-
-    // 防抖节流
+    // 防抖节流交互演示（独立于 Monaco 编辑器）
     function debounce(fn, delay) {
       let timer = null
-      return function(...args) {
-        clearTimeout(timer)
-        timer = setTimeout(() => fn.apply(this, args), delay)
-      }
+      return function(...args) { clearTimeout(timer); timer = setTimeout(() => fn.apply(this, args), delay) }
     }
     function throttle(fn, interval) {
       let last = 0
@@ -412,218 +415,22 @@ element.<span class="fn">removeEventListener</span>(<span class="str">'click'</s
         if (now - last >= interval) { last = now; return fn.apply(this, args) }
       }
     }
-    const out2 = document.getElementById('out2')
-    const logOut2 = (msg, type='log') => {
+    const out2b = document.getElementById('out2b')
+    const logOut2b = (msg, type='log') => {
       const d = document.createElement('div'); d.className = type
-      d.textContent = msg; out2.appendChild(d); out2.scrollTop = out2.scrollHeight
+      d.textContent = msg; out2b.appendChild(d); out2b.scrollTop = out2b.scrollHeight
     }
-    const debouncedSearch = debounce(v => logOut2(`🔍 防抖搜索: "${v}"`, 'result'), 500)
+    const debouncedSearch = debounce(v => logOut2b(`🔍 防抖搜索: "${v}"`, 'result'), 500)
     document.getElementById('debounceInput').addEventListener('input', e => {
-      logOut2(`输入: "${e.target.value}"`)
+      logOut2b(`输入: "${e.target.value}"`)
       debouncedSearch(e.target.value)
     })
     let throttleCount = 0
-    const throttledClick = throttle(() => logOut2(`⚡ 节流执行 #${++throttleCount}`, 'result'), 500)
+    const throttledClick = throttle(() => logOut2b(`⚡ 节流执行 #${++throttleCount}`, 'result'), 500)
     document.getElementById('throttleBtn').addEventListener('click', () => {
-      logOut2('点击按钮')
+      logOut2b('点击按钮')
       throttledClick()
     })
-
-    function runFunctional() {
-      r3.run(() => {
-        // 柯里化
-        function curry(fn) {
-          return function curried(...args) {
-            if (args.length >= fn.length) return fn.apply(this, args)
-            return (...more) => curried(...args, ...more)
-          }
-        }
-        const add = curry((a, b, c) => a + b + c)
-        console.log('curry(1)(2)(3):', add(1)(2)(3))
-        console.log('curry(1,2)(3):', add(1, 2)(3))
-        console.log('curry(1)(2,3):', add(1)(2, 3))
-
-        // 偏函数
-        function partial(fn, ...preArgs) {
-          return (...laterArgs) => fn(...preArgs, ...laterArgs)
-        }
-        const multiply = (a, b, c) => a * b * c
-        const double = partial(multiply, 2)
-        console.log('偏函数 double(3,4):', double(3, 4))
-
-        // 函数组合
-        const compose = (...fns) => x => fns.reduceRight((v, f) => f(v), x)
-        const pipe    = (...fns) => x => fns.reduce((v, f) => f(v), x)
-        const double2 = x => x * 2
-        const addOne  = x => x + 1
-        const square  = x => x * x
-        console.log('pipe(double,addOne,square)(3):', pipe(double2, addOne, square)(3))
-        console.log('compose(square,addOne,double)(3):', compose(square, addOne, double2)(3))
-
-        // Memoize
-        function memoize(fn) {
-          const cache = new Map()
-          return function(...args) {
-            const key = JSON.stringify(args)
-            if (cache.has(key)) { console.log(`缓存命中 key=${key}`); return cache.get(key) }
-            const result = fn.apply(this, args)
-            cache.set(key, result)
-            return result
-          }
-        }
-        const expensiveFib = memoize(function fib(n) {
-          return n <= 1 ? n : expensiveFib(n-1) + expensiveFib(n-2)
-        })
-        console.log('memoize fib(10):', expensiveFib(10))
-        console.log('memoize fib(10) 再次:', expensiveFib(10))
-      })
-    }
-
-    function runPatterns() {
-      r4.run(() => {
-        // 单例
-        class Singleton {
-          static #instance = null
-          constructor() { this.id = Math.random().toFixed(4) }
-          static getInstance() {
-            if (!Singleton.#instance) Singleton.#instance = new Singleton()
-            return Singleton.#instance
-          }
-        }
-        const s1 = Singleton.getInstance()
-        const s2 = Singleton.getInstance()
-        console.log('单例 s1===s2:', s1 === s2, 's1.id:', s1.id)
-
-        // 观察者（EventEmitter）
-        class EventEmitter {
-          #events = new Map()
-          on(e, l) { if (!this.#events.has(e)) this.#events.set(e, []); this.#events.get(e).push(l); return this }
-          off(e, l) { this.#events.set(e, (this.#events.get(e)??[]).filter(x => x !== l)); return this }
-          emit(e, ...a) { (this.#events.get(e)??[]).forEach(l => l(...a)); return this }
-          once(e, l) { const w = (...a) => { l(...a); this.off(e, w) }; return this.on(e, w) }
-        }
-        const emitter = new EventEmitter()
-        const logs = []
-        emitter.on('data', v => logs.push(`on: ${v}`))
-        emitter.once('data', v => logs.push(`once: ${v}`))
-        emitter.emit('data', 'first')
-        emitter.emit('data', 'second')
-        console.log('EventEmitter logs:', JSON.stringify(logs))
-
-        // 策略模式
-        const validators = {
-          required: v => !!v || '必填',
-          email: v => /\S+@\S+\.\S+/.test(v) || '邮箱格式错误',
-          minLen: n => v => v.length >= n || `最少 ${n} 个字符`,
-        }
-        function validate(value, rules) {
-          for (const rule of rules) { const r = rule(value); if (r !== true) return r }
-          return true
-        }
-        console.log('策略验证 "":', validate('', [validators.required]))
-        console.log('策略验证 "bad":', validate('bad', [validators.required, validators.email]))
-        console.log('策略验证 "a@b.com":', validate('a@b.com', [validators.required, validators.email]))
-
-        // 发布订阅（与观察者区别：有中间调度层）
-        class PubSub {
-          #topics = new Map()
-          subscribe(topic, fn) {
-            if (!this.#topics.has(topic)) this.#topics.set(topic, new Set())
-            this.#topics.get(topic).add(fn)
-            return () => this.#topics.get(topic).delete(fn)
-          }
-          publish(topic, data) { (this.#topics.get(topic)??new Set()).forEach(fn => fn(data)) }
-        }
-        const ps = new PubSub()
-        const unsub = ps.subscribe('news', d => console.log('订阅者1:', d))
-        ps.subscribe('news', d => console.log('订阅者2:', d))
-        ps.publish('news', '头条新闻')
-        unsub()
-        ps.publish('news', '第二条新闻（订阅者1已退订）')
-      })
-    }
-
-    function runMemory() {
-      r5.run(() => {
-        // WeakMap 缓存
-        const cache = new WeakMap()
-        function process(obj) {
-          if (cache.has(obj)) { console.log('缓存命中'); return cache.get(obj) }
-          const result = obj.value * 2
-          cache.set(obj, result)
-          return result
-        }
-        const obj = { value: 21 }
-        console.log('WeakMap 缓存 first:', process(obj))
-        console.log('WeakMap 缓存 second:', process(obj))
-
-        // WeakRef（ES2021）
-        let bigObj = { data: new Array(100).fill('x') }
-        const ref = new WeakRef(bigObj)
-        console.log('WeakRef.deref():', ref.deref()?.data.length, '个元素')
-        // bigObj = null  // GC 后 ref.deref() 返回 undefined
-
-        // FinalizationRegistry（ES2021）
-        const registry = new FinalizationRegistry(key => {
-          console.log(`对象 ${key} 已被 GC 回收`)
-        })
-        let temp = { name: 'temp' }
-        registry.register(temp, 'temp-object')
-        console.log('FinalizationRegistry 已注册，对象 GC 后会触发回调')
-
-        // 内存泄漏示例（演示，不实际泄漏）
-        console.log('常见泄漏：未清除定时器、未移除事件监听、闭包持有大对象')
-        console.log('解决：组件卸载时 clearInterval/removeEventListener，使用 WeakMap/WeakRef')
-      })
-    }
-
-    function runErrors() {
-      r6.run(() => {
-        class AppError extends Error {
-          constructor(message, code, data) {
-            super(message)
-            this.name = 'AppError'
-            this.code = code
-            this.data = data
-          }
-        }
-        class NetworkError extends AppError {}
-        class ValidationError extends AppError {}
-
-        try {
-          throw new NetworkError('连接超时', 'TIMEOUT', { url: '/api/users' })
-        } catch(e) {
-          console.log('错误类型:', e.name)
-          console.log('错误消息:', e.message)
-          console.log('错误代码:', e.code)
-          console.log('是 NetworkError:', e instanceof NetworkError)
-          console.log('是 AppError:', e instanceof AppError)
-          console.log('是 Error:', e instanceof Error)
-        }
-
-        // Result 模式
-        async function safeAsync(promise) {
-          try { return [null, await promise] }
-          catch(e) { return [e, null] }
-        }
-        const delay = (ms, val, fail=false) => new Promise((res, rej) =>
-          setTimeout(() => fail ? rej(new Error(val)) : res(val), ms))
-
-        safeAsync(delay(10, 'success')).then(([err, data]) => {
-          console.log('Result 成功:', err, data)
-        })
-        safeAsync(delay(10, '请求失败', true)).then(([err, data]) => {
-          console.log('Result 失败:', err?.message, data)
-        })
-
-        // 全局错误捕获
-        window.addEventListener('unhandledrejection', e => {
-          console.error('未处理的 Promise 拒绝:', e.reason)
-          e.preventDefault()
-        })
-        console.log('已注册 unhandledrejection 全局错误处理')
-      })
-    }
   </script>
 </body>
 </html>

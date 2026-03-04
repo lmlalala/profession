@@ -66,33 +66,104 @@
             </tbody>
           </table>
         </div>
-        <div class="code-block" data-readonly><span class="cmt">// Vue3 响应式核心：Proxy + Reflect</span>
-<span class="kw">function</span> <span class="fn">reactive</span>(raw) {
-  <span class="kw">return</span> <span class="kw">new</span> Proxy(raw, {
-    <span class="fn">get</span>(target, key, receiver) {
-      <span class="fn">track</span>(target, key)           <span class="cmt">// 收集依赖</span>
-      <span class="kw">const</span> res = Reflect.<span class="fn">get</span>(target, key, receiver)
-      <span class="cmt">// 懒代理：访问嵌套对象时才代理</span>
-      <span class="kw">return</span> res && <span class="kw">typeof</span> res === <span class="str">'object'</span> ? <span class="fn">reactive</span>(res) : res
+        <div class="code-block" data-mode="console">// Vue3 响应式核心：Proxy + Reflect + track/trigger
+const targetMap = new WeakMap()
+let activeEffect = null
+const effectStack = []
+
+function track(target, key) {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
+}
+
+function trigger(target, type, key) {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set()
+  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
+  if (type === 'ADD' || type === 'DELETE') depsMap.get('length')?.forEach(e => effects.add(e))
+  effects.forEach(e => e())
+}
+
+function effect(fn) {
+  const effectFn = () => {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
+  }
+  effectFn.deps = new Set()
+  effectFn()
+  return effectFn
+}
+
+const reactiveMap = new WeakMap()
+function reactive(raw) {
+  if (reactiveMap.has(raw)) return reactiveMap.get(raw)
+  const proxy = new Proxy(raw, {
+    get(target, key, receiver) {
+      track(target, key)
+      const res = Reflect.get(target, key, receiver)
+      return res && typeof res === 'object' ? reactive(res) : res
     },
-    <span class="fn">set</span>(target, key, value, receiver) {
-      <span class="kw">const</span> hadKey = Object.<span class="fn">hasOwn</span>(target, key)
-      <span class="kw">const</span> result = Reflect.<span class="fn">set</span>(target, key, value, receiver)
-      <span class="kw">if</span> (!hadKey) <span class="fn">trigger</span>(target, <span class="str">'ADD'</span>, key)  <span class="cmt">// 新增属性</span>
-      <span class="kw">else</span>         <span class="fn">trigger</span>(target, <span class="str">'SET'</span>, key)  <span class="cmt">// 修改属性</span>
-      <span class="kw">return</span> result
+    set(target, key, value, receiver) {
+      const hadKey = Object.hasOwn(target, key)
+      const oldVal = target[key]
+      const result = Reflect.set(target, key, value, receiver)
+      if (!hadKey) trigger(target, 'ADD', key)
+      else if (value !== oldVal) trigger(target, 'SET', key)
+      return result
     },
-    <span class="fn">deleteProperty</span>(target, key) {
-      <span class="kw">const</span> result = Reflect.<span class="fn">deleteProperty</span>(target, key)
-      <span class="fn">trigger</span>(target, <span class="str">'DELETE'</span>, key)          <span class="cmt">// 删除属性</span>
-      <span class="kw">return</span> result
+    deleteProperty(target, key) {
+      const hadKey = Object.hasOwn(target, key)
+      const result = Reflect.deleteProperty(target, key)
+      if (hadKey) trigger(target, 'DELETE', key)
+      return result
     }
   })
-}</span></div>
+  reactiveMap.set(raw, proxy)
+  return proxy
+}
+
+// ── 演示 ──
+const state = reactive({ name: 'Alice', age: 25 })
+const logs = []
+effect(() => { logs.push(`name=${state.name}`) })
+
+state.name = 'Bob'
+console.log('修改已有属性 name=Bob → 响应:', logs.join(' | '))
+
+// ✅ 新增属性（Vue2 无法检测，Vue3 可以）
+const logs2 = []
+effect(() => { logs2.push(`city=${state.city ?? 'undefined'}`) })
+state.city = 'Beijing'
+console.log('✅ 新增属性 city=Beijing → 响应:', logs2.join(' | '))
+
+// ✅ 删除属性
+const logs3 = []
+effect(() => { logs3.push(`age=${state.age ?? 'deleted'}`) })
+delete state.age
+console.log('✅ 删除属性 age → 响应:', logs3.join(' | '))
+
+// ✅ 数组下标赋值
+const arr = reactive([1, 2, 3])
+const arrLogs = []
+effect(() => { arrLogs.push(`arr[0]=${arr[0]}`) })
+arr[0] = 99
+console.log('✅ 数组下标赋值 arr[0]=99 → 响应:', arrLogs.join(' | '))
+
+// ✅ 深层嵌套（懒代理）
+const nested = reactive({ a: { b: { c: 1 } } })
+const nestedLogs = []
+effect(() => { nestedLogs.push(`c=${nested.a.b.c}`) })
+nested.a.b.c = 42
+console.log('✅ 深层嵌套 nested.a.b.c=42 → 响应:', nestedLogs.join(' | '))</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runProxyDemo()">▶ 运行对比演示</button>
-          <button class="btn btn-outline btn-sm" onclick="proxyLog.clear()">清空</button>
-          <div class="console-output" id="proxyOut"><span class="info">点击运行</span></div>
+          <div class="console-output" id="proxyOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -101,44 +172,85 @@
     <section class="section">
       <h2 class="section-title">2. effect / track / trigger 依赖收集 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;</span>
-<span class="kw">const</span> targetMap = <span class="kw">new</span> WeakMap()
-<span class="kw">let</span> activeEffect = <span class="kw">null</span>
+        <div class="code-block" data-mode="console">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;
+const targetMap = new WeakMap()
+let activeEffect = null
+const effectStack = []
 
-<span class="cmt">// track：在 getter 中收集当前 activeEffect</span>
-<span class="kw">function</span> <span class="fn">track</span>(target, key) {
-  <span class="kw">if</span> (!activeEffect) <span class="kw">return</span>
-  <span class="kw">let</span> depsMap = targetMap.<span class="fn">get</span>(target)
-  <span class="kw">if</span> (!depsMap) targetMap.<span class="fn">set</span>(target, depsMap = <span class="kw">new</span> Map())
-  <span class="kw">let</span> dep = depsMap.<span class="fn">get</span>(key)
-  <span class="kw">if</span> (!dep) depsMap.<span class="fn">set</span>(key, dep = <span class="kw">new</span> Set())
-  dep.<span class="fn">add</span>(activeEffect)
+// track：在 getter 中收集当前 activeEffect
+function track(target, key) {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
 }
 
-<span class="cmt">// trigger：在 setter 中触发所有依赖该属性的 effect</span>
-<span class="kw">function</span> <span class="fn">trigger</span>(target, key) {
-  <span class="kw">const</span> depsMap = targetMap.<span class="fn">get</span>(target)
-  <span class="kw">if</span> (!depsMap) <span class="kw">return</span>
-  depsMap.<span class="fn">get</span>(key)?.forEach(effect => effect())
+// trigger：在 setter 中触发所有依赖该属性的 effect
+function trigger(target, type, key) {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set()
+  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e => e.options?.scheduler ? e.options.scheduler(e) : e())
 }
 
-<span class="cmt">// effect：注册副作用函数，执行时自动收集依赖</span>
-<span class="kw">function</span> <span class="fn">effect</span>(fn) {
-  <span class="kw">const</span> effectFn = () => {
-    activeEffect = effectFn
-    <span class="kw">const</span> result = <span class="fn">fn</span>()
-    activeEffect = <span class="kw">null</span>
-    <span class="kw">return</span> result
+// effect：注册副作用函数，执行时自动收集依赖
+function effect(fn, options = {}) {
+  const effectFn = () => {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
   }
-  effectFn()  <span class="cmt">// 立即执行，触发 getter，完成依赖收集</span>
-  <span class="kw">return</span> effectFn
-}</span></div>
+  effectFn.deps = new Set()
+  effectFn.options = options
+  if (!options.lazy) effectFn()
+  return effectFn
+}
+
+// reactive（简化版）
+function reactive(raw) {
+  return new Proxy(raw, {
+    get(target, key, receiver) {
+      track(target, key)
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receiver) {
+      const result = Reflect.set(target, key, value, receiver)
+      trigger(target, 'SET', key)
+      return result
+    }
+  })
+}
+
+// ── 演示：effect track/trigger ──
+const state = reactive({ a: 1, b: 2, c: 3 })
+
+const e1Logs = []
+effect(() => { e1Logs.push(state.a + state.b) })
+console.log('effect1 依赖 a+b，初始值:', e1Logs.at(-1))
+
+const e2Logs = []
+effect(() => { e2Logs.push(state.b + state.c) })
+console.log('effect2 依赖 b+c，初始值:', e2Logs.at(-1))
+
+// 修改 a → 只触发 effect1
+state.a = 10
+console.log('修改 a=10 → effect1 触发:', e1Logs.at(-1), '| effect2 未触发:', e2Logs.length === 1)
+
+// 修改 b → 触发 effect1 和 effect2
+state.b = 20
+console.log('修改 b=20 → effect1:', e1Logs.at(-1), '| effect2:', e2Logs.at(-1))
+
+// 修改 c → 只触发 effect2
+state.c = 30
+console.log('修改 c=30 → effect2 触发:', e2Logs.at(-1), '| effect1 未触发:', e1Logs.length === 3)
+
+console.log('\n依赖图：a→[effect1] | b→[effect1, effect2] | c→[effect2]')</div>
         <div class="demo-box">
-          <div class="demo-label">依赖收集可视化</div>
-          <div id="effectTrackViz" style="margin-bottom:0.75rem"></div>
-          <button class="btn btn-primary btn-sm" onclick="runEffectDemo()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="effectLog.clear()">清空</button>
-          <div class="console-output" id="effectOut"><span class="info">点击运行</span></div>
+          <div class="console-output" id="effectOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -147,48 +259,105 @@
     <section class="section">
       <h2 class="section-title">3. ref / reactive / computed 实现</h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// ref：包装基本类型（通过 .value 访问）</span>
-<span class="kw">function</span> <span class="fn">ref</span>(raw) {
-  <span class="kw">return</span> {
-    <span class="kw">get</span> value() { <span class="fn">track</span>(<span class="kw">this</span>, <span class="str">'value'</span>); <span class="kw">return</span> raw },
-    <span class="kw">set</span> value(newVal) { raw = newVal; <span class="fn">trigger</span>(<span class="kw">this</span>, <span class="str">'value'</span>) },
-    __v_isRef: <span class="kw">true</span>
+        <div class="code-block" data-mode="console">// 依赖收集基础（复用 track/trigger/effect）
+const targetMap = new WeakMap()
+let activeEffect = null
+const effectStack = []
+function track(target, key) {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
+}
+function trigger(target, type, key) {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set()
+  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e => e.options?.scheduler ? e.options.scheduler(e) : e())
+}
+function effect(fn, options = {}) {
+  const effectFn = () => {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
   }
+  effectFn.deps = new Set(); effectFn.options = options
+  if (!options.lazy) effectFn()
+  return effectFn
 }
 
-<span class="cmt">// computed：带缓存的计算属性</span>
-<span class="kw">function</span> <span class="fn">computed</span>(getter) {
-  <span class="kw">let</span> dirty = <span class="kw">true</span>, _value
-  <span class="kw">const</span> effectFn = <span class="fn">effect</span>(getter, {
-    lazy: <span class="kw">true</span>,
-    scheduler() { dirty = <span class="kw">true</span>; <span class="fn">trigger</span>(obj, <span class="str">'value'</span>) }  <span class="cmt">// 依赖变化时标脏</span>
+// ref：包装基本类型（通过 .value 访问）
+function ref(raw) {
+  const r = {
+    __v_isRef: true,
+    get value() { track(r, 'value'); return raw },
+    set value(newVal) { if (newVal !== raw) { raw = newVal; trigger(r, 'SET', 'value') } }
+  }
+  return r
+}
+
+// computed：带缓存的计算属性
+function computed(getter) {
+  let dirty = true, _value
+  const effectFn = effect(getter, {
+    lazy: true,
+    scheduler() { if (!dirty) { dirty = true; trigger(obj, 'SET', 'value') } }
   })
-  <span class="kw">const</span> obj = {
-    <span class="kw">get</span> value() {
-      <span class="kw">if</span> (dirty) { _value = <span class="fn">effectFn</span>(); dirty = <span class="kw">false</span> }  <span class="cmt">// 脏时重算</span>
-      <span class="fn">track</span>(obj, <span class="str">'value'</span>)
-      <span class="kw">return</span> _value
+  const obj = {
+    __v_isRef: true,
+    get value() {
+      if (dirty) { _value = effectFn(); dirty = false }  // 脏时重算
+      track(obj, 'value')
+      return _value
     }
   }
-  <span class="kw">return</span> obj
+  return obj
 }
 
-<span class="cmt">// watch：监听响应式数据变化</span>
-<span class="kw">function</span> <span class="fn">watch</span>(source, cb, options = {}) {
-  <span class="kw">let</span> oldValue
-  <span class="kw">const</span> job = () => {
-    <span class="kw">const</span> newValue = effectFn()
-    <span class="kw">if</span> (newValue !== oldValue) { <span class="fn">cb</span>(newValue, oldValue); oldValue = newValue }
+// watch：监听响应式数据变化
+function watch(source, cb, options = {}) {
+  let getter = typeof source === 'function' ? source : () => source.value
+  let oldValue
+  const job = () => {
+    const newValue = effectFn()
+    if (newValue !== oldValue) { cb(newValue, oldValue); oldValue = newValue }
   }
-  <span class="kw">const</span> effectFn = <span class="fn">effect</span>(<span class="kw">typeof</span> source === <span class="str">'function'</span> ? source : () => source.value,
-    { lazy: <span class="kw">true</span>, scheduler: job })
-  <span class="kw">if</span> (options.immediate) <span class="fn">job</span>()
-  <span class="kw">else</span> oldValue = <span class="fn">effectFn</span>()
-}</span></div>
+  const effectFn = effect(getter, { lazy: true, scheduler: job })
+  if (options.immediate) job()
+  else oldValue = effectFn()
+}
+
+// ── 演示 ──
+// ref
+const count = ref(0)
+const logs = []
+effect(() => { logs.push(`count=${count.value}`) })
+count.value++; count.value++
+console.log('ref count 变化:', logs.join(' → '))
+
+// computed（带缓存）
+const price = ref(100)
+const quantity = ref(3)
+let computeCount = 0
+const total = computed(() => { computeCount++; return price.value * quantity.value })
+console.log('computed total:', total.value, '(计算次数:', computeCount, ')')
+console.log('再次读取 total（缓存）:', total.value, '(计算次数:', computeCount, ')')
+price.value = 200
+console.log('price 变化后 total:', total.value, '(计算次数:', computeCount, ')')
+console.log('再次读取（缓存）:', total.value, '(计算次数:', computeCount, ')')
+
+// watch
+const name = ref('Alice')
+const watchLogs = []
+watch(name, (newVal, oldVal) => { watchLogs.push(`${oldVal}→${newVal}`) })
+name.value = 'Bob'; name.value = 'Charlie'
+console.log('watch 变化记录:', watchLogs.join(' | '))</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runRefComputed()">▶ 运行</button>
-          <button class="btn btn-outline btn-sm" onclick="refLog.clear()">清空</button>
-          <div class="console-output" id="refOut"><span class="info">点击运行</span></div>
+          <div class="console-output" id="refOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -247,30 +416,45 @@
     <section class="section">
       <h2 class="section-title">5. Vue3 编译优化 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block" data-readonly><span class="cmt">// ① 静态提升（hoistStatic）：静态节点只创建一次</span>
-<span class="cmt">// 编译前：</span>
-<span class="tag">&lt;div&gt;</span>
-  <span class="tag">&lt;span&gt;</span>静态内容<span class="tag">&lt;/span&gt;</span>   <span class="cmt">&lt;!-- 每次渲染都重新创建 --&gt;</span>
-  <span class="tag">&lt;span&gt;</span>{{ dynamic }}<span class="tag">&lt;/span&gt;</span>
-<span class="tag">&lt;/div&gt;</span>
+        <div class="code-block" data-mode="console">// Vue3 编译优化演示
 
-<span class="cmt">// 编译后（Vue3）：</span>
-<span class="kw">const</span> _hoisted = <span class="fn">createVNode</span>(<span class="str">'span'</span>, <span class="kw">null</span>, <span class="str">'静态内容'</span>)  <span class="cmt">// 提升到外部，只创建一次</span>
-<span class="kw">function</span> <span class="fn">render</span>() {
-  <span class="kw">return</span> <span class="fn">createVNode</span>(<span class="str">'div'</span>, <span class="kw">null</span>, [_hoisted, <span class="fn">createVNode</span>(<span class="str">'span'</span>, <span class="kw">null</span>, dynamic.value)])
+// ① PatchFlag 模拟：标记动态内容类型，diff 时跳过静态部分
+const PatchFlags = { TEXT: 1, CLASS: 2, STYLE: 4, PROPS: 8, FULL_PROPS: 16 }
+function createVNode(type, props, children, patchFlag = 0, dynamicProps = null) {
+  return { type, props, children, patchFlag, dynamicProps, _isVNode: true }
 }
+const vnode1 = createVNode('div', { id: 'static' }, 'static text', 0)
+const vnode2 = createVNode('div', { class: 'dynamic' }, 'hello', PatchFlags.TEXT)
+const vnode3 = createVNode('div', { class: 'x' }, null, PatchFlags.CLASS)
+console.log('静态节点 patchFlag:', vnode1.patchFlag, '(0=无需diff)')
+console.log('动态文本 patchFlag:', vnode2.patchFlag, '(1=只diff文本)')
+console.log('动态class patchFlag:', vnode3.patchFlag, '(2=只diff class)')
 
-<span class="cmt">// ② PatchFlag：标记动态内容类型，diff 时跳过静态部分</span>
-<span class="fn">createVNode</span>(<span class="str">'div'</span>, { id: <span class="str">'app'</span> }, text, PatchFlags.TEXT)  <span class="cmt">// 只有 text 是动态的</span>
-<span class="fn">createVNode</span>(<span class="str">'div'</span>, props, children, PatchFlags.PROPS, [<span class="str">'class'</span>])  <span class="cmt">// 只有 class 是动态的</span>
+// ② 静态提升模拟：静态节点只创建一次
+let renderCount = 0
+const _hoisted = createVNode('span', null, '静态内容')  // 只创建一次
+function render(dynamic) {
+  renderCount++
+  return createVNode('div', null, [_hoisted, createVNode('span', null, dynamic, PatchFlags.TEXT)])
+}
+render('第一次'); render('第二次'); render('第三次')
+console.log(`静态提升：渲染 3 次，静态节点只创建 1 次（renderCount=${renderCount}）`)
 
-<span class="cmt">// ③ Block Tree：收集动态节点，diff 时只对比动态节点</span>
-<span class="cmt">// ④ v-memo：手动缓存子树，类似 React.memo</span>
-<span class="tag">&lt;div</span> <span class="atr">v-memo</span>=<span class="val">"[item.id, item.selected]"</span><span class="tag">&gt;</span>...<span class="tag">&lt;/div&gt;</span></div>
+// ③ Block Tree 模拟：收集动态节点，diff 时只对比动态节点
+const dynamicNodes = []
+function openBlock() { dynamicNodes.length = 0 }
+function closeBlock(vnode) { vnode.dynamicChildren = [...dynamicNodes]; return vnode }
+function trackDynamic(vnode) { if (vnode.patchFlag) dynamicNodes.push(vnode); return vnode }
+openBlock()
+const block = closeBlock(createVNode('div', null, [
+  trackDynamic(createVNode('span', null, '静态', 0)),
+  trackDynamic(createVNode('span', null, '动态1', PatchFlags.TEXT)),
+  trackDynamic(createVNode('span', null, '动态2', PatchFlags.CLASS)),
+]))
+console.log('Block Tree 动态子节点数:', block.dynamicChildren.length, '(跳过静态节点)')
+console.log('动态节点 patchFlags:', block.dynamicChildren.map(n => n.patchFlag).join(', '))</div>
         <div class="demo-box">
-          <button class="btn btn-primary btn-sm" onclick="runOptimization()">▶ 运行优化演示</button>
-          <button class="btn btn-outline btn-sm" onclick="optLog.clear()">清空</button>
-          <div class="console-output" id="optOut"><span class="info">点击运行</span></div>
+          <div class="console-output" id="optOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
@@ -288,312 +472,121 @@
     </section>
   </div>
 
-  <script src="../js/runner.js"></script>
   <script>
     // ============================================================
-    // Vue3 响应式核心实现
+    // Mini Vue3 完整实现（供 Section 6 交互 demo 使用）
     // ============================================================
-    const targetMap = new WeakMap()
-    let activeEffect = null
-    const effectStack = []
+    const _targetMap = new WeakMap()
+    let _activeEffect = null
+    const _effectStack = []
 
-    function track(target, key) {
-      if (!activeEffect) return
-      let depsMap = targetMap.get(target)
-      if (!depsMap) targetMap.set(target, depsMap = new Map())
+    function _track(target, key) {
+      if (!_activeEffect) return
+      let depsMap = _targetMap.get(target)
+      if (!depsMap) _targetMap.set(target, depsMap = new Map())
       let dep = depsMap.get(key)
       if (!dep) depsMap.set(key, dep = new Set())
-      dep.add(activeEffect)
-      activeEffect.deps.add(dep)
+      dep.add(_activeEffect)
+      _activeEffect.deps.add(dep)
     }
 
-    function trigger(target, type, key) {
-      const depsMap = targetMap.get(target)
+    function _trigger(target, type, key) {
+      const depsMap = _targetMap.get(target)
       if (!depsMap) return
       const effects = new Set()
-      const add = (effectsToAdd) => effectsToAdd?.forEach(e => { if (e !== activeEffect) effects.add(e) })
+      const add = (effectsToAdd) => effectsToAdd?.forEach(e => { if (e !== _activeEffect) effects.add(e) })
       add(depsMap.get(key))
       if (type === 'ADD' || type === 'DELETE') add(depsMap.get('length'))
       effects.forEach(e => e.options?.scheduler ? e.options.scheduler(e) : e())
     }
 
-    function effect(fn, options = {}) {
-      const effectFn = () => {
-        cleanup(effectFn)
-        effectStack.push(effectFn)
-        activeEffect = effectFn
-        const result = fn()
-        effectStack.pop()
-        activeEffect = effectStack[effectStack.length - 1] ?? null
-        return result
-      }
-      effectFn.deps = new Set()
-      effectFn.options = options
-      if (!options.lazy) effectFn()
-      return effectFn
-    }
-
-    function cleanup(effectFn) {
+    function _cleanup(effectFn) {
       effectFn.deps.forEach(dep => dep.delete(effectFn))
       effectFn.deps.clear()
     }
 
-    // reactive
-    const reactiveMap = new WeakMap()
-    function reactive(raw) {
-      if (reactiveMap.has(raw)) return reactiveMap.get(raw)
+    function _effect(fn, options = {}) {
+      const effectFn = () => {
+        _cleanup(effectFn)
+        _effectStack.push(effectFn); _activeEffect = effectFn
+        const result = fn()
+        _effectStack.pop(); _activeEffect = _effectStack[_effectStack.length - 1] ?? null
+        return result
+      }
+      effectFn.deps = new Set(); effectFn.options = options
+      if (!options.lazy) effectFn()
+      return effectFn
+    }
+
+    const _reactiveMap = new WeakMap()
+    function _reactive(raw) {
+      if (_reactiveMap.has(raw)) return _reactiveMap.get(raw)
       const proxy = new Proxy(raw, {
         get(target, key, receiver) {
           if (key === '__v_raw') return target
-          track(target, key)
+          _track(target, key)
           const res = Reflect.get(target, key, receiver)
-          return res && typeof res === 'object' ? reactive(res) : res
+          return res && typeof res === 'object' ? _reactive(res) : res
         },
         set(target, key, value, receiver) {
           const hadKey = Object.hasOwn(target, key)
           const oldVal = target[key]
           const result = Reflect.set(target, key, value, receiver)
-          if (!hadKey) trigger(target, 'ADD', key)
-          else if (value !== oldVal) trigger(target, 'SET', key)
+          if (!hadKey) _trigger(target, 'ADD', key)
+          else if (value !== oldVal) _trigger(target, 'SET', key)
           return result
         },
         deleteProperty(target, key) {
           const hadKey = Object.hasOwn(target, key)
           const result = Reflect.deleteProperty(target, key)
-          if (hadKey) trigger(target, 'DELETE', key)
+          if (hadKey) _trigger(target, 'DELETE', key)
           return result
-        },
-        has(target, key) { track(target, key); return Reflect.has(target, key) },
-        ownKeys(target) { track(target, Array.isArray(target) ? 'length' : 'iterate'); return Reflect.ownKeys(target) }
+        }
       })
-      reactiveMap.set(raw, proxy)
+      _reactiveMap.set(raw, proxy)
       return proxy
     }
 
-    // ref
-    function ref(raw) {
+    function _ref(raw) {
       const r = {
         __v_isRef: true,
-        get value() { track(r, 'value'); return raw },
-        set value(newVal) {
-          if (newVal !== raw) { raw = newVal; trigger(r, 'SET', 'value') }
-        }
+        get value() { _track(r, 'value'); return raw },
+        set value(newVal) { if (newVal !== raw) { raw = newVal; _trigger(r, 'SET', 'value') } }
       }
       return r
     }
 
-    // computed
-    function computed(getter) {
+    function _computed(getter) {
       let dirty = true, _value
-      const effectFn = effect(getter, {
+      const effectFn = _effect(getter, {
         lazy: true,
-        scheduler() { if (!dirty) { dirty = true; trigger(obj, 'SET', 'value') } }
+        scheduler() { if (!dirty) { dirty = true; _trigger(obj, 'SET', 'value') } }
       })
       const obj = {
         __v_isRef: true,
         get value() {
           if (dirty) { _value = effectFn(); dirty = false }
-          track(obj, 'value')
-          return _value
+          _track(obj, 'value'); return _value
         }
       }
       return obj
     }
 
-    // watch
-    function watch(source, cb, options = {}) {
+    function _watch(source, cb, options = {}) {
       let getter = typeof source === 'function' ? source : () => source.value
-      let oldValue, cleanup2
-      const onInvalidate = (fn) => { cleanup2 = fn }
+      let oldValue
       const job = () => {
         const newValue = effectFn()
-        if (newValue !== oldValue || options.deep) {
-          cleanup2?.()
-          cb(newValue, oldValue, onInvalidate)
-          oldValue = newValue
-        }
+        if (newValue !== oldValue || options.deep) { cb(newValue, oldValue); oldValue = newValue }
       }
-      const effectFn = effect(getter, { lazy: true, scheduler: job })
+      const effectFn = _effect(getter, { lazy: true, scheduler: job })
       if (options.immediate) job()
       else oldValue = effectFn()
-      return () => cleanup(effectFn)
     }
 
-    // ============================================================
-    // 演示 1：Proxy vs defineProperty
-    // ============================================================
-    const proxyLog = createRunner('proxyOut')
-    function runProxyDemo() {
-      proxyLog.run(() => {
-        const state = reactive({ name: 'Alice', age: 25 })
-        const logs = []
-        effect(() => { logs.push(`name=${state.name}`) })
+    // 别名供 Mini Vue3 使用
+    const ref = _ref, reactive = _reactive, computed = _computed, watch = _watch, effect = _effect
 
-        // 修改已有属性
-        state.name = 'Bob'
-        console.log('修改已有属性 name=Bob → 响应:', logs.join(' | '))
-
-        // 新增属性（Vue2 无法检测，Vue3 可以）
-        const logs2 = []
-        effect(() => { logs2.push(`city=${state.city ?? 'undefined'}`) })
-        state.city = 'Beijing'
-        console.log('✅ 新增属性 city=Beijing → 响应:', logs2.join(' | '))
-
-        // 删除属性
-        const logs3 = []
-        effect(() => { logs3.push(`age=${state.age ?? 'deleted'}`) })
-        delete state.age
-        console.log('✅ 删除属性 age → 响应:', logs3.join(' | '))
-
-        // 数组下标赋值
-        const arr = reactive([1, 2, 3])
-        const arrLogs = []
-        effect(() => { arrLogs.push(`arr[0]=${arr[0]}`) })
-        arr[0] = 99
-        console.log('✅ 数组下标赋值 arr[0]=99 → 响应:', arrLogs.join(' | '))
-
-        // 嵌套对象（懒代理）
-        const nested = reactive({ a: { b: { c: 1 } } })
-        const nestedLogs = []
-        effect(() => { nestedLogs.push(`c=${nested.a.b.c}`) })
-        nested.a.b.c = 42
-        console.log('✅ 深层嵌套 nested.a.b.c=42 → 响应:', nestedLogs.join(' | '))
-      })
-    }
-
-    // ============================================================
-    // 演示 2：effect track/trigger 可视化
-    // ============================================================
-    const effectLog = createRunner('effectOut')
-    function runEffectDemo() {
-      const viz = document.getElementById('effectTrackViz')
-      viz.innerHTML = ''
-      effectLog.run(() => {
-        const state = reactive({ a: 1, b: 2, c: 3 })
-
-        // effect 1：依赖 a + b
-        const e1Logs = []
-        effect(() => { e1Logs.push(state.a + state.b) })
-        console.log('effect1 依赖 a+b，初始值:', e1Logs.at(-1))
-
-        // effect 2：依赖 b + c
-        const e2Logs = []
-        effect(() => { e2Logs.push(state.b + state.c) })
-        console.log('effect2 依赖 b+c，初始值:', e2Logs.at(-1))
-
-        // 修改 a → 只触发 effect1
-        state.a = 10
-        console.log('修改 a=10 → effect1 触发:', e1Logs.at(-1), '| effect2 未触发:', e2Logs.length === 1)
-
-        // 修改 b → 触发 effect1 和 effect2
-        state.b = 20
-        console.log('修改 b=20 → effect1:', e1Logs.at(-1), '| effect2:', e2Logs.at(-1))
-
-        // 修改 c → 只触发 effect2
-        state.c = 30
-        console.log('修改 c=30 → effect2 触发:', e2Logs.at(-1), '| effect1 未触发:', e1Logs.length === 3)
-
-        // 可视化
-        viz.innerHTML = `
-          <div class="effect-track">
-            <div class="effect-item active">effect1: a+b = ${e1Logs.at(-1)}</div>
-            <div class="effect-item triggered">effect2: b+c = ${e2Logs.at(-1)}</div>
-          </div>
-          <div style="font-size:0.75rem;color:var(--color-text-muted)">
-            依赖图：a→[effect1] | b→[effect1, effect2] | c→[effect2]
-          </div>`
-      })
-    }
-
-    // ============================================================
-    // 演示 3：ref / computed / watch
-    // ============================================================
-    const refLog = createRunner('refOut')
-    function runRefComputed() {
-      refLog.run(() => {
-        // ref
-        const count = ref(0)
-        const logs = []
-        effect(() => { logs.push(`count=${count.value}`) })
-        count.value++
-        count.value++
-        console.log('ref count 变化:', logs.join(' → '))
-
-        // computed（带缓存）
-        const price = ref(100)
-        const quantity = ref(3)
-        let computeCount = 0
-        const total = computed(() => { computeCount++; return price.value * quantity.value })
-        console.log('computed total:', total.value, '(计算次数:', computeCount, ')')
-        console.log('再次读取 total（缓存）:', total.value, '(计算次数:', computeCount, ')')
-        price.value = 200
-        console.log('price 变化后 total:', total.value, '(计算次数:', computeCount, ')')
-        console.log('再次读取（缓存）:', total.value, '(计算次数:', computeCount, ')')
-
-        // watch
-        const name = ref('Alice')
-        const watchLogs = []
-        watch(name, (newVal, oldVal) => { watchLogs.push(`${oldVal}→${newVal}`) })
-        name.value = 'Bob'
-        name.value = 'Charlie'
-        console.log('watch 变化记录:', watchLogs.join(' | '))
-
-        // watchEffect（立即执行）
-        const x = ref(1)
-        const effectLogs = []
-        effect(() => { effectLogs.push(`x=${x.value}`) })
-        x.value = 2; x.value = 3
-        console.log('watchEffect 记录:', effectLogs.join(' → '))
-      })
-    }
-
-    // ============================================================
-    // 演示 4：编译优化
-    // ============================================================
-    const optLog = createRunner('optOut')
-    function runOptimization() {
-      optLog.run(() => {
-        // PatchFlag 模拟
-        const PatchFlags = { TEXT: 1, CLASS: 2, STYLE: 4, PROPS: 8, FULL_PROPS: 16 }
-        function createVNode(type, props, children, patchFlag = 0, dynamicProps = null) {
-          return { type, props, children, patchFlag, dynamicProps, _isVNode: true }
-        }
-        const vnode1 = createVNode('div', { id: 'static' }, 'static text', 0)
-        const vnode2 = createVNode('div', { class: 'dynamic' }, 'hello', PatchFlags.TEXT)
-        const vnode3 = createVNode('div', { class: 'x' }, null, PatchFlags.CLASS)
-        console.log('静态节点 patchFlag:', vnode1.patchFlag, '(0=无需diff)')
-        console.log('动态文本 patchFlag:', vnode2.patchFlag, '(1=只diff文本)')
-        console.log('动态class patchFlag:', vnode3.patchFlag, '(2=只diff class)')
-
-        // 静态提升模拟
-        let renderCount = 0
-        const _hoisted = createVNode('span', null, '静态内容')  // 只创建一次
-        function render(dynamic) {
-          renderCount++
-          return createVNode('div', null, [_hoisted, createVNode('span', null, dynamic, PatchFlags.TEXT)])
-        }
-        render('第一次')
-        render('第二次')
-        render('第三次')
-        console.log(`静态提升：渲染 3 次，静态节点只创建 1 次（renderCount=${renderCount}）`)
-
-        // Block Tree 模拟
-        const dynamicNodes = []
-        function openBlock() { dynamicNodes.length = 0 }
-        function closeBlock(vnode) { vnode.dynamicChildren = [...dynamicNodes]; return vnode }
-        function trackDynamic(vnode) { if (vnode.patchFlag) dynamicNodes.push(vnode); return vnode }
-        openBlock()
-        const block = closeBlock(createVNode('div', null, [
-          trackDynamic(createVNode('span', null, '静态', 0)),
-          trackDynamic(createVNode('span', null, '动态1', PatchFlags.TEXT)),
-          trackDynamic(createVNode('span', null, '动态2', PatchFlags.CLASS)),
-        ]))
-        console.log('Block Tree 动态子节点数:', block.dynamicChildren.length, '(跳过静态节点)')
-      })
-    }
-
-    // ============================================================
-    // Mini Vue3 完整实现
     // ============================================================
     function h(type, props, ...children) {
       return { type, props: props || {}, children: children.flat().filter(c => c != null) }

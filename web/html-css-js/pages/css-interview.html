@@ -8,36 +8,7 @@
   <script type="module" src="../js/nav.js"></script>
   <script type="module" src="../js/code-editor.js"></script>
   <style>
-    /* BFC 演示 */
-    .bfc-no-clear::after { content: ''; display: none; }
-    .bfc-float { float: left; width: 60px; height: 60px; background: var(--color-primary); border-radius: 4px; margin-right: 10px; }
-    .bfc-parent { background: rgba(255,255,255,0.05); border: 2px dashed var(--color-border); padding: 8px; border-radius: 4px; margin-bottom: 0.5rem; }
-    .bfc-parent.bfc-active { overflow: hidden; border-color: var(--color-secondary); }
-    .bfc-text { font-size: 0.8rem; color: var(--color-text-muted); }
-
-    /* 居中方案 */
-    .center-demo {
-      height: 100px;
-      background: var(--color-surface-2);
-      border: 1px dashed var(--color-border);
-      border-radius: 4px;
-      position: relative;
-      margin-bottom: 0.5rem;
-    }
-    .center-child {
-      width: 80px; height: 40px;
-      background: var(--color-primary);
-      border-radius: 4px;
-      color: #fff;
-      font-size: 0.7rem;
-      display: flex; align-items: center; justify-content: center;
-    }
-    .center-flex { display: flex; align-items: center; justify-content: center; }
-    .center-grid { display: grid; place-items: center; }
-    .center-abs .center-child { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); }
-    .center-abs2 .center-child { position: absolute; top: 0; left: 0; right: 0; bottom: 0; margin: auto; }
-
-    /* 层叠上下文 */
+    /* 层叠上下文演示 */
     .stacking-demo { position: relative; height: 120px; }
     .stack-box {
       position: absolute;
@@ -46,15 +17,8 @@
       display: flex; align-items: center; justify-content: center;
       font-size: 0.75rem; font-weight: 700; color: #fff;
     }
-
-    /* 响应式 */
-    .rwd-demo { font-size: 0.85rem; }
-
-    /* CSS 变量 */
-    .var-demo {
-      --btn-color: #6c63ff;
-      --btn-radius: 8px;
-    }
+    /* CSS 变量演示 */
+    .var-demo { --btn-color: #6c63ff; --btn-radius: 8px; }
     .var-btn {
       background: var(--btn-color);
       border-radius: var(--btn-radius);
@@ -65,41 +29,6 @@
       font-size: 0.875rem;
       transition: all 0.3s;
     }
-
-    /* 伪元素 */
-    .pseudo-demo .clearfix::after {
-      content: '';
-      display: table;
-      clear: both;
-    }
-    .pseudo-item::before {
-      content: '▶ ';
-      color: var(--color-primary);
-    }
-    .pseudo-tooltip {
-      position: relative;
-      display: inline-block;
-      cursor: pointer;
-      color: var(--color-primary-light);
-      border-bottom: 1px dashed var(--color-primary);
-    }
-    .pseudo-tooltip::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      padding: 0.3rem 0.6rem;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      white-space: nowrap;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.2s;
-    }
-    .pseudo-tooltip:hover::after { opacity: 1; }
   </style>
 </head>
 <body>
@@ -120,33 +49,68 @@
           <code>overflow: hidden/auto/scroll</code> | <code>display: flex/grid/inline-block</code> |
           <code>position: absolute/fixed</code> | <code>float: left/right</code>
         </div>
-        <p class="card-title">BFC 的三大作用</p>
-        <div class="grid-2">
-          <div>
-            <div class="demo-label">① 清除浮动（父元素高度塌陷）</div>
-            <div class="bfc-parent" id="bfcParent">
-              <div class="bfc-float"></div>
-              <p class="bfc-text">父元素未触发 BFC，高度塌陷</p>
-            </div>
-            <button class="btn btn-outline btn-sm" onclick="toggleBFC()">切换 overflow:hidden</button>
-          </div>
-          <div>
-            <div class="demo-label">② 阻止 margin 合并</div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">
-<span class="cmt">/* 相邻兄弟 margin 会合并 */</span>
-.p1 { margin-bottom: 20px; }
-.p2 { margin-top: 30px; }
-<span class="cmt">/* 实际间距 = max(20,30) = 30px */</span>
+        <p class="card-title">BFC 的三大作用 — 编辑代码查看效果</p>
+        <div class="code-block" data-tabs="html,css" data-mode="dom">
+          <div data-tab="html"><h4>① 清除浮动（父元素高度塌陷）</h4>
+<div class="parent no-bfc">
+  <div class="float-box"></div>
+  <p class="tip">未触发 BFC → 高度塌陷</p>
+</div>
 
-<span class="cmt">/* 用 BFC 包裹其中一个可阻止合并 */</span>
-.wrapper { overflow: hidden; }</div>
-            <div class="demo-label" style="margin-top:0.5rem">③ 阻止浮动元素覆盖</div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">
-.float { float: left; width: 60px; }
-.text  { overflow: hidden; } <span class="cmt">/* BFC */</span>
-<span class="cmt">/* text 不会被 float 覆盖，自适应宽度 */</span></div>
-          </div>
+<h4>② 触发 BFC 后</h4>
+<div class="parent with-bfc">
+  <div class="float-box"></div>
+  <p class="tip">overflow:hidden 触发 BFC → 高度自适应</p>
+</div>
+
+<h4>③ 阻止 margin 合并</h4>
+<div class="margin-demo">
+  <p class="m1">margin-bottom: 20px</p>
+  <div class="bfc-wrapper">
+    <p class="m2">margin-top: 30px（BFC 包裹后不合并）</p>
+  </div>
+</div></div>
+          <div data-tab="css">h4 { font-size: 0.85rem; color: #8892b0; margin: 1rem 0 0.4rem; }
+
+/* 浮动元素 */
+.float-box {
+  float: left;
+  width: 60px;
+  height: 60px;
+  background: #6c63ff;
+  border-radius: 4px;
+  margin-right: 10px;
+}
+
+/* 父元素 */
+.parent {
+  background: rgba(255,255,255,0.05);
+  border: 2px dashed #2e3350;
+  padding: 8px;
+  border-radius: 4px;
+  margin-bottom: 0.5rem;
+}
+
+/* 未触发 BFC：高度塌陷 */
+.no-bfc { border-color: #ff6584; }
+
+/* 触发 BFC：overflow:hidden */
+.with-bfc {
+  overflow: hidden; /* 触发 BFC */
+  border-color: #00d4aa;
+}
+
+.tip { font-size: 0.8rem; color: #8892b0; }
+
+/* margin 合并演示 */
+.margin-demo { margin-top: 0.5rem; }
+.m1 { margin-bottom: 20px; background: rgba(108,99,255,0.1); padding: 6px; border-radius: 4px; font-size: 0.8rem; }
+.m2 { margin-top: 30px; background: rgba(0,212,170,0.1); padding: 6px; border-radius: 4px; font-size: 0.8rem; }
+
+/* BFC 包裹阻止 margin 合并 */
+.bfc-wrapper { overflow: hidden; }</div>
         </div>
+        <div class="demo-box"></div>
       </div>
     </section>
 
@@ -196,46 +160,93 @@
     <section class="section">
       <h2 class="section-title">3. 水平垂直居中方案 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="grid-2">
-          <div>
-            <div class="demo-label">① Flexbox（推荐）</div>
-            <div class="center-demo center-flex"><div class="center-child">flex</div></div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent {
+        <div class="code-block" data-tabs="html,css" data-mode="dom">
+          <div data-tab="html"><div class="center-grid-layout">
+  <div>
+    <p class="label">① Flexbox（推荐）</p>
+    <div class="parent center-flex">
+      <div class="child">flex</div>
+    </div>
+  </div>
+  <div>
+    <p class="label">② Grid place-items</p>
+    <div class="parent center-grid">
+      <div class="child">grid</div>
+    </div>
+  </div>
+  <div>
+    <p class="label">③ absolute + transform</p>
+    <div class="parent center-abs">
+      <div class="child">abs</div>
+    </div>
+  </div>
+  <div>
+    <p class="label">④ absolute + margin:auto</p>
+    <div class="parent center-auto">
+      <div class="child fixed-size">auto</div>
+    </div>
+  </div>
+</div></div>
+          <div data-tab="css">.center-grid-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+.label {
+  font-size: 0.78rem;
+  color: #8892b0;
+  margin-bottom: 6px;
+}
+.parent {
+  height: 100px;
+  background: #22263a;
+  border: 1px dashed #2e3350;
+  border-radius: 4px;
+  position: relative;
+}
+.child {
+  width: 80px;
+  height: 40px;
+  background: #6c63ff;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   justify-content: center;
-}</div>
-          </div>
-          <div>
-            <div class="demo-label">② Grid place-items</div>
-            <div class="center-demo center-grid"><div class="center-child">grid</div></div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent {
+}
+
+/* ① Flexbox */
+.center-flex {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+/* ② Grid */
+.center-grid {
   display: grid;
   place-items: center;
-}</div>
-          </div>
-          <div>
-            <div class="demo-label">③ absolute + transform</div>
-            <div class="center-demo center-abs"><div class="center-child">abs</div></div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent { position: relative; }
-.child {
+}
+
+/* ③ absolute + transform */
+.center-abs .child {
   position: absolute;
-  top: 50%; left: 50%;
+  top: 50%;
+  left: 50%;
   transform: translate(-50%, -50%);
-}</div>
-          </div>
-          <div>
-            <div class="demo-label">④ absolute + margin:auto</div>
-            <div class="center-demo center-abs2"><div class="center-child">auto</div></div>
-            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent { position: relative; }
-.child {
+}
+
+/* ④ absolute + margin:auto（需要固定宽高）*/
+.center-auto .fixed-size {
   position: absolute;
   inset: 0; /* top/right/bottom/left: 0 */
   margin: auto;
-  width: 80px; height: 40px;
 }</div>
-          </div>
         </div>
+        <div class="demo-box"></div>
       </div>
     </section>
 
@@ -260,10 +271,7 @@ font-size: <span class="num">5vw</span>; <span class="cmt">/* 随视口宽度缩
 font-size: <span class="fn">clamp</span>(<span class="num">1rem</span>, <span class="num">2.5vw</span>, <span class="num">2rem</span>); <span class="cmt">/* min, preferred, max */</span>
 
 <span class="cmt">/* 图片响应式 */</span>
-img { max-width: <span class="num">100%</span>; height: auto; }
-
-<span class="cmt">/* 移动端 meta 标签（必须！）*/</span>
-&lt;meta name=<span class="str">"viewport"</span> content=<span class="str">"width=device-width, initial-scale=1.0"</span>&gt;</div>
+img { max-width: <span class="num">100%</span>; height: auto; }</div>
         <div class="callout tip">
           <strong>移动优先（Mobile First）</strong>
           先写手机样式，再用 <code>min-width</code> 媒体查询覆盖大屏样式。比"桌面优先"性能更好，因为移动端不需要下载和解析覆盖样式。
@@ -305,30 +313,93 @@ document.documentElement.style.<span class="fn">setProperty</span>(<span class="
     <section class="section">
       <h2 class="section-title">6. 伪元素 ::before / ::after <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 必须有 content 属性（可以为空字符串）*/</span>
-.item::before { content: <span class="str">'▶ '</span>; color: #6c63ff; }
+        <div class="code-block" data-tabs="html,css" data-mode="dom">
+          <div data-tab="html"><div class="pseudo-demo">
+  <p class="pseudo-item">使用 ::before 添加图标</p>
+  <p class="pseudo-item">无需修改 HTML 结构</p>
+  <p class="pseudo-item">常用于装饰、清除浮动</p>
+</div>
 
-<span class="cmt">/* 清除浮动（经典 clearfix）*/</span>
-.clearfix::after {
-  content: <span class="str">''</span>;
+<div class="clearfix-demo">
+  <div class="float-left">float: left</div>
+  <div class="float-left">float: left</div>
+  <p class="after-clear">clearfix::after 清除浮动，父元素高度正常</p>
+</div>
+
+<p style="margin-top:1rem">
+  <span class="tooltip" data-tip="这是纯 CSS tooltip，无需 JS！">hover 我查看 tooltip</span>
+</p></div>
+          <div data-tab="css">/* ── ::before 添加图标 ── */
+.pseudo-item {
+  padding: 0.3rem 0;
+  font-size: 0.9rem;
+  line-height: 1.8;
+}
+.pseudo-item::before {
+  content: '▶ ';   /* 必须有 content 属性 */
+  color: #6c63ff;
+}
+
+/* ── ::after 清除浮动（经典 clearfix）── */
+.clearfix-demo {
+  background: rgba(255,255,255,0.05);
+  border: 1px dashed #2e3350;
+  border-radius: 4px;
+  padding: 8px;
+  margin-top: 1rem;
+}
+.clearfix-demo::after {
+  content: '';
   display: table;
   clear: both;
 }
+.float-left {
+  float: left;
+  width: 80px;
+  height: 40px;
+  background: #6c63ff;
+  border-radius: 4px;
+  color: #fff;
+  font-size: 0.72rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 8px;
+}
+.after-clear {
+  font-size: 0.8rem;
+  color: #00d4aa;
+  padding-top: 4px;
+}
 
-<span class="cmt">/* 纯 CSS tooltip */</span>
-[data-tip]::after {
-  content: <span class="fn">attr</span>(data-tip); <span class="cmt">/* 读取 HTML 属性 */</span>
+/* ── ::after 纯 CSS tooltip ── */
+.tooltip {
+  position: relative;
+  display: inline-block;
+  cursor: pointer;
+  color: #8b85ff;
+  border-bottom: 1px dashed #6c63ff;
+}
+.tooltip::after {
+  content: attr(data-tip); /* 读取 HTML 属性值 */
   position: absolute;
-  <span class="cmt">/* ... */</span>
-}</div>
-        <div class="demo-box pseudo-demo">
-          <p class="pseudo-item">使用 ::before 添加图标</p>
-          <p class="pseudo-item">无需修改 HTML 结构</p>
-          <p class="pseudo-item">常用于装饰、清除浮动</p>
-          <p style="margin-top:0.75rem">
-            <span class="pseudo-tooltip" data-tip="这是纯 CSS tooltip，无 JS！">hover 我查看 tooltip</span>
-          </p>
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: #1a1d27;
+  border: 1px solid #2e3350;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  margin-bottom: 4px;
+}
+.tooltip:hover::after { opacity: 1; }</div>
         </div>
+        <div class="demo-box"></div>
       </div>
     </section>
 
@@ -362,15 +433,6 @@ document.documentElement.style.<span class="fn">setProperty</span>(<span class="
   </div>
 
   <script>
-    // BFC 演示
-    function toggleBFC() {
-      const p = document.getElementById('bfcParent')
-      p.classList.toggle('bfc-active')
-      p.querySelector('.bfc-text').textContent = p.classList.contains('bfc-active')
-        ? '✅ overflow:hidden 触发 BFC，高度自适应'
-        : '父元素未触发 BFC，高度塌陷'
-    }
-
     // CSS 变量主题切换
     function setTheme(primary, secondary) {
       document.documentElement.style.setProperty('--color-primary', primary)
