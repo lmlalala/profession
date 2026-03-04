@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>CSS3 选择器与布局</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
   <style>
     /* ── 选择器演示 ── */
     .sel-demo p:first-child { color: var(--color-secondary); }
@@ -107,7 +108,7 @@
           <strong>优先级计算规则（权重）</strong>
           <code>!important</code> &gt; 内联样式(1000) &gt; ID(100) &gt; 类/伪类/属性(10) &gt; 标签/伪元素(1) &gt; 通配符(0)
         </div>
-        <div class="code-block"><span class="cmt">/* 权重示例 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 权重示例 */</span>
 <span class="fn">#app</span> .list <span class="fn">li</span>:hover  <span class="cmt">/* 100 + 10 + 1 + 10 = 121 */</span>
 <span class="fn">.nav</span> > <span class="fn">a</span>.<span class="fn">active</span>        <span class="cmt">/* 10 + 1 + 10 = 21 */</span>
 <span class="fn">div</span> + <span class="fn">p</span>                  <span class="cmt">/* 1 + 1 = 2 */</span>
@@ -160,7 +161,7 @@
         </div>
         <div class="grid-2">
           <div>
-            <div class="code-block"><span class="cmt">/* 推荐全局设置 */</span>
+            <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 推荐全局设置 */</span>
 *, *::before, *::after {
   <span class="kw">box-sizing</span>: border-box;
 }
@@ -240,7 +241,7 @@
             <div class="flex-item">3</div>
             <div class="flex-item" style="height:40px">4</div>
           </div>
-          <div class="code-block" id="flexCode" style="margin-top:0.75rem">display: flex;</div>
+          <div class="code-block" data-lang="css" data-readonly id="flexCode" style="margin-top:0.75rem">display: flex;</div>
         </div>
         <div class="table-wrap" style="margin-top:1rem">
           <table>
@@ -254,7 +255,7 @@
             </tbody>
           </table>
         </div>
-        <div class="code-block" style="margin-top:0.75rem"><span class="cmt">/* 子项属性 */</span>
+        <div class="code-block" data-lang="css" data-readonly style="margin-top:0.75rem"><span class="cmt">/* 子项属性 */</span>
 .item {
   flex: <span class="num">1</span>;         <span class="cmt">/* flex-grow:1 flex-shrink:1 flex-basis:0 */</span>
   flex-grow: <span class="num">1</span>;    <span class="cmt">/* 剩余空间分配比例 */</span>
@@ -291,7 +292,7 @@
             <div class="grid-cell">6</div>
           </div>
         </div>
-        <div class="code-block" style="margin-top:0.75rem"><span class="cmt">/* Grid 核心属性 */</span>
+        <div class="code-block" data-lang="css" data-readonly style="margin-top:0.75rem"><span class="cmt">/* Grid 核心属性 */</span>
 .container {
   display: grid;
   grid-template-columns: <span class="fn">repeat</span>(<span class="num">3</span>, <span class="num">1fr</span>); <span class="cmt">/* 3列等宽 */</span>

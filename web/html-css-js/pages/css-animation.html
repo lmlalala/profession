@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>CSS3 动画与视觉效果</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
   <style>
     /* ── transition ── */
     .trans-box {
@@ -160,7 +161,7 @@
     <section class="section">
       <h2 class="section-title">1. transition 过渡</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 语法 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 语法 */</span>
 transition: [property] [duration] [timing-function] [delay];
 
 <span class="cmt">/* 示例 */</span>
@@ -186,7 +187,7 @@ cubic-bezier(x1, y1, x2, y2)  <span class="cmt">/* 自定义贝塞尔曲线 */</
     <section class="section">
       <h2 class="section-title">2. transform 变换</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 2D 变换 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 2D 变换 */</span>
 transform: <span class="fn">translate</span>(<span class="num">50px</span>, <span class="num">-20px</span>);  <span class="cmt">/* 位移 */</span>
 transform: <span class="fn">scale</span>(<span class="num">1.5</span>);             <span class="cmt">/* 缩放 */</span>
 transform: <span class="fn">rotate</span>(<span class="num">45deg</span>);          <span class="cmt">/* 旋转 */</span>
@@ -220,7 +221,7 @@ transform: <span class="fn">translateX</span>(<span class="num">50px</span>) <sp
     <section class="section">
       <h2 class="section-title">3. animation 关键帧动画</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 定义关键帧 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 定义关键帧 */</span>
 <span class="kw">@keyframes</span> bounce {
   <span class="num">0%</span>, <span class="num">100%</span> { transform: <span class="fn">translateY</span>(<span class="num">0</span>); }
   <span class="num">50%</span>       { transform: <span class="fn">translateY</span>(<span class="num">-40px</span>); }
@@ -259,7 +260,7 @@ both      <span class="cmt">/* 同时应用 forwards + backwards */</span></div>
     <section class="section">
       <h2 class="section-title">4. filter 滤镜</h2>
       <div class="card">
-        <div class="code-block">filter: <span class="fn">blur</span>(<span class="num">4px</span>);           <span class="cmt">/* 模糊 */</span>
+        <div class="code-block" data-lang="css" data-readonly>filter: <span class="fn">blur</span>(<span class="num">4px</span>);           <span class="cmt">/* 模糊 */</span>
 filter: <span class="fn">brightness</span>(<span class="num">1.5</span>);     <span class="cmt">/* 亮度 */</span>
 filter: <span class="fn">contrast</span>(<span class="num">2</span>);         <span class="cmt">/* 对比度 */</span>
 filter: <span class="fn">grayscale</span>(<span class="num">1</span>);        <span class="cmt">/* 灰度 */</span>
@@ -285,7 +286,7 @@ filter: <span class="fn">invert</span>(<span class="num">1</span>);           <s
     <section class="section">
       <h2 class="section-title">5. 渐变（Gradient）</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 线性渐变 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 线性渐变 */</span>
 background: <span class="fn">linear-gradient</span>(135deg, #6c63ff, #00d4aa);
 background: <span class="fn">linear-gradient</span>(to right, red, yellow, green);
 

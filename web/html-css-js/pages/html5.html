@@ -6,6 +6,7 @@
   <title>HTML5 语义化与新特性</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
   <style>
     .semantic-demo {
       border: 1px solid var(--color-border);
@@ -92,7 +93,7 @@
         <div class="grid-2">
           <div>
             <div class="demo-label">❌ 非语义化（div 地狱）</div>
-            <div class="code-block"><span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"header"</span><span class="tag">&gt;</span>...
+            <div class="code-block" data-lang="html" data-readonly><span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"header"</span><span class="tag">&gt;</span>...
 <span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"nav"</span><span class="tag">&gt;</span>...
 <span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"main"</span><span class="tag">&gt;</span>...
 <span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"sidebar"</span><span class="tag">&gt;</span>...
@@ -100,7 +101,7 @@
           </div>
           <div>
             <div class="demo-label">✅ 语义化</div>
-            <div class="code-block"><span class="tag">&lt;header&gt;</span>页头<span class="tag">&lt;/header&gt;</span>
+            <div class="code-block" data-lang="html" data-readonly><span class="tag">&lt;header&gt;</span>页头<span class="tag">&lt;/header&gt;</span>
 <span class="tag">&lt;nav&gt;</span>导航<span class="tag">&lt;/nav&gt;</span>
 <span class="tag">&lt;main&gt;</span>
   <span class="tag">&lt;article&gt;</span>文章<span class="tag">&lt;/article&gt;</span>
@@ -150,7 +151,7 @@
     <section class="section">
       <h2 class="section-title">2. 自定义数据属性 data-*</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">&lt;!-- HTML --&gt;</span>
+        <div class="code-block" data-readonly><span class="cmt">&lt;!-- HTML --&gt;</span>
 <span class="tag">&lt;button</span> <span class="atr">data-id</span>=<span class="val">"42"</span> <span class="atr">data-action</span>=<span class="val">"delete"</span> <span class="atr">data-label</span>=<span class="val">"删除用户"</span><span class="tag">&gt;</span>删除<span class="tag">&lt;/button&gt;</span>
 
 <span class="cmt">// JavaScript</span>
@@ -217,14 +218,32 @@ btn.<span class="fn">getAttribute</span>(<span class="str">'data-id'</span>) <sp
     <section class="section">
       <h2 class="section-title">4. Canvas 画布</h2>
       <div class="card">
-        <div class="code-block"><span class="kw">const</span> canvas = document.<span class="fn">getElementById</span>(<span class="str">'canvas'</span>)
-<span class="kw">const</span> ctx = canvas.<span class="fn">getContext</span>(<span class="str">'2d'</span>)
+        <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
+ctx.clearRect(0, 0, canvas.width, canvas.height)
 
-ctx.fillStyle = <span class="str">'#6c63ff'</span>
-ctx.<span class="fn">fillRect</span>(<span class="num">10</span>, <span class="num">10</span>, <span class="num">100</span>, <span class="num">80</span>)    <span class="cmt">// 填充矩形</span>
-ctx.<span class="fn">strokeStyle</span> = <span class="str">'#00d4aa'</span>
-ctx.<span class="fn">arc</span>(<span class="num">200</span>, <span class="num">50</span>, <span class="num">40</span>, <span class="num">0</span>, Math.PI * <span class="num">2</span>) <span class="cmt">// 圆形路径</span>
-ctx.<span class="fn">stroke</span>()</div>
+// 矩形
+ctx.fillStyle = '#6c63ff'
+ctx.fillRect(20, 30, 100, 80)
+
+// 圆形
+ctx.beginPath()
+ctx.arc(200, 70, 50, 0, Math.PI * 2)
+ctx.fillStyle = '#00d4aa'
+ctx.fill()
+
+// 三角形
+ctx.beginPath()
+ctx.moveTo(320, 20); ctx.lineTo(380, 120); ctx.lineTo(260, 120)
+ctx.closePath()
+ctx.fillStyle = '#ff6584'
+ctx.fill()
+
+// 线段
+ctx.beginPath()
+ctx.moveTo(420, 20); ctx.lineTo(480, 120)
+ctx.strokeStyle = '#ffd166'
+ctx.lineWidth = 3
+ctx.stroke()</div>
         <div class="demo-box">
           <div class="demo-label">在画布上绘制（可点击）</div>
           <canvas id="demoCanvas" width="500" height="160"></canvas>

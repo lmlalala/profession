@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>CSS 面试高频考点</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
   <style>
     /* BFC 演示 */
     .bfc-no-clear::after { content: ''; display: none; }
@@ -131,7 +132,7 @@
           </div>
           <div>
             <div class="demo-label">② 阻止 margin 合并</div>
-            <div class="code-block" style="font-size:0.78rem">
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">
 <span class="cmt">/* 相邻兄弟 margin 会合并 */</span>
 .p1 { margin-bottom: 20px; }
 .p2 { margin-top: 30px; }
@@ -140,7 +141,7 @@
 <span class="cmt">/* 用 BFC 包裹其中一个可阻止合并 */</span>
 .wrapper { overflow: hidden; }</div>
             <div class="demo-label" style="margin-top:0.5rem">③ 阻止浮动元素覆盖</div>
-            <div class="code-block" style="font-size:0.78rem">
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">
 .float { float: left; width: 60px; }
 .text  { overflow: hidden; } <span class="cmt">/* BFC */</span>
 <span class="cmt">/* text 不会被 float 覆盖，自适应宽度 */</span></div>
@@ -199,7 +200,7 @@
           <div>
             <div class="demo-label">① Flexbox（推荐）</div>
             <div class="center-demo center-flex"><div class="center-child">flex</div></div>
-            <div class="code-block" style="font-size:0.78rem">.parent {
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -208,7 +209,7 @@
           <div>
             <div class="demo-label">② Grid place-items</div>
             <div class="center-demo center-grid"><div class="center-child">grid</div></div>
-            <div class="code-block" style="font-size:0.78rem">.parent {
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent {
   display: grid;
   place-items: center;
 }</div>
@@ -216,7 +217,7 @@
           <div>
             <div class="demo-label">③ absolute + transform</div>
             <div class="center-demo center-abs"><div class="center-child">abs</div></div>
-            <div class="code-block" style="font-size:0.78rem">.parent { position: relative; }
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent { position: relative; }
 .child {
   position: absolute;
   top: 50%; left: 50%;
@@ -226,7 +227,7 @@
           <div>
             <div class="demo-label">④ absolute + margin:auto</div>
             <div class="center-demo center-abs2"><div class="center-child">auto</div></div>
-            <div class="code-block" style="font-size:0.78rem">.parent { position: relative; }
+            <div class="code-block" data-lang="css" data-readonly style="font-size:0.78rem">.parent { position: relative; }
 .child {
   position: absolute;
   inset: 0; /* top/right/bottom/left: 0 */
@@ -242,7 +243,7 @@
     <section class="section">
       <h2 class="section-title">4. 响应式设计 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 媒体查询 */</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 媒体查询 */</span>
 <span class="kw">@media</span> (max-width: <span class="num">768px</span>) {
   .container { flex-direction: column; }
 }
@@ -274,7 +275,7 @@ img { max-width: <span class="num">100%</span>; height: auto; }
     <section class="section">
       <h2 class="section-title">5. CSS 自定义属性（变量）</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 定义（通常在 :root 全局定义）*/</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 定义（通常在 :root 全局定义）*/</span>
 :root {
   --color-primary: #6c63ff;
   --spacing-md: 1rem;
@@ -304,7 +305,7 @@ document.documentElement.style.<span class="fn">setProperty</span>(<span class="
     <section class="section">
       <h2 class="section-title">6. 伪元素 ::before / ::after <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">/* 必须有 content 属性（可以为空字符串）*/</span>
+        <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 必须有 content 属性（可以为空字符串）*/</span>
 .item::before { content: <span class="str">'▶ '</span>; color: #6c63ff; }
 
 <span class="cmt">/* 清除浮动（经典 clearfix）*/</span>

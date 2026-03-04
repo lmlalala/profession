@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>JS 高级特性与设计模式</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
 </head>
 <body>
   <nav class="nav"></nav>
@@ -19,7 +20,7 @@
       <h2 class="section-title">1. 手写核心方法 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
         <p class="card-title">手写 call / apply / bind</p>
-        <div class="code-block"><span class="cmt">// 手写 call</span>
+        <div class="code-block" data-readonly><span class="cmt">// 手写 call</span>
 Function.prototype.<span class="fn">myCall</span> = <span class="kw">function</span>(context, ...args) {
   context = context ?? globalThis
   <span class="kw">const</span> key = Symbol()
@@ -54,7 +55,7 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
 
       <div class="card">
         <p class="card-title">手写深拷贝 <span class="tag-badge interview">面试必考</span></p>
-        <div class="code-block"><span class="kw">function</span> <span class="fn">deepClone</span>(value, map = <span class="kw">new</span> WeakMap()) {
+        <div class="code-block" data-readonly><span class="kw">function</span> <span class="fn">deepClone</span>(value, map = <span class="kw">new</span> WeakMap()) {
   <span class="cmt">// 处理 null 和基本类型</span>
   <span class="kw">if</span> (value === <span class="kw">null</span> || <span class="kw">typeof</span> value !== <span class="str">'object'</span>) <span class="kw">return</span> value
   <span class="cmt">// 处理特殊对象</span>
@@ -87,7 +88,7 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
           <strong>防抖</strong>：最后一次触发后等待 n ms 才执行（搜索框输入）<br>
           <strong>节流</strong>：每 n ms 最多执行一次（滚动、resize）
         </div>
-        <div class="code-block"><span class="cmt">// 防抖（支持立即执行）</span>
+        <div class="code-block" data-readonly><span class="cmt">// 防抖（支持立即执行）</span>
 <span class="kw">function</span> <span class="fn">debounce</span>(fn, delay, immediate = <span class="kw">false</span>) {
   <span class="kw">let</span> timer = <span class="kw">null</span>
   <span class="kw">return function</span>(...args) {
@@ -126,7 +127,7 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
     <section class="section">
       <h2 class="section-title">3. 函数式编程</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 纯函数：相同输入 → 相同输出，无副作用</span>
+        <div class="code-block" data-readonly><span class="cmt">// 纯函数：相同输入 → 相同输出，无副作用</span>
 <span class="kw">const</span> <span class="fn">add</span> = (a, b) => a + b  <span class="cmt">// ✅ 纯函数</span>
 
 <span class="cmt">// 柯里化（Currying）</span>
@@ -162,7 +163,7 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
     <section class="section">
       <h2 class="section-title">4. 常用设计模式 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 单例模式（Singleton）</span>
+        <div class="code-block" data-readonly><span class="cmt">// 单例模式（Singleton）</span>
 <span class="kw">class</span> <span class="cls">Singleton</span> {
   <span class="kw">static</span> #instance = <span class="kw">null</span>
   <span class="kw">static</span> <span class="fn">getInstance</span>() {
@@ -223,7 +224,7 @@ Function.prototype.<span class="fn">myBind</span> = <span class="kw">function</s
           <strong>V8 垃圾回收算法</strong>：标记-清除（Mark-Sweep）+ 标记-整理（Mark-Compact）+ 增量标记。
           新生代（Scavenge）处理短期对象，老生代处理长期存活对象。
         </div>
-        <div class="code-block"><span class="cmt">// 常见内存泄漏场景</span>
+        <div class="code-block" data-readonly><span class="cmt">// 常见内存泄漏场景</span>
 
 <span class="cmt">// ① 意外的全局变量</span>
 <span class="kw">function</span> <span class="fn">leak</span>() {
@@ -265,7 +266,7 @@ element.<span class="fn">removeEventListener</span>(<span class="str">'click'</s
     <section class="section">
       <h2 class="section-title">6. 错误处理最佳实践</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 自定义错误类型</span>
+        <div class="code-block" data-readonly><span class="cmt">// 自定义错误类型</span>
 <span class="kw">class</span> <span class="cls">AppError</span> <span class="kw">extends</span> Error {
   <span class="fn">constructor</span>(message, code, data) {
     <span class="kw">super</span>(message)

@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8">
@@ -6,6 +6,7 @@
   <title>JS 异步编程全解</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
   <style>
     .event-loop-diagram {
       display: grid;
@@ -69,7 +70,7 @@
             <div class="el-item macro">requestAnimationFrame</div>
           </div>
         </div>
-        <div class="code-block"><span class="cmt">// 经典面试题：输出顺序</span>
+        <div class="code-block" data-readonly><span class="cmt">// 经典面试题：输出顺序</span>
 console.<span class="fn">log</span>(<span class="str">'1'</span>)                          <span class="cmt">// ① 同步</span>
 
 setTimeout(() => console.<span class="fn">log</span>(<span class="str">'2'</span>), <span class="num">0</span>)    <span class="cmt">// ⑤ 宏任务</span>
@@ -90,7 +91,7 @@ console.<span class="fn">log</span>(<span class="str">'5'</span>)               
 
       <div class="card">
         <p class="card-title">进阶：async/await 与事件循环 <span class="tag-badge interview">面试必考</span></p>
-        <div class="code-block"><span class="kw">async function</span> <span class="fn">async1</span>() {
+        <div class="code-block" data-readonly><span class="kw">async function</span> <span class="fn">async1</span>() {
   console.<span class="fn">log</span>(<span class="str">'async1 start'</span>)    <span class="cmt">// ② 同步（async 函数体同步执行到 await）</span>
   <span class="kw">await</span> <span class="fn">async2</span>()
   console.<span class="fn">log</span>(<span class="str">'async1 end'</span>)      <span class="cmt">// ⑥ 微任务（await 后的代码）</span>
@@ -120,7 +121,7 @@ console.<span class="fn">log</span>(<span class="str">'script end'</span>)      
     <section class="section">
       <h2 class="section-title">2. Promise 深入 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// Promise 三种状态：pending → fulfilled / rejected</span>
+        <div class="code-block" data-readonly><span class="cmt">// Promise 三种状态：pending → fulfilled / rejected</span>
 <span class="kw">const</span> p = <span class="kw">new</span> Promise((resolve, reject) => {
   <span class="cmt">// 异步操作...</span>
   resolve(<span class="str">'成功'</span>)  <span class="cmt">// 或 reject(new Error('失败'))</span>
@@ -149,7 +150,7 @@ Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// �
     <section class="section">
       <h2 class="section-title">3. async / await <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// async 函数总是返回 Promise</span>
+        <div class="code-block" data-readonly><span class="cmt">// async 函数总是返回 Promise</span>
 <span class="kw">async function</span> <span class="fn">fetchUser</span>(id) {
   <span class="kw">const</span> res = <span class="kw">await</span> fetch(<span class="str">`/api/users/${id}`</span>)
   <span class="kw">if</span> (!res.ok) <span class="kw">throw new</span> Error(<span class="str">`HTTP ${res.status}`</span>)
@@ -182,7 +183,7 @@ Promise.<span class="fn">any</span>([p1, p2, p3])        <span class="cmt">// �
     <section class="section">
       <h2 class="section-title">4. 并发控制与实用模式</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 限制并发数量（p-limit 原理）</span>
+        <div class="code-block" data-readonly><span class="cmt">// 限制并发数量（p-limit 原理）</span>
 <span class="kw">async function</span> <span class="fn">pLimit</span>(tasks, limit) {
   <span class="kw">const</span> results = []
   <span class="kw">const</span> executing = <span class="kw">new</span> Set()

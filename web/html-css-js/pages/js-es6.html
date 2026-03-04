@@ -6,6 +6,7 @@
   <title>JS ES6+ 现代语法</title>
   <link rel="stylesheet" href="../css/common.css">
   <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
 </head>
 <body>
   <nav class="nav"></nav>
@@ -18,7 +19,7 @@
     <section class="section">
       <h2 class="section-title">1. 解构赋值与展开运算符</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 数组解构</span>
+        <div class="code-block" data-readonly><span class="cmt">// 数组解构</span>
 <span class="kw">const</span> [a, b, ...rest] = [<span class="num">1</span>, <span class="num">2</span>, <span class="num">3</span>, <span class="num">4</span>, <span class="num">5</span>]
 <span class="cmt">// a=1, b=2, rest=[3,4,5]</span>
 
@@ -58,7 +59,7 @@
     <section class="section">
       <h2 class="section-title">2. 模板字符串与标签模板</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 模板字符串</span>
+        <div class="code-block" data-readonly><span class="cmt">// 模板字符串</span>
 <span class="kw">const</span> name = <span class="str">'Alice'</span>
 <span class="kw">const</span> msg = <span class="str">`Hello, ${name}! 1+1=${1+1}`</span>
 
@@ -88,7 +89,7 @@
     <section class="section">
       <h2 class="section-title">3. Symbol <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// Symbol：唯一标识符</span>
+        <div class="code-block" data-readonly><span class="cmt">// Symbol：唯一标识符</span>
 <span class="kw">const</span> s1 = Symbol(<span class="str">'id'</span>)
 <span class="kw">const</span> s2 = Symbol(<span class="str">'id'</span>)
 s1 === s2  <span class="cmt">// false（每次都是唯一的）</span>
@@ -126,7 +127,7 @@ user[ID]             <span class="cmt">// 42</span>
     <section class="section">
       <h2 class="section-title">4. 迭代器（Iterator）与生成器（Generator）<span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 迭代器协议：对象有 next() 方法，返回 { value, done }</span>
+        <div class="code-block" data-readonly><span class="cmt">// 迭代器协议：对象有 next() 方法，返回 { value, done }</span>
 <span class="kw">function</span> <span class="fn">createRange</span>(start, end) {
   <span class="kw">let</span> current = start
   <span class="kw">return</span> {
@@ -173,7 +174,7 @@ fib.<span class="fn">next</span>().value  <span class="cmt">// 1</span>
         <div class="callout info">
           <strong>Proxy</strong> 拦截对象的基本操作（读取、赋值、删除等），是 Vue3 响应式系统的核心。
         </div>
-        <div class="code-block"><span class="cmt">// 数据验证代理</span>
+        <div class="code-block" data-readonly><span class="cmt">// 数据验证代理</span>
 <span class="kw">const</span> validator = {
   <span class="fn">set</span>(target, key, value) {
     <span class="kw">if</span> (key === <span class="str">'age'</span> && (typeof value !== <span class="str">'number'</span> || value &lt; <span class="num">0</span>))
@@ -211,7 +212,7 @@ person.age = <span class="str">'old'</span> <span class="cmt">// ❌ TypeError</
     <section class="section">
       <h2 class="section-title">6. ES2020+ 新特性</h2>
       <div class="card">
-        <div class="code-block"><span class="cmt">// 可选链 ?.（ES2020）</span>
+        <div class="code-block" data-readonly><span class="cmt">// 可选链 ?.（ES2020）</span>
 <span class="kw">const</span> user = { profile: { avatar: <span class="str">'url'</span> } }
 user?.profile?.avatar     <span class="cmt">// "url"</span>
 user?.address?.city       <span class="cmt">// undefined（不报错）</span>
