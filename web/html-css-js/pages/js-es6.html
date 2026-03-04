@@ -84,8 +84,8 @@ function safeHtml(strings, ...values) {
   const escape = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
   return strings.reduce((acc, str, i) => acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
 }
-const userInput = '<script>alert("xss")</script>'
-console.log('安全 HTML:', safeHtml`<p>${userInput}</p>`)</div>
+const userInput = '&lt;script&gt;alert("xss")&lt;/script&gt;'
+console.log('安全 HTML:', safeHtml`&lt;p&gt;${userInput}&lt;/p&gt;`)</div>
         <div class="demo-box">
           <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -138,7 +138,7 @@ function createRange(start, end) {
   return {
     [Symbol.iterator]() { return this },
     next() {
-      return current <= end
+      return current &lt;= end
         ? { value: current++, done: false }
         : { value: undefined, done: true }
     }
@@ -157,7 +157,7 @@ console.log('Fibonacci 前8项:', JSON.stringify(first8))
 
 // 生成器实现 range
 function* range(start, end, step = 1) {
-  for (let i = start; i <= end; i += step) yield i
+  for (let i = start; i &lt;= end; i += step) yield i
 }
 console.log('range(1,10,2):', JSON.stringify([...range(1, 10, 2)]))
 
