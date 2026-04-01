@@ -81,7 +81,7 @@ console.log('标签模板:', highlight`姓名: ${name}, 年龄: ${age}`)
 
 // 安全 HTML 转义（防 XSS）
 function safeHtml(strings, ...values) {
-  const escape = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+  const escape = s => String(s).replace(/&/g,'&amp;').replace(/&lt;/g,'&lt;').replace(/&gt;/g,'&gt;')
   return strings.reduce((acc, str, i) => acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
 }
 const userInput = '&lt;script&gt;alert("xss")&lt;/script&gt;'
@@ -197,7 +197,7 @@ console.log('生成器双向通信 result:', final.value)</div>
         <div class="code-block" data-mode="console">// 数据验证代理
 const validator = {
   set(target, key, value) {
-    if (key === 'age' && (typeof value !== 'number' || value < 0))
+    if (key === 'age' && (typeof value !== 'number' || value &lt; 0))
       throw new TypeError('age 必须是非负数字')
     target[key] = value
     return true

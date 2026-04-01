@@ -47,12 +47,40 @@ function extractCode(el) {
   const tmp = document.createElement('div');
   tmp.innerHTML = el.innerHTML;
   return tmp.textContent
+    .replace(/&amp;/g, '&') // 先替换 &，避免 &lt; 被误判
     .replace(/&lt;/g, '<')
     .replace(/&gt;/g, '>')
-    .replace(/&amp;/g, '&')
     .replace(/&quot;/g, '"')
     .replace(/&#39;/g, "'")
+    .replace(/&nbsp;/g, ' ') // 添加对不间断空格的支持
     .trim();
+}
+
+/**
+ * 从元素中提取 HTML 源码（保留标签结构）
+ * 用于 multi-tab 中 data-tab="html" 的内容提取。
+ *
+ * 两种情况：
+ * 1. HTML tab 内容是真实 DOM（未转义）→ innerHTML 直接返回 HTML 字符串
+ * 2. HTML tab 内容是转义文本（&lt;div&gt;）→ innerHTML 含实体，需反转义
+ *
+ * 判断依据：若 innerHTML 包含 &lt; 说明是转义文本，用 textContent 提取；
+ * 否则直接用 innerHTML（真实 DOM 结构）。
+ */
+function extractHtmlCode(el) {
+  const raw = el.innerHTML;
+  if (raw.includes('&lt;')) {
+    // 内容是转义文本，用 textContent 提取并反转义
+    return el.textContent
+      .replace(/&lt;/g, '<')
+      .replace(/&gt;/g, '>')
+      .replace(/&amp;/g, '&')
+      .replace(/&quot;/g, '"')
+      .replace(/&#39;/g, "'")
+      .trim();
+  }
+  // 内容是真实 DOM，直接序列化为 HTML 字符串
+  return raw.trim();
 }
 
 /** 当前主题对应的 Monaco 主题名 */
@@ -306,10 +334,15 @@ async function initMultiTabCodeBlock(codeBlockEl) {
   const tabLangs = tabsAttr.split(',').map((s) => s.trim().toLowerCase());
 
   // 从子元素 [data-tab="xxx"] 中提取各 tab 的原始代码
+  // html tab 保留标签结构，css/js tab 用纯文本提取
   const originalCodes = {};
   tabLangs.forEach((lang) => {
     const tabEl = codeBlockEl.querySelector(`[data-tab="${lang}"]`);
-    originalCodes[lang] = tabEl ? extractCode(tabEl) : '';
+    if (!tabEl) {
+      originalCodes[lang] = '';
+      return;
+    }
+    originalCodes[lang] = lang === 'html' ? extractHtmlCode(tabEl) : extractCode(tabEl);
   });
 
   // ── 构建 wrapper ──────────────────────────────────────────────────────────

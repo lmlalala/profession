@@ -1,73 +1,45 @@
-# React + TypeScript + Vite
+# React 学习项目
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+基于 Vite 的 React 19 + TypeScript 学习项目，掌握现代 React 开发模式。
 
-Currently, two official plugins are available:
+## 技术栈
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- **React** 19 — Hooks + 函数式组件
+- **TypeScript** 5.x
+- **Vite** — 构建工具
+- **Ant Design** 6 — UI 组件库
+- **Redux Toolkit** — 状态管理
+- **React Redux** — Redux 与 React 绑定
+- **ESLint** + **Prettier** — 代码规范
+- **Sass** — CSS 预处理器
 
-## React Compiler
+## 开发
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+```bash
+pnpm install
 
-## Expanding the ESLint configuration
+# 启动开发服务器
+pnpm dev           # http://localhost:5173
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+# 生产构建
+pnpm build
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+# 类型检查
+pnpm typecheck
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+# 代码检查与格式化
+pnpm lint
+pnpm format
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+## 学习内容
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+- JSX 语法与组件化
+- Hooks（useState、useEffect、useContext、useRef、useMemo、useCallback）
+- 自定义 Hooks
+- 组件通信（props、Context、状态提升）
+- React Router 路由
+- Redux Toolkit 状态管理（createSlice、createAsyncThunk）
+- Ant Design 组件使用与主题定制
+- 性能优化（React.memo、useMemo、useCallback、lazy/Suspense）
+- TypeScript 与 React 的深度集成

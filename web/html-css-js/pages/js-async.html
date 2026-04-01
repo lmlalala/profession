@@ -81,12 +81,16 @@
               <div class="el-item macro">requestAnimationFrame</div>
             </div>
           </div>
+          <!-- prettier-ignore -->
           <div class="code-block" data-mode="console">
-            // 经典面试题：输出顺序是什么？ // 运行后观察实际顺序，理解事件循环 console.log('① 同步: 1') setTimeout(()
-            => console.log('⑤ 宏任务: setTimeout(0)'), 0) Promise.resolve() .then(() => console.log('③ 微任务:
-            Promise.then 1')) .then(() => console.log('④ 微任务: Promise.then 2')) console.log('② 同步: 5') //
-            预期输出：① ② ③ ④ ⑤
-          </div>
+// 经典面试题：输出顺序是什么？
+console.log('① 同步：1')
+setTimeout(() => console.log('⑤ 宏任务：setTimeout(0)'), 0)
+Promise.resolve()
+  .then(() => console.log('③ 微任务：Promise.then 1'))
+  .then(() => console.log('④ 微任务：Promise.then 2'))
+console.log('② 同步：5')
+// 预期输出：① ③ ④ ⑤</div>
           <div class="demo-box">
             <div class="console-output" id="out1"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -94,14 +98,24 @@
 
         <div class="card">
           <p class="card-title">进阶：async/await 与事件循环 <span class="tag-badge interview">面试必考</span></p>
+          <!-- prettier-ignore -->
           <div class="code-block" data-mode="console">
-            async function async1() { console.log('② async1 start') // 同步（async 函数体同步执行到 await） await
-            async2() console.log('⑥ async1 end') // 微任务（await 后的代码） } async function async2() { console.log('③
-            async2') // 同步 } console.log('① script start') setTimeout(() => console.log('⑦ setTimeout（宏任务）'), 0)
-            async1() new Promise(resolve => { console.log('④ promise executor（同步）') resolve() }).then(() =>
-            console.log('⑤ promise.then（微任务）')) console.log('⑤ script end') // 预期：① ② ③ ④ ⑤(script end) ⑥
-            ⑤(then) ⑦
-          </div>
+async function async1() {
+  console.log('② async1 start');
+  await async2()
+  console.log('⑥ async1 end')
+}
+async function async2() {
+  console.log('③ async2')
+}
+console.log('① script start')
+setTimeout(() => console.log('⑦ setTimeout（宏任务）'), 0)
+async1()
+new Promise(resolve => {
+  console.log('④ promise executor（同步）')
+  resolve()
+}).then(() => console.log('⑤ promise.then（微任务）'))
+console.log('⑤ script end')</div>
           <div class="demo-box">
             <div class="console-output" id="out1b"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -112,18 +126,35 @@
       <section class="section">
         <h2 class="section-title">2. Promise 深入 <span class="tag-badge interview">面试必考</span></h2>
         <div class="card">
-          <div class="code-block" data-mode="console">
-            const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms)) const fail = (ms, msg) => new
-            Promise((_, r) => setTimeout(() => r(new Error(msg)), ms)) // Promise.all：全部成功才 resolve，一个失败即
-            reject const [a, b, c] = await Promise.all([delay(30,'A'), delay(20,'B'), delay(10,'C')])
-            console.log('Promise.all 结果:', a, b, c) // Promise.allSettled：全部完成，收集所有结果（不管成败） const
-            results = await Promise.allSettled([delay(10,'ok'), fail(10,'失败'), delay(10,'ok2')]) results.forEach((r,
-            i) => console.log(`allSettled[${i}]: ${r.status} =`, r.status === 'fulfilled' ? r.value : r.reason.message))
-            // Promise.race：最先 settle 的结果 const winner = await Promise.race([delay(50,'slow'), delay(10,'fast')])
-            console.log('Promise.race 胜者:', winner) // Promise.any：最先成功的结果（ES2021） const first = await
-            Promise.any([fail(10,'err1'), delay(20,'second'), delay(30,'third')]) console.log('Promise.any 第一个成功:',
-            first)
-          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+const fail = (ms, msg) => new Promise((_, r) => setTimeout(() => r(new Error(msg)), ms))
+
+// Promise.all：全部成功才 resolve，一个失败即 reject
+const [a, b, c] = await Promise.all([
+  delay(30, 'A'),
+  delay(20, 'B'),
+  delay(10, 'C')
+])
+console.log('Promise.all 结果:', a, b, c)
+
+// Promise.allSettled：全部完成，收集所有结果（不管成败）
+const results = await Promise.allSettled([
+  delay(10, 'ok'),
+  fail(10, '失败'),
+  delay(10, 'ok2')
+])
+results.forEach((r, i) => {
+  console.log(`allSettled[${i}]: ${r.status} =`, r.status === 'fulfilled' ? r.value : r.reason.message)
+})
+
+// Promise.race：最先 settle 的结果
+const winner = await Promise.race([delay(50, 'slow'), delay(10, 'fast')])
+console.log('Promise.race 胜者:', winner)
+
+// Promise.any：最先成功的结果（ES2021）
+const first = await Promise.any([fail(10, 'err1'), delay(20, 'second'), delay(30, 'third')])
+console.log('Promise.any 第一个成功:', first)</div>
           <div class="demo-box">
             <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -134,17 +165,39 @@
       <section class="section">
         <h2 class="section-title">3. async / await <span class="tag-badge interview">面试必考</span></h2>
         <div class="card">
+          <!-- prettier-ignore -->
           <div class="code-block" data-mode="console">
-            const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms)) // 串行 vs 并发对比
-            console.log('--- 串行执行（慢）---') const t1 = Date.now() const r1 = await delay(50, 'user1') const r2 =
-            await delay(50, 'user2') console.log(`串行耗时: ~${Date.now()-t1}ms，结果: ${r1} ${r2}`) console.log('---
-            并发执行（快）---') const t2 = Date.now() const [u1, u2] = await Promise.all([delay(50,'user1'),
-            delay(50,'user2')]) console.log(`并发耗时: ~${Date.now()-t2}ms，结果: ${u1} ${u2}`) // 错误处理 async
-            function riskyOp(shouldFail) { if (shouldFail) throw new Error('操作失败') return '操作成功' } try {
-            console.log(await riskyOp(false)) console.log(await riskyOp(true)) } catch(e) { console.error('try/catch
-            捕获:', e.message) } // async 函数总是返回 Promise const result = await (async () => 42)()
-            console.log('async 函数返回 Promise，await 解包:', result)
-          </div>
+const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+// 串行 vs 并发对比
+console.log('--- 串行执行（慢）---')
+const t1 = Date.now()
+const r1 = await delay(50, 'user1')
+const r2 = await delay(50, 'user2')
+console.log(`串行耗时：~${Date.now() - t1}ms，结果：${r1} ${r2}`)
+
+console.log('--- 并发执行（快）---')
+const t2 = Date.now()
+const [u1, u2] = await Promise.all([
+  delay(50, 'user1'),
+  delay(50, 'user2')
+])
+console.log(`并发耗时：~${Date.now() - t2}ms，结果：${u1} ${u2}`)
+
+// 错误处理
+async function riskyOp(shouldFail) {
+  if (shouldFail) throw new Error('操作失败')
+  return '操作成功'
+}
+try {
+  console.log(await riskyOp(false))
+  console.log(await riskyOp(true))
+} catch(e) {
+  console.error('try/catch 捕获:', e.message)
+}
+
+// async 函数总是返回 Promise
+const result = await (async () => 42)()
+console.log('async 函数返回 Promise，await 解包:', result)</div>
           <div class="demo-box">
             <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -155,22 +208,61 @@
       <section class="section">
         <h2 class="section-title">4. 并发控制与实用模式</h2>
         <div class="card">
+          <!-- prettier-ignore -->
           <div class="code-block" data-mode="console">
-            const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms)) // 限制并发数量（p-limit 原理）
-            async function pLimit(tasks, limit) { const results = [] const executing = new Set() for (const [i, task] of
-            tasks.entries()) { const p = Promise.resolve().then(() => task()) results[i] = p executing.add(p)
-            p.finally(() => executing.delete(p)) if (executing.size >= limit) await Promise.race(executing) } return
-            Promise.all(results) } const tasks = Array.from({ length: 6 }, (_, i) => () => delay(30, `task${i+1}`))
-            const t = Date.now() const res = await pLimit(tasks, 2) console.log('并发限制2，6个任务结果:', res.join(',
-            ')) console.log(`耗时约: ${Date.now()-t}ms（理论 ~90ms）`) // 超时控制 function withTimeout(promise, ms) {
-            const timeout = new Promise((_, reject) => setTimeout(() => reject(new Error(`超时 ${ms}ms`)), ms)) return
-            Promise.race([promise, timeout]) } try { await withTimeout(delay(200, 'ok'), 50) } catch(e) {
-            console.warn('超时控制:', e.message) } const ok = await withTimeout(delay(10, '成功'), 100)
-            console.log('超时控制（未超时）:', ok) // 重试机制（指数退避） let attempt = 0 async function retry(fn,
-            times = 3) { for (let i = 0; i &lt; times; i++) { try { return await fn() } catch(e) { if (i === times-1)
-            throw e; console.warn(`第${i+1}次失败，重试...`) } } } const result = await retry(async () => { attempt++ if
-            (attempt < 3) throw new Error('暂时失败') return `第${attempt}次成功` }) console.log('重试机制:', result)
-          </div>
+const delay = (ms, val) => new Promise(r => setTimeout(() => r(val), ms))
+// 限制并发数量（p-limit 原理）
+async function pLimit(tasks, limit) {
+  const results = []
+  const executing = new Set()
+  for (const [i, task] of tasks.entries()) {
+    const p = Promise.resolve().then(() => task())
+    results[i] = p
+    executing.add(p)
+    p.finally(() => executing.delete(p))
+    if (executing.size >= limit) await Promise.race(executing)
+  }
+  return Promise.all(results)
+}
+const tasks = Array.from({ length: 6 }, (_, i) => () => delay(30, `task${i + 1}`))
+const t = Date.now()
+const res = await pLimit(tasks, 2)
+console.log('并发限制 2，6 个任务结果:', res.join(', '))
+console.log(`耗时约：${Date.now() - t}ms（理论 ~90ms）`)
+
+// 超时控制
+function withTimeout(promise, ms) {
+  const timeout = new Promise((_, reject) =>
+    setTimeout(() => reject(new Error(`超时 ${ms}ms`)), ms)
+  )
+  return Promise.race([promise, timeout])
+}
+try {
+  await withTimeout(delay(200, 'ok'), 50)
+} catch(e) {
+  console.warn('超时控制:', e.message)
+}
+const ok = await withTimeout(delay(10, '成功'), 100)
+console.log('超时控制（未超时）:', ok)
+
+// 重试机制（指数退避）
+let attempt = 0
+async function retry(fn, times = 3) {
+  for (let i = 0; i &lt; times; i++) {
+    try {
+      return await fn()
+    } catch(e) {
+      if (i === times - 1) throw e
+      console.warn(`第${i + 1}次失败，重试...`)
+    }
+  }
+}
+const result = await retry(async () => {
+  attempt++
+  if (attempt &lt; 3) throw new Error('暂时失败')
+  return `第${attempt}次成功`
+})
+console.log('重试机制:', result)</div>
           <div class="demo-box">
             <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>

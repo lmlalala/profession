@@ -34,8 +34,14 @@ module.exports = {
   htmlWhitespaceSensitivity: 'css',
   // 换行符使用 lf
   endOfLine: 'lf',
-  // 自定义文件后缀对应的parser
+  // 针对 HTML 文件的特殊配置
   overrides: [
+    {
+      files: '*.html',
+      options: {
+        htmlWhitespaceSensitivity: 'ignore', // 忽略 HTML 空白字符敏感性，保留代码格式
+      },
+    },
     {
       files: '*.uvue',
       options: {
