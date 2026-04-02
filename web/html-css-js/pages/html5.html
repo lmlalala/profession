@@ -93,6 +93,7 @@
         <div class="grid-2">
           <div>
             <div class="demo-label">❌ 非语义化（div 地狱）</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-lang="html" data-readonly><span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"header"</span><span class="tag">&gt;</span>...
 <span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"nav"</span><span class="tag">&gt;</span>...
 <span class="tag">&lt;div</span> <span class="atr">class</span>=<span class="val">"main"</span><span class="tag">&gt;</span>...
@@ -101,6 +102,7 @@
           </div>
           <div>
             <div class="demo-label">✅ 语义化</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-lang="html" data-readonly><span class="tag">&lt;header&gt;</span>页头<span class="tag">&lt;/header&gt;</span>
 <span class="tag">&lt;nav&gt;</span>导航<span class="tag">&lt;/nav&gt;</span>
 <span class="tag">&lt;main&gt;</span>
@@ -151,6 +153,7 @@
     <section class="section">
       <h2 class="section-title">2. 自定义数据属性 data-*</h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 创建带 data-* 属性的元素（模拟 DOM 操作）
 const btn = document.createElement('button')
 btn.dataset.id = '42'
@@ -238,6 +241,7 @@ list.forEach(user => {
       <h2 class="section-title">4. Canvas 画布</h2>
       <div class="card">
         <p class="card-title">绘制图形（可编辑运行）</p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
 ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -271,6 +275,7 @@ ctx.stroke()</div>
 
       <div class="card">
         <p class="card-title">绘制文字</p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
 ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -297,6 +302,7 @@ ctx.strokeText('strokeText 描边', canvas.width / 2, canvas.height / 2 + 60)</d
 
       <div class="card">
         <p class="card-title">渐变填充</p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="canvas">const ctx = canvas.getContext('2d')
 ctx.clearRect(0, 0, canvas.width, canvas.height)
 
@@ -323,6 +329,7 @@ ctx.fill()</div>
 
       <div class="card">
         <p class="card-title">鼠标绘制（在画布上拖动）</p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-lang="javascript" data-readonly>// 鼠标绘制（监听 mousedown/mousemove/mouseup）
 const canvas = document.getElementById('demoCanvas')
 const ctx = canvas.getContext('2d')
@@ -369,6 +376,7 @@ canvas.addEventListener('mouseleave', () => drawing = false)</div>
             </table>
           </div>
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// localStorage API 演示
 localStorage.setItem('user', JSON.stringify({ name: 'Alice', age: 25 }))
 localStorage.setItem('theme', 'dark')
@@ -422,6 +430,7 @@ console.log('✅ 演示完成，已清理测试数据')</div>
     <section class="section">
       <h2 class="section-title">6. 拖拽 API（Drag and Drop）</h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-tabs="html,css,js" data-mode="dom">
           <div data-tab="html">&lt;div class="drag-source"&gt;
   &lt;span class="drag-item" draggable="true"&gt;🍎 苹果&lt;/span&gt;

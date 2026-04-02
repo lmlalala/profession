@@ -57,6 +57,7 @@
         <div class="grid-2">
           <div>
             <div class="demo-label">JSX 写法</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-readonly style="font-size:0.78rem"><span class="cmt">// 开发者写的 JSX</span>
 <span class="kw">const</span> element = (
   <span class="tag">&lt;div</span> <span class="atr">className</span>=<span class="val">"app"</span><span class="tag">&gt;</span>
@@ -69,6 +70,7 @@
           </div>
           <div>
             <div class="demo-label">Babel 编译结果</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-readonly style="font-size:0.78rem"><span class="cmt">// Babel 编译后</span>
 <span class="kw">const</span> element = React.<span class="fn">createElement</span>(
   <span class="str">'div'</span>, { className: <span class="str">'app'</span> },
@@ -80,6 +82,7 @@
 )</div>
           </div>
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console" style="margin-top:0.75rem">// createElement 返回 VNode 对象
 function createElement(type, props, ...children) {
   return {
@@ -123,6 +126,7 @@ console.log('完整 VNode:', JSON.stringify(element, (k, v) => typeof v === 'sym
           React 15 的 Stack Reconciler 是同步递归的，一旦开始无法中断，大型组件树会阻塞主线程导致卡顿。
           React 16 引入 Fiber，将渲染工作拆分为可中断的小单元，利用浏览器空闲时间（requestIdleCallback）执行。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Fiber 架构：时间切片调度模拟
 // 模拟 Fiber 工作单元
 const components = ['App', 'Header', 'Nav', 'Main', 'Article', 'Sidebar', 'Footer']
@@ -179,6 +183,7 @@ console.log('effectTag:', fiberNode.effectTag)</div>
           ② 类型不同直接替换；
           ③ key 相同则复用（key 的重要性！）
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-readonly><span class="cmt">// React 多节点 diff（React 18 核心逻辑）</span>
 <span class="kw">function</span> <span class="fn">reconcileChildrenArray</span>(returnFiber, currentFirstChild, newChildren) {
   <span class="kw">let</span> resultFirstChild = <span class="kw">null</span>
@@ -242,6 +247,7 @@ console.log('effectTag:', fiberNode.effectTag)</div>
           <strong>Hooks 本质</strong>：每个组件对应一个 Fiber，Fiber 上有一个 <code>memoizedState</code> 链表，每个 Hook 调用对应链表中的一个节点。
           这就是为什么 Hooks 不能在条件语句中调用——顺序必须固定！
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Mini Hooks 实现（fiber.memoizedState 链表）
 let currentFiber = null
 let hookIndex = 0

@@ -1,225 +1,957 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>HTML5 + CSS3 + JS 渐进式学习</title>
-  <link rel="stylesheet" href="css/common.css">
-  <script type="module" src="js/nav.js"></script>
-  <style>
-    .hero {
-      min-height: calc(100vh - 60px);
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 2rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .hero::before {
-      content: '';
-      position: absolute;
-      inset: 0;
-      background:
-        radial-gradient(ellipse 60% 50% at 20% 40%, rgba(108,99,255,0.15) 0%, transparent 60%),
-        radial-gradient(ellipse 50% 40% at 80% 60%, rgba(0,212,170,0.1) 0%, transparent 60%);
-      pointer-events: none;
-    }
-    .hero-title {
-      font-size: clamp(2rem, 5vw, 3.5rem);
-      font-weight: 900;
-      line-height: 1.15;
-      margin-bottom: 1rem;
-      background: linear-gradient(135deg, #fff 0%, var(--color-primary-light) 50%, var(--color-secondary) 100%);
-      -webkit-background-clip: text;
-      -webkit-text-fill-color: transparent;
-      background-clip: text;
-    }
-    .hero-desc {
-      font-size: 1.1rem;
-      color: var(--color-text-muted);
-      max-width: 600px;
-      margin-bottom: 2.5rem;
-    }
-    .chapter-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 1.25rem;
-      width: 100%;
-      max-width: 1100px;
-      padding: 80px 2rem 4rem;
-      margin: 0 auto;
-    }
-    .chapter-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius);
-      padding: 1.5rem;
-      text-decoration: none;
-      color: var(--color-text);
-      transition: all var(--transition);
-      display: flex;
-      flex-direction: column;
-      gap: 0.5rem;
-      position: relative;
-      overflow: hidden;
-    }
-    .chapter-card::before {
-      content: '';
-      position: absolute;
-      top: 0; left: 0; right: 0;
-      height: 3px;
-      border-radius: var(--radius) var(--radius) 0 0;
-    }
-    .chapter-card.html::before { background: linear-gradient(90deg, #e44d26, #f16529); }
-    .chapter-card.css::before  { background: linear-gradient(90deg, #264de4, #2965f1); }
-    .chapter-card.js::before   { background: linear-gradient(90deg, #f7df1e, #f0c000); }
-    .chapter-card:hover {
-      border-color: var(--color-primary);
-      transform: translateY(-3px);
-      box-shadow: 0 8px 32px rgba(108, 99, 255, 0.2);
-    }
-    .chapter-icon { font-size: 2rem; }
-    .chapter-num  { font-size: 0.75rem; color: var(--color-text-muted); }
-    .chapter-name { font-size: 1.05rem; font-weight: 700; }
-    .chapter-desc { font-size: 0.85rem; color: var(--color-text-muted); line-height: 1.5; }
-    .chapter-tags { display: flex; gap: 0.4rem; flex-wrap: wrap; margin-top: 0.25rem; }
-  </style>
-</head>
-<body>
-  <nav class="nav"></nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>前端知识体系 · 思维导图</title>
+    <link rel="stylesheet" href="css/common.css" />
+    <script type="module" src="js/nav.js"></script>
+    <style>
+      .hero {
+        text-align: center;
+        padding: 5rem 2rem 2rem;
+        margin: 15rem 0 20rem;
+      }
+      .hero-title {
+        font-size: clamp(1.8rem, 4vw, 2.8rem);
+        font-weight: 900;
+        line-height: 1.2;
+        margin-bottom: 0.6rem;
+        background: linear-gradient(135deg, #fff 0%, var(--color-primary-light) 50%, var(--color-secondary) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .hero-desc {
+        font-size: 0.95rem;
+        color: var(--color-text-muted);
+        max-width: 640px;
+        margin: 0 auto;
+      }
 
-  <section class="hero">
-    <h1 class="hero-title">HTML5 · CSS3 · JavaScript</h1>
-    <p class="hero-desc">渐进式学习路径，从基础到高级，覆盖面试高频考点，每个知识点都有可运行的交互示例。</p>
-  </section>
+      /* ── 思维导图容器 ── */
+      .mindmap {
+        max-width: 1200px;
+        margin: 2rem auto 4rem;
+        padding: 0 1.5rem;
+      }
 
-  <div class="chapter-grid">
-    <a href="pages/html5.html" class="chapter-card html">
-      <span class="chapter-icon">🏗️</span>
-      <span class="chapter-num">第一章</span>
-      <span class="chapter-name">HTML5 语义化与新特性</span>
-      <span class="chapter-desc">语义化标签、表单增强、媒体元素、Canvas、Web Storage、拖拽 API</span>
-      <div class="chapter-tags">
-        <span class="tag-badge html">HTML5</span>
-        <span class="tag-badge interview">面试高频</span>
+      /* ── 大分类（HTML5 / CSS3 / JS / TS / 框架） ── */
+      .mm-category {
+        margin-bottom: 2.5rem;
+      }
+      .mm-root {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        padding: 0.75rem 1.25rem;
+        border-radius: var(--radius);
+        font-weight: 800;
+        font-size: 1.1rem;
+        cursor: default;
+        position: relative;
+        user-select: none;
+      }
+      .mm-root-icon {
+        font-size: 1.4rem;
+      }
+      .mm-root-label {
+        flex: 1;
+      }
+      .mm-root-count {
+        font-size: 0.7rem;
+        font-weight: 600;
+        padding: 0.15rem 0.5rem;
+        border-radius: 10px;
+        opacity: 0.7;
+      }
+
+      /* 分类配色 */
+      .mm-html .mm-root {
+        background: linear-gradient(135deg, rgba(228, 77, 38, 0.15), rgba(241, 101, 41, 0.08));
+        border: 1px solid rgba(228, 77, 38, 0.3);
+        color: #f16529;
+      }
+      .mm-html .mm-root-count {
+        background: rgba(228, 77, 38, 0.2);
+        color: #f16529;
+      }
+      .mm-html .mm-branch::before {
+        background: rgba(228, 77, 38, 0.25);
+      }
+
+      .mm-css .mm-root {
+        background: linear-gradient(135deg, rgba(38, 77, 228, 0.15), rgba(41, 101, 241, 0.08));
+        border: 1px solid rgba(38, 77, 228, 0.3);
+        color: #2965f1;
+      }
+      .mm-css .mm-root-count {
+        background: rgba(38, 77, 228, 0.2);
+        color: #2965f1;
+      }
+      .mm-css .mm-branch::before {
+        background: rgba(38, 77, 228, 0.25);
+      }
+
+      .mm-js .mm-root {
+        background: linear-gradient(135deg, rgba(247, 223, 30, 0.15), rgba(240, 192, 0, 0.08));
+        border: 1px solid rgba(247, 223, 30, 0.3);
+        color: #f0c000;
+      }
+      .mm-js .mm-root-count {
+        background: rgba(247, 223, 30, 0.2);
+        color: #d4a800;
+      }
+      .mm-js .mm-branch::before {
+        background: rgba(247, 223, 30, 0.25);
+      }
+
+      .mm-ts .mm-root {
+        background: linear-gradient(135deg, rgba(49, 120, 198, 0.15), rgba(49, 120, 198, 0.08));
+        border: 1px solid rgba(49, 120, 198, 0.3);
+        color: #3178c6;
+      }
+      .mm-ts .mm-root-count {
+        background: rgba(49, 120, 198, 0.2);
+        color: #3178c6;
+      }
+      .mm-ts .mm-branch::before {
+        background: rgba(49, 120, 198, 0.25);
+      }
+
+      .mm-fw .mm-root {
+        background: linear-gradient(135deg, rgba(66, 184, 131, 0.15), rgba(97, 218, 251, 0.08));
+        border: 1px solid rgba(66, 184, 131, 0.3);
+        color: #42b883;
+      }
+      .mm-fw .mm-root-count {
+        background: rgba(66, 184, 131, 0.2);
+        color: #42b883;
+      }
+      .mm-fw .mm-branch::before {
+        background: rgba(66, 184, 131, 0.25);
+      }
+
+      .mm-exam .mm-root {
+        background: linear-gradient(135deg, rgba(255, 101, 132, 0.15), rgba(255, 209, 102, 0.08));
+        border: 1px solid rgba(255, 101, 132, 0.3);
+        color: #ff6584;
+      }
+      .mm-exam .mm-root-count {
+        background: rgba(255, 101, 132, 0.2);
+        color: #ff6584;
+      }
+      .mm-exam .mm-branch::before {
+        background: rgba(255, 101, 132, 0.25);
+      }
+
+      /* ── 章节分支 ── */
+      .mm-branches {
+        margin-left: 1.5rem;
+        padding-left: 1.5rem;
+        position: relative;
+      }
+      .mm-branch {
+        position: relative;
+        margin-top: 0.75rem;
+      }
+      .mm-branch::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 0;
+        bottom: 0;
+        width: 2px;
+        border-radius: 1px;
+      }
+
+      /* 章节标题行 */
+      .mm-chapter {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        padding: 0.5rem 0.75rem;
+        border-radius: var(--radius-sm);
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        cursor: pointer;
+        transition: all var(--transition);
+        text-decoration: none;
+        color: var(--color-text);
+        font-weight: 700;
+        font-size: 0.88rem;
+        position: relative;
+      }
+      .mm-chapter::before {
+        content: '';
+        position: absolute;
+        left: -1.5rem;
+        top: 50%;
+        width: 1.5rem;
+        height: 2px;
+        border-radius: 1px;
+      }
+      .mm-html .mm-chapter::before {
+        background: rgba(228, 77, 38, 0.25);
+      }
+      .mm-css .mm-chapter::before {
+        background: rgba(38, 77, 228, 0.25);
+      }
+      .mm-js .mm-chapter::before {
+        background: rgba(247, 223, 30, 0.25);
+      }
+      .mm-ts .mm-chapter::before {
+        background: rgba(49, 120, 198, 0.25);
+      }
+      .mm-fw .mm-chapter::before {
+        background: rgba(66, 184, 131, 0.25);
+      }
+      .mm-exam .mm-chapter::before {
+        background: rgba(255, 101, 132, 0.25);
+      }
+
+      .mm-chapter:hover {
+        border-color: var(--color-primary);
+        transform: translateX(4px);
+        box-shadow: 0 2px 12px rgba(108, 99, 255, 0.15);
+      }
+      .mm-chapter-icon {
+        font-size: 1rem;
+        flex-shrink: 0;
+      }
+      .mm-chapter-name {
+        flex: 1;
+      }
+      .mm-chapter-arrow {
+        font-size: 0.7rem;
+        color: var(--color-text-muted);
+        transition: transform var(--transition);
+      }
+      .mm-chapter:hover .mm-chapter-arrow {
+        transform: translateX(3px);
+      }
+
+      /* ── 知识点叶子节点 ── */
+      .mm-leaves {
+        margin-left: 2rem;
+        padding-left: 1rem;
+        margin-top: 0.35rem;
+        position: relative;
+      }
+      .mm-leaves::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 1px;
+        background: var(--color-border);
+      }
+      .mm-leaf {
+        display: flex;
+        align-items: baseline;
+        gap: 0.4rem;
+        padding: 0.2rem 0 0.2rem 0.75rem;
+        font-size: 0.78rem;
+        color: var(--color-text-muted);
+        line-height: 1.5;
+        position: relative;
+      }
+      .mm-leaf::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0.6rem;
+        width: 0.75rem;
+        height: 1px;
+        background: var(--color-border);
+      }
+      .mm-leaf-dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        flex-shrink: 0;
+        margin-top: 0.35rem;
+      }
+      .mm-html .mm-leaf-dot {
+        background: rgba(228, 77, 38, 0.6);
+      }
+      .mm-css .mm-leaf-dot {
+        background: rgba(38, 77, 228, 0.6);
+      }
+      .mm-js .mm-leaf-dot {
+        background: rgba(247, 223, 30, 0.6);
+      }
+      .mm-ts .mm-leaf-dot {
+        background: rgba(49, 120, 198, 0.6);
+      }
+      .mm-fw .mm-leaf-dot {
+        background: rgba(66, 184, 131, 0.6);
+      }
+      .mm-exam .mm-leaf-dot {
+        background: rgba(255, 101, 132, 0.6);
+      }
+
+      .mm-leaf-name {
+        font-weight: 600;
+        color: var(--color-text);
+        white-space: nowrap;
+      }
+      .mm-leaf-desc {
+        color: var(--color-text-muted);
+        font-size: 0.73rem;
+      }
+      .mm-leaf-badge {
+        font-size: 0.6rem;
+        padding: 0.05rem 0.35rem;
+        border-radius: 3px;
+        font-weight: 600;
+        flex-shrink: 0;
+        margin-left: auto;
+      }
+      .badge-interview {
+        background: rgba(255, 101, 132, 0.15);
+        color: var(--color-accent);
+      }
+      .badge-demo {
+        background: rgba(0, 212, 170, 0.15);
+        color: var(--color-secondary);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav"></nav>
+
+    <section class="hero">
+      <h1 class="hero-title">前端知识体系 · 思维导图</h1>
+      <p class="hero-desc">
+        涵盖 HTML5 / CSS3 / JavaScript / TypeScript / Vue / React 核心知识点，点击章节进入交互式学习
+      </p>
+    </section>
+
+    <div class="mindmap">
+      <!-- ═══════════ HTML5 ═══════════ -->
+      <div class="mm-category mm-html">
+        <div class="mm-root">
+          <span class="mm-root-icon">🏗️</span>
+          <span class="mm-root-label">HTML5</span>
+          <span class="mm-root-count">1 章 · 7 节</span>
+        </div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <a href="pages/html5.html" class="mm-chapter">
+              <span class="mm-chapter-icon">📄</span>
+              <span class="mm-chapter-name">HTML5 语义化与新特性</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">语义化标签</span>
+                <span class="mm-leaf-desc">— header/nav/main/article/section/aside/footer，提升 SEO 与可访问性</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">data-* 自定义属性</span>
+                <span class="mm-leaf-desc">— dataset API 读写，事件委托传参</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">表单增强</span>
+                <span class="mm-leaf-desc">— email/number/range/date 等新类型，required/pattern/placeholder 验证</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Canvas 画布</span>
+                <span class="mm-leaf-desc">— 2D 绑图形/文字/渐变，鼠标绘制</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Web Storage</span>
+                <span class="mm-leaf-desc">— localStorage 5MB 持久 / sessionStorage 5MB 会话 / Cookie 4KB 随请求</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">拖拽 API</span>
+                <span class="mm-leaf-desc">— draggable/dataTransfer/dragover 需 preventDefault</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">折叠与对话框</span>
+                <span class="mm-leaf-desc">— details/summary 原生折叠，dialog showModal</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
 
-    <a href="pages/css-layout.html" class="chapter-card css">
-      <span class="chapter-icon">📐</span>
-      <span class="chapter-num">第二章</span>
-      <span class="chapter-name">CSS3 选择器与布局</span>
-      <span class="chapter-desc">选择器优先级、盒模型、Flexbox 完整指南、Grid 布局、定位</span>
-      <div class="chapter-tags">
-        <span class="tag-badge css">CSS3</span>
-        <span class="tag-badge interview">面试高频</span>
+      <!-- ═══════════ CSS3 ═══════════ -->
+      <div class="mm-category mm-css">
+        <div class="mm-root">
+          <span class="mm-root-icon">🎨</span>
+          <span class="mm-root-label">CSS3</span>
+          <span class="mm-root-count">3 章 · 17 节</span>
+        </div>
+        <div class="mm-branches">
+          <!-- CSS 布局 -->
+          <div class="mm-branch">
+            <a href="pages/css-layout.html" class="mm-chapter">
+              <span class="mm-chapter-icon">📐</span>
+              <span class="mm-chapter-name">选择器与布局</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">选择器优先级</span>
+                <span class="mm-leaf-desc">— !important > 内联(1000) > ID(100) > 类(10) > 标签(1)</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">盒模型</span>
+                <span class="mm-leaf-desc">— content-box 总宽=width+padding+border / border-box 总宽=width</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Flexbox</span>
+                <span class="mm-leaf-desc">— 主轴/交叉轴，justify-content/align-items/flex-grow/shrink/basis</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Grid</span>
+                <span class="mm-leaf-desc">— grid-template-columns/rows/areas，fr 单位，gap</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">定位</span>
+                <span class="mm-leaf-desc">— static/relative/absolute/fixed/sticky，absolute 找最近非 static 祖先</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+            </div>
+          </div>
+          <!-- CSS 动画 -->
+          <div class="mm-branch">
+            <a href="pages/css-animation.html" class="mm-chapter">
+              <span class="mm-chapter-icon">✨</span>
+              <span class="mm-chapter-name">动画与视觉效果</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">transition</span>
+                <span class="mm-leaf-desc">— property duration timing-function delay，cubic-bezier 弹性</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">transform</span>
+                <span class="mm-leaf-desc">— translate/scale/rotate/skew/matrix，3D perspective</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">animation</span>
+                <span class="mm-leaf-desc">— @keyframes 关键帧，弹跳/旋转/脉冲/打字机效果</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">filter</span>
+                <span class="mm-leaf-desc">— blur/brightness/contrast/grayscale/hue-rotate/drop-shadow</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">渐变</span>
+                <span class="mm-leaf-desc">— linear/radial/conic-gradient，repeating 条纹</span>
+              </div>
+            </div>
+          </div>
+          <!-- CSS 面试 -->
+          <div class="mm-branch">
+            <a href="pages/css-interview.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🎯</span>
+              <span class="mm-chapter-name">CSS 面试高频考点</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">BFC</span>
+                <span class="mm-leaf-desc">— 独立渲染区域，overflow/flex/grid/float 触发，清浮动/防 margin 塌陷</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">层叠上下文</span>
+                <span class="mm-leaf-desc">
+                  — z-index 只在同一上下文内比较，transform/opacity/filter 会创建新上下文
+                </span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">居中方案</span>
+                <span class="mm-leaf-desc">— flex/grid place-items/absolute+transform/absolute+margin:auto</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">响应式</span>
+                <span class="mm-leaf-desc">— @media/vw/vh/clamp，移动优先 min-width</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">CSS 变量</span>
+                <span class="mm-leaf-desc">— :root 定义 var() 使用，JS setProperty 动态换肤</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">伪元素</span>
+                <span class="mm-leaf-desc">— ::before/::after 必须 content，clearfix/tooltip</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">性能优化</span>
+                <span class="mm-leaf-desc">
+                  — transform/opacity 走 Composite，will-change，Reflow > Repaint > Composite
+                </span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
 
-    <a href="pages/css-animation.html" class="chapter-card css">
-      <span class="chapter-icon">✨</span>
-      <span class="chapter-num">第三章</span>
-      <span class="chapter-name">CSS3 动画与视觉效果</span>
-      <span class="chapter-desc">transition 过渡、transform 变换、animation 关键帧、滤镜、渐变</span>
-      <div class="chapter-tags">
-        <span class="tag-badge css">CSS3</span>
-        <span class="tag-badge tip">交互演示</span>
+      <!-- ═══════════ JavaScript ═══════════ -->
+      <div class="mm-category mm-js">
+        <div class="mm-root">
+          <span class="mm-root-icon">⚡</span>
+          <span class="mm-root-label">JavaScript</span>
+          <span class="mm-root-count">4 章 · 21 节</span>
+        </div>
+        <div class="mm-branches">
+          <!-- JS 基础 -->
+          <div class="mm-branch">
+            <a href="pages/js-basic.html" class="mm-chapter">
+              <span class="mm-chapter-icon">⚙️</span>
+              <span class="mm-chapter-name">核心基础</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">数据类型</span>
+                <span class="mm-leaf-desc">— 7 原始类型 + object，typeof null === 'object' 历史遗留</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">var/let/const</span>
+                <span class="mm-leaf-desc">— 作用域差异，TDZ 暂时性死区，变量提升</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">作用域链与闭包</span>
+                <span class="mm-leaf-desc">— 词法作用域查找链，闭包保留外部变量引用</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">this 绑定</span>
+                <span class="mm-leaf-desc">— new > 显式(call/apply/bind) > 隐式 > 默认，箭头函数词法 this</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">原型链与继承</span>
+                <span class="mm-leaf-desc">— prototype/__proto__/Object.create，class extends 语法糖</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+            </div>
+          </div>
+          <!-- JS ES6+ -->
+          <div class="mm-branch">
+            <a href="pages/js-es6.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🚀</span>
+              <span class="mm-chapter-name">ES6+ 现代语法</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">解构与展开</span>
+                <span class="mm-leaf-desc">— 数组/对象解构，默认值/重命名，...rest/...spread</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">模板字符串</span>
+                <span class="mm-leaf-desc">— 插值/多行/标签模板 Tagged Template</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Symbol</span>
+                <span class="mm-leaf-desc">— 唯一标识，Symbol.for 共享，Symbol.toPrimitive 自定义转换</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">迭代器与生成器</span>
+                <span class="mm-leaf-desc">— Iterator 协议 next()，function* yield/yield*，双向通信</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Proxy/Reflect</span>
+                <span class="mm-leaf-desc">— 拦截读写删，数据校验，Vue3 响应式核心</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">ES2020+ 新特性</span>
+                <span class="mm-leaf-desc">— ?. / ?? / ??= / structuredClone / at() / toSorted()</span>
+              </div>
+            </div>
+          </div>
+          <!-- JS 异步 -->
+          <div class="mm-branch">
+            <a href="pages/js-async.html" class="mm-chapter">
+              <span class="mm-chapter-icon">⏳</span>
+              <span class="mm-chapter-name">异步编程全解</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">事件循环</span>
+                <span class="mm-leaf-desc">— 同步 → 清微任务(Promise.then) → 宏任务(setTimeout) → 循环</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Promise</span>
+                <span class="mm-leaf-desc">— all(全成功)/allSettled(全完成)/race(最快)/any(最快成功)</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">async/await</span>
+                <span class="mm-leaf-desc">— 串行 vs Promise.all 并发，try/catch 错误处理</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">并发控制</span>
+                <span class="mm-leaf-desc">— p-limit 限制并发数，Promise.race 超时，指数退避重试</span>
+              </div>
+            </div>
+          </div>
+          <!-- JS 高级 -->
+          <div class="mm-branch">
+            <a href="pages/js-advanced.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🧠</span>
+              <span class="mm-chapter-name">高级特性与设计模式</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">手写系列</span>
+                <span class="mm-leaf-desc">— call/apply/bind/new/deepClone，循环引用+特殊类型处理</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">防抖与节流</span>
+                <span class="mm-leaf-desc">— debounce 停抖后执行 / throttle 固定间隔最多一次</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">函数式编程</span>
+                <span class="mm-leaf-desc">— 柯里化/偏函数/compose/pipe/memoize 缓存</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">设计模式</span>
+                <span class="mm-leaf-desc">— 单例/观察者 EventEmitter/策略/发布订阅 PubSub</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">内存管理</span>
+                <span class="mm-leaf-desc">— V8 标记清除/新老生代，WeakMap/WeakRef，常见泄漏场景</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">错误处理</span>
+                <span class="mm-leaf-desc">— 自定义 Error 子类，safeAsync [err, data] Result 模式</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
 
-    <a href="pages/css-interview.html" class="chapter-card css">
-      <span class="chapter-icon">🎯</span>
-      <span class="chapter-num">第四章</span>
-      <span class="chapter-name">CSS 面试高频考点</span>
-      <span class="chapter-desc">BFC、层叠上下文、响应式设计、居中方案、CSS 变量、性能优化</span>
-      <div class="chapter-tags">
-        <span class="tag-badge css">CSS3</span>
-        <span class="tag-badge interview">面试必备</span>
+      <!-- ═══════════ TypeScript ═══════════ -->
+      <div class="mm-category mm-ts">
+        <div class="mm-root">
+          <span class="mm-root-icon">🔷</span>
+          <span class="mm-root-label">TypeScript</span>
+          <span class="mm-root-count">1 章 · 8 节</span>
+        </div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <a href="pages/ts-core.html" class="mm-chapter">
+              <span class="mm-chapter-icon">📘</span>
+              <span class="mm-chapter-name">TypeScript 核心知识点</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">基础类型</span>
+                <span class="mm-leaf-desc">— string/number/boolean/tuple/enum，any vs unknown vs never</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">interface vs type</span>
+                <span class="mm-leaf-desc">— interface 可声明合并/extends，type 支持联合/交叉/条件类型</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">泛型</span>
+                <span class="mm-leaf-desc">— 类型参数化，extends 约束，keyof + 泛型安全取值</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">工具类型</span>
+                <span class="mm-leaf-desc">— Partial/Required/Pick/Omit/Record/ReturnType/Parameters</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">类型守卫</span>
+                <span class="mm-leaf-desc">— typeof/instanceof/in/is 收窄，可辨识联合 Discriminated Union</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">类型体操</span>
+                <span class="mm-leaf-desc">— 条件类型 extends + infer 推断 + keyof/in 映射，模板字面量类型</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">声明文件</span>
+                <span class="mm-leaf-desc">— .d.ts 全局/模块声明，declare module 扩展，tsconfig 核心配置</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">框架实战</span>
+                <span class="mm-leaf-desc">— Vue3 defineProps/defineEmits 类型，React FC/Hooks/事件类型</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
 
-    <a href="pages/js-basic.html" class="chapter-card js">
-      <span class="chapter-icon">⚙️</span>
-      <span class="chapter-num">第五章</span>
-      <span class="chapter-name">JavaScript 核心基础</span>
-      <span class="chapter-desc">数据类型、变量提升、作用域链、闭包、this 绑定、原型链、继承</span>
-      <div class="chapter-tags">
-        <span class="tag-badge js">JavaScript</span>
-        <span class="tag-badge interview">面试必备</span>
+      <!-- ═══════════ 框架原理 ═══════════ -->
+      <div class="mm-category mm-fw">
+        <div class="mm-root">
+          <span class="mm-root-icon">🏛️</span>
+          <span class="mm-root-label">框架原理</span>
+          <span class="mm-root-count">3 章 · 17 节</span>
+        </div>
+        <div class="mm-branches">
+          <!-- Vue2 -->
+          <div class="mm-branch">
+            <a href="pages/vue2-principle.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🟢</span>
+              <span class="mm-chapter-name">Vue2 原理实现</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">响应式</span>
+                <span class="mm-leaf-desc">— Object.defineProperty 劫持，Dep 收集 / Watcher 订阅通知</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">响应式局限</span>
+                <span class="mm-leaf-desc">— 无法检测新增/删除属性、数组下标赋值，需 Vue.set</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">虚拟 DOM</span>
+                <span class="mm-leaf-desc">— JS 对象描述 DOM 树，diff 对比后最小化更新真实 DOM</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">diff 算法</span>
+                <span class="mm-leaf-desc">— 同层对比，双端指针 + key 映射，O(n) 复杂度</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Mini Vue2</span>
+                <span class="mm-leaf-desc">— 完整实现 observe/computed/watch/render/patch</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+            </div>
+          </div>
+          <!-- Vue3 -->
+          <div class="mm-branch">
+            <a href="pages/vue3-principle.html" class="mm-chapter">
+              <span class="mm-chapter-icon">💚</span>
+              <span class="mm-chapter-name">Vue3 原理实现</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Proxy 响应式</span>
+                <span class="mm-leaf-desc">— 对比 defineProperty：支持新增/删除/数组/Map/Set，懒代理</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">effect/track/trigger</span>
+                <span class="mm-leaf-desc">— WeakMap→Map→Set 三层依赖收集，activeEffect 栈</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">ref/reactive/computed</span>
+                <span class="mm-leaf-desc">— .value 拆箱，computed 脏检查缓存，watch scheduler</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Composition API</span>
+                <span class="mm-leaf-desc">— 按逻辑组织代码，composable 复用，对比 Options API</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">编译优化</span>
+                <span class="mm-leaf-desc">— PatchFlag 标记动态类型，静态提升，Block Tree 只跟踪动态节点</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Mini Vue3</span>
+                <span class="mm-leaf-desc">— 完整实现 Proxy 响应式 + Composition API 风格应用</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+            </div>
+          </div>
+          <!-- React -->
+          <div class="mm-branch">
+            <a href="pages/react-principle.html" class="mm-chapter">
+              <span class="mm-chapter-icon">⚛️</span>
+              <span class="mm-chapter-name">React 原理实现</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">JSX 与虚拟 DOM</span>
+                <span class="mm-leaf-desc">— JSX → createElement → VNode 对象，key/ref/$$typeof</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Fiber 架构</span>
+                <span class="mm-leaf-desc">— 可中断渲染，时间切片，child/sibling/return 链表结构</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">diff 算法</span>
+                <span class="mm-leaf-desc">— 同层+类型+key，两轮遍历 + lastPlacedIndex 移动判断</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Hooks 原理</span>
+                <span class="mm-leaf-desc">— fiber.memoizedState 链表，顺序固定不可条件调用</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Mini React</span>
+                <span class="mm-leaf-desc">— 完整实现 Fiber workLoop + useState 交互演示</span>
+                <span class="mm-leaf-badge badge-demo">交互</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">三框架对比</span>
+                <span class="mm-leaf-desc">— Vue2/Vue3/React 响应式/diff/调度/复用方式对照表</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
-
-    <a href="pages/js-es6.html" class="chapter-card js">
-      <span class="chapter-icon">🚀</span>
-      <span class="chapter-num">第六章</span>
-      <span class="chapter-name">ES6+ 现代语法</span>
-      <span class="chapter-desc">解构、展开、箭头函数、类、模块、Symbol、迭代器、生成器、Proxy</span>
-      <div class="chapter-tags">
-        <span class="tag-badge js">ES6+</span>
-        <span class="tag-badge tip">交互演示</span>
+      <!-- ═══════════ 面试题库 ═══════════ -->
+      <div class="mm-category mm-exam">
+        <div class="mm-root">
+          <span class="mm-root-icon">📝</span>
+          <span class="mm-root-label">面试题库</span>
+          <span class="mm-root-count">5 套 · 130 题</span>
+        </div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <a href="pages/exam-index.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🏠</span>
+              <span class="mm-chapter-name">面试题库首页</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">前端基础综合</span>
+                <span class="mm-leaf-desc">— HTML5 / CSS3 / JS 核心 / ES6+ / 手写实现，25 题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">Vue3 技术栈</span>
+                <span class="mm-leaf-desc">— 响应式原理 / Composition API / Pinia / Vite / TypeScript，25 题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">React 技术栈</span>
+                <span class="mm-leaf-desc">— Hooks / Fiber 架构 / Redux Toolkit / Next.js / 性能优化，25 题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">工程化与性能优化</span>
+                <span class="mm-leaf-desc">— Vite/Webpack / CI/CD / Web Vitals / 前端安全 / 监控，25 题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">金融/支付中台方向</span>
+                <span class="mm-leaf-desc">— Vue3+TS 深度 / 金融安全 / 大数精度 / 权限控制 / 综合实战，30 题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    </a>
-
-    <a href="pages/js-async.html" class="chapter-card js">
-      <span class="chapter-icon">⏳</span>
-      <span class="chapter-num">第七章</span>
-      <span class="chapter-name">异步编程全解</span>
-      <span class="chapter-desc">回调地狱、Promise 原理、async/await、事件循环、宏任务/微任务</span>
-      <div class="chapter-tags">
-        <span class="tag-badge js">异步</span>
-        <span class="tag-badge interview">面试必备</span>
-      </div>
-    </a>
-
-    <a href="pages/js-advanced.html" class="chapter-card js">
-      <span class="chapter-icon">🧠</span>
-      <span class="chapter-num">第八章</span>
-      <span class="chapter-name">JS 高级特性与设计模式</span>
-      <span class="chapter-desc">手写 call/apply/bind/new、深拷贝、防抖节流、设计模式、错误处理</span>
-      <div class="chapter-tags">
-        <span class="tag-badge js">高级</span>
-        <span class="tag-badge interview">面试必备</span>
-      </div>
-    </a>
-
-    <a href="pages/vue2-principle.html" class="chapter-card" style="--card-color:#42b883">
-      <style>.chapter-card[href*='vue2']::before{background:linear-gradient(90deg,#42b883,#35495e)}</style>
-      <span class="chapter-icon">🟢</span>
-      <span class="chapter-num">第九章</span>
-      <span class="chapter-name">Vue2 原理实现</span>
-      <span class="chapter-desc">Object.defineProperty 响应式、Dep/Watcher 依赖收集、虚拟 DOM、diff 双端指针、Mini Vue2</span>
-      <div class="chapter-tags">
-        <span class="tag-badge tip">Vue2</span>
-        <span class="tag-badge interview">面试必备</span>
-      </div>
-    </a>
-
-    <a href="pages/vue3-principle.html" class="chapter-card" style="--card-color:#42b883">
-      <style>.chapter-card[href*='vue3']::before{background:linear-gradient(90deg,#42b883,#6c63ff)}</style>
-      <span class="chapter-icon">💚</span>
-      <span class="chapter-num">第十章</span>
-      <span class="chapter-name">Vue3 原理实现</span>
-      <span class="chapter-desc">Proxy 响应式、effect/track/trigger、ref/reactive/computed、Composition API、编译优化</span>
-      <div class="chapter-tags">
-        <span class="tag-badge tip">Vue3</span>
-        <span class="tag-badge interview">面试必备</span>
-      </div>
-    </a>
-
-    <a href="pages/react-principle.html" class="chapter-card" style="--card-color:#61dafb">
-      <style>.chapter-card[href*='react']::before{background:linear-gradient(90deg,#61dafb,#0088cc)}</style>
-      <span class="chapter-icon">⚛️</span>
-      <span class="chapter-num">第十一章</span>
-      <span class="chapter-name">React 原理实现</span>
-      <span class="chapter-desc">JSX/createElement、Fiber 架构、可中断渲染、diff 算法、Hooks 链表实现、Mini React</span>
-      <div class="chapter-tags">
-        <span class="tag-badge js">React</span>
-        <span class="tag-badge interview">面试必备</span>
-      </div>
-    </a>
-  </div>
-</body>
+    </div>
+  </body>
 </html>

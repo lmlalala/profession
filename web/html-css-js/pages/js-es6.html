@@ -1,25 +1,28 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>JS ES6+ 现代语法</title>
-  <link rel="stylesheet" href="../css/common.css">
-  <script type="module" src="../js/nav.js"></script>
-  <script type="module" src="../js/code-editor.js"></script>
-</head>
-<body>
-  <nav class="nav"></nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>JS ES6+ 现代语法</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <script type="module" src="../js/nav.js"></script>
+    <script type="module" src="../js/code-editor.js"></script>
+  </head>
+  <body>
+    <nav class="nav"></nav>
 
-  <div class="page-wrapper">
-    <h1 class="page-title">ES6+ 现代语法</h1>
-    <p class="page-subtitle">解构 · 展开 · 箭头函数 · 模板字符串 · 类 · 模块 · Symbol · 迭代器 · 生成器 · Proxy · WeakRef</p>
+    <div class="page-wrapper">
+      <h1 class="page-title">ES6+ 现代语法</h1>
+      <p class="page-subtitle">
+        解构 · 展开 · 箭头函数 · 模板字符串 · 类 · 模块 · Symbol · 迭代器 · 生成器 · Proxy · WeakRef
+      </p>
 
-    <!-- 1. 解构与展开 -->
-    <section class="section">
-      <h2 class="section-title">1. 解构赋值与展开运算符</h2>
-      <div class="card">
-        <div class="code-block" data-mode="console">// 数组解构
+      <!-- 1. 解构与展开 -->
+      <section class="section">
+        <h2 class="section-title">1. 解构赋值与展开运算符</h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">// 数组解构
 const [a, b, ...rest] = [1, 2, 3, 4, 5]
 console.log('数组解构 a,b:', a, b)
 console.log('rest:', JSON.stringify(rest))
@@ -51,17 +54,18 @@ console.log('展开合并对象:', JSON.stringify({ ...obj1, ...obj2 }))
 let x = 1, y = 2;
 [x, y] = [y, x]
 console.log('解构交换变量 x,y:', x, y)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out1"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out1"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 2. 模板字符串 / 标签模板 -->
-    <section class="section">
-      <h2 class="section-title">2. 模板字符串与标签模板</h2>
-      <div class="card">
-        <div class="code-block" data-mode="console">const name = 'Alice', age = 25
+      <!-- 2. 模板字符串 / 标签模板 -->
+      <section class="section">
+        <h2 class="section-title">2. 模板字符串与标签模板</h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">const name = 'Alice', age = 25
 console.log(`模板字符串: Hello, ${name}! 明年 ${age + 1} 岁`)
 
 // 多行字符串
@@ -86,17 +90,18 @@ function safeHtml(strings, ...values) {
 }
 const userInput = '&lt;script&gt;alert("xss")&lt;/script&gt;'
 console.log('安全 HTML:', safeHtml`&lt;p&gt;${userInput}&lt;/p&gt;`)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 3. Symbol -->
-    <section class="section">
-      <h2 class="section-title">3. Symbol <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <div class="code-block" data-mode="console">// Symbol：唯一标识符
+      <!-- 3. Symbol -->
+      <section class="section">
+        <h2 class="section-title">3. Symbol <span class="tag-badge interview">面试高频</span></h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">// Symbol：唯一标识符
 const s1 = Symbol('id'), s2 = Symbol('id')
 console.log('Symbol 唯一性 s1===s2:', s1 === s2)
 
@@ -122,17 +127,20 @@ class Money {
 const price = new Money(99.9, 'CNY')
 console.log('Symbol.toPrimitive number:', +price)
 console.log('Symbol.toPrimitive string:', `${price}`)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 4. 迭代器与生成器 -->
-    <section class="section">
-      <h2 class="section-title">4. 迭代器（Iterator）与生成器（Generator）<span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <div class="code-block" data-mode="console">// 迭代器协议：对象有 next() 方法，返回 { value, done }
+      <!-- 4. 迭代器与生成器 -->
+      <section class="section">
+        <h2 class="section-title">
+          4. 迭代器（Iterator）与生成器（Generator）<span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">// 迭代器协议：对象有 next() 方法，返回 { value, done }
 function createRange(start, end) {
   let current = start
   return {
@@ -181,20 +189,21 @@ calc.next(10)    // result = 10
 calc.next(20)    // result = 30
 const final = calc.next(5)  // result = 35
 console.log('生成器双向通信 result:', final.value)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 5. Proxy / Reflect -->
-    <section class="section">
-      <h2 class="section-title">5. Proxy 与 Reflect <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>Proxy</strong> 拦截对象的基本操作（读取、赋值、删除等），是 Vue3 响应式系统的核心。
-        </div>
-        <div class="code-block" data-mode="console">// 数据验证代理
+      <!-- 5. Proxy / Reflect -->
+      <section class="section">
+        <h2 class="section-title">5. Proxy 与 Reflect <span class="tag-badge interview">面试高频</span></h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>Proxy</strong> 拦截对象的基本操作（读取、赋值、删除等），是 Vue3 响应式系统的核心。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">// 数据验证代理
 const validator = {
   set(target, key, value) {
     if (key === 'age' && (typeof value !== 'number' || value &lt; 0))
@@ -234,17 +243,18 @@ function traceFunction(fn, name) {
 }
 const tracedAdd = traceFunction((a, b) => a + b, 'add')
 tracedAdd(3, 4)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 6. 可选链 / 空值合并 / 逻辑赋值 -->
-    <section class="section">
-      <h2 class="section-title">6. ES2020+ 新特性</h2>
-      <div class="card">
-        <div class="code-block" data-mode="console">// 可选链 ?.（ES2020）
+      <!-- 6. 可选链 / 空值合并 / 逻辑赋值 -->
+      <section class="section">
+        <h2 class="section-title">6. ES2020+ 新特性</h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-mode="console">// 可选链 ?.（ES2020）
 const user = { profile: { avatar: 'avatar.png' }, getName() { return 'Alice' } }
 console.log('可选链 profile.avatar:', user?.profile?.avatar)
 console.log('可选链 address.city:', user?.address?.city)
@@ -278,11 +288,11 @@ const clone = structuredClone(original)
 clone.b.c = 999
 console.log('深拷贝 original.b.c:', original.b.c)
 console.log('深拷贝 clone.b.c:', clone.b.c)</div>
-        <div class="demo-box">
-          <div class="console-output" id="out6"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          <div class="demo-box">
+            <div class="console-output" id="out6"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
         </div>
-      </div>
-    </section>
-  </div>
-</body>
+      </section>
+    </div>
+  </body>
 </html>

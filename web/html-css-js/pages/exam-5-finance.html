@@ -1,0 +1,533 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>试卷五：金融/支付中台方向 · 前端面试题库</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/exam.js"></script>
+  <style>
+    .exam-header { text-align: center; padding: 4rem 2rem 1.5rem; }
+    .exam-header h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .exam-header p { color: var(--color-text-muted); font-size: 0.85rem; }
+    .exam-body { max-width: 860px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+    .q-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .q-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .q-num {
+      width: 28px; height: 28px;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .q-tag {
+      font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 3px; font-weight: 600;
+    }
+    .tag-html { background: rgba(228,77,38,0.15); color: #e44d26; }
+    .tag-css { background: rgba(38,77,228,0.15); color: #2965f1; }
+    .tag-js { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-es6 { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-ts { background: rgba(49,120,198,0.15); color: #3178c6; }
+    .tag-vue { background: rgba(66,184,131,0.15); color: #42b883; }
+    .tag-react { background: rgba(97,218,251,0.15); color: #0088cc; }
+    .tag-eng { background: rgba(108,99,255,0.15); color: #6c63ff; }
+    .tag-perf { background: rgba(0,212,170,0.15); color: #00d4aa; }
+    .tag-safe { background: rgba(255,101,132,0.15); color: #ff6584; }
+    .tag-biz { background: rgba(255,209,102,0.15); color: #d4a800; }
+    .q-body { font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.75rem; }
+    .q-body code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; }
+    .q-input {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      font-family: inherit; font-size: 0.82rem;
+      resize: vertical; min-height: 60px;
+      margin-bottom: 0.5rem;
+    }
+    .q-input:focus { outline: none; border-color: var(--color-primary); }
+    .q-toggle-answer {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.75rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .q-toggle-answer:hover { border-color: var(--color-primary); color: var(--color-text); }
+    .q-answer {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-code-bg);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--color-text);
+      border-left: 3px solid var(--color-secondary);
+    }
+    .q-answer code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.8rem; }
+    .exam-footer {
+      text-align: center;
+      padding: 2rem 0 4rem;
+    }
+    .btn-show-all {
+      padding: 0.6rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-show-all:hover { background: var(--color-primary-light); }
+  </style>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <header class="exam-header">
+    <h1>试卷五：金融/支付中台方向</h1>
+    <p>Vue3 + TS 深度 · 金融安全 · 大数精度 · 高并发 · 权限控制 · 综合实战 · 共 30 题 · 建议先作答再对照参考答案</p>
+  </header>
+
+  <main class="exam-body">
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">1</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 的响应式原理？对比 Vue2 的 <code>Object.defineProperty</code> 有哪些核心优势？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Vue3 使用 Proxy 拦截 13 种操作。核心优势：① 支持新增/删除属性检测（Vue2 需 <code>Vue.set</code>）② 支持数组下标和 length 变化 ③ 懒代理（访问时才递归代理，Vue2 初始化递归所有）④ 支持 Map/Set/WeakMap ⑤ 更好的性能。依赖收集：<code>WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;</code> 三层结构。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">2</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body"><code>ref</code> 和 <code>reactive</code> 的区别？解构 <code>reactive</code> 时如何保证响应式不丢失？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>ref</code> 包装任意类型（<code>.value</code> 访问），<code>reactive</code> 只能包装对象。解构 <code>reactive</code> 丢失响应式，解决：<code>toRefs(state)</code> 将每个属性转为 <code>ref</code>，或 <code>toRef(state, 'key')</code>。<code>ref</code> 在模板中自动解包，<code>reactive</code> 不需要 <code>.value</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">3</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body"><code>setup</code> 语法的优势？<code>watch</code> 和 <code>watchEffect</code> 的核心区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>script setup</code> 优势：更简洁（无需 return）、更好的 TS 推断、编译优化。<code>watch</code>：显式指定监听源，可获取新旧值，默认懒执行；<code>watchEffect</code>：自动追踪依赖，立即执行，无旧值。<code>watch</code> 适合对比变化，<code>watchEffect</code> 适合副作用同步。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">4</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 生命周期对比 Vue2？<code>onMounted</code> 和 <code>nextTick</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>beforeCreate</code>/<code>created</code> → <code>setup</code>；<code>mounted</code> → <code>onMounted</code>；<code>beforeDestroy</code> → <code>onBeforeUnmount</code>。<code>onMounted</code>：组件挂载后执行一次；<code>nextTick</code>：DOM 更新后执行（每次响应式数据变化触发 DOM 更新后）。<code>nextTick</code> 返回 Promise，可 <code>await</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">5</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body"><code>defineAsyncComponent</code> 和 <code>Suspense</code> 如何实现按需加载？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>defineAsyncComponent(() =&gt; import('./Comp.vue'))</code> 定义异步组件。<code>Suspense</code> 包裹异步组件，<code>#default</code> 显示加载完成内容，<code>#fallback</code> 显示加载中状态。支持嵌套异步组件和 <code>async setup()</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">6</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body"><code>Teleport</code> 和 <code>Fragment</code> 的理解和应用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>Teleport</code>：将组件内容传送到 DOM 其他位置（如 body），适合模态框、通知、下拉菜单等需要脱离父级 overflow/z-index 限制的场景。<code>Fragment</code>：组件支持多根节点，减少无意义的包裹 div。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">7</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">TypeScript 和 JavaScript 的核心区别？为什么大型项目优先选择 TS？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        TS 是 JS 的超集，增加静态类型系统。优势：① 编译时发现类型错误 ② IDE 智能提示和自动补全 ③ 代码即文档（类型注解）④ 重构安全（类型检查保障）⑤ 团队协作效率提升。大型项目接口多、人员多，类型系统能显著降低沟通成本和 bug 率。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">8</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body"><code>interface</code> 和 <code>type</code> 的区别？适用场景？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>interface</code>：可声明合并、extends 继承、class implements。<code>type</code>：支持联合/交叉/条件/映射类型。推荐：对象形状用 interface（可扩展），联合类型/工具类型用 type。性能上 interface 略优（编译器内部优化）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">9</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">泛型在支付中台的应用？举例统一请求响应封装。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>interface ApiResponse&lt;T&gt; { code: number; data: T; message: string }</code> + <code>async function request&lt;T&gt;(url: string, params?: any): Promise&lt;ApiResponse&lt;T&gt;&gt;</code>。使用：<code>const { data } = await request&lt;TransactionList&gt;('/api/transactions')</code>。泛型保证响应数据类型安全，IDE 自动补全字段。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">10</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body"><code>any</code>、<code>unknown</code>、<code>never</code> 的区别？如何避免滥用 <code>any</code>？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>any</code> 跳过检查（传染性强），<code>unknown</code> 安全的 any（使用前必须收窄），<code>never</code> 永不存在的值。避免 any：① 开启 <code>noImplicitAny</code> ② 用 <code>unknown</code> + 类型守卫替代 ③ 第三方库缺类型时写 <code>.d.ts</code> ④ 复杂类型用泛型抽象 ⑤ Code Review 检查。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">11</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">类型收窄的方式？结合 <code>in</code>、<code>typeof</code>、自定义类型守卫举例。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>typeof</code>：<code>if (typeof x === 'string')</code>；<code>in</code>：<code>if ('swim' in animal)</code>；自定义守卫：<code>function isTransaction(x: unknown): x is Transaction { return typeof x === 'object' &amp;&amp; x !== null &amp;&amp; 'amount' in x }</code>。可辨识联合：<code>type Result = { status: 'success'; data: T } | { status: 'error'; message: string }</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">12</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">金融场景如何定义复杂数据类型？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        交易流水：<code>interface Transaction { readonly id: string; amount: string; currency: 'CNY'|'USD'; status: TransactionStatus; createdAt: string; metadata?: Record&lt;string, unknown&gt; }</code>。金额用 string 避免精度丢失，id 设 readonly，可选属性用 ?。对账结果用可辨识联合区分成功/失败。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">13</span>
+        <span class="q-tag tag-eng">工程</span>
+      </div>
+      <div class="q-body">Vite 开发环境速度快的核心原理？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 浏览器原生 ESM：不打包，按需编译（请求时才转换模块）② esbuild 预构建：Go 编写，将 CJS 依赖转为 ESM，速度比 JS 快 10-100 倍 ③ HMR 精准更新：只更新变更模块，不重建整个 bundle ④ 依赖缓存：<code>node_modules/.vite</code> 缓存预构建结果。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">14</span>
+        <span class="q-tag tag-eng">工程</span>
+      </div>
+      <div class="q-body">如何配置多环境（开发/测试/生产）？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Vite：<code>.env.development</code> / <code>.env.staging</code> / <code>.env.production</code>，变量以 <code>VITE_</code> 前缀。<code>package.json</code> scripts：<code>"build:staging": "vite build --mode staging"</code>。代码中 <code>import.meta.env.VITE_API_URL</code>。Webpack：DefinePlugin + env 文件。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">15</span>
+        <span class="q-tag tag-eng">工程</span>
+      </div>
+      <div class="q-body">HMR 机制是什么？如何自定义处理？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Hot Module Replacement：模块变更时，只替换变更模块而不刷新页面。Vite HMR 基于 ESM，通过 WebSocket 通知客户端。自定义：<code>if (import.meta.hot) { import.meta.hot.accept('./module.js', (newModule) =&gt; { /* 处理更新 */ }) }</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">16</span>
+        <span class="q-tag tag-eng">工程</span>
+      </div>
+      <div class="q-body">如何优化打包体积？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① Tree Shaking（ESM + <code>sideEffects: false</code>）② 代码分割（动态 import）③ 压缩（Terser/esbuild minify）④ 图片优化（WebP/压缩）⑤ 依赖分析（rollup-plugin-visualizer）⑥ 按需导入 UI 库 ⑦ CDN 外部化大依赖 ⑧ Gzip/Brotli 压缩。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">17</span>
+        <span class="q-tag tag-eng">工程</span>
+      </div>
+      <div class="q-body">Webpack loader 和 plugin 的区别？各举 3 个常用的。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        loader 转换文件：babel-loader（ES6→ES5）、css-loader（处理 CSS 导入）、file-loader（处理文件资源）。plugin 扩展功能：HtmlWebpackPlugin（生成 HTML）、MiniCssExtractPlugin（提取 CSS 文件）、DefinePlugin（定义环境变量）。loader 在 <code>module.rules</code> 配置，plugin 在 <code>plugins</code> 数组。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">18</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">如何将复杂金融业务（清算、对账）抽象为可维护的前端代码？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 领域模型抽象：定义清晰的 TypeScript 类型（交易、账户、对账记录）② 状态机管理：用有限状态机描述业务流程（待处理→处理中→成功/失败）③ 策略模式：不同清算规则封装为策略 ④ 组件化：业务组件（交易列表、对账面板）+ 通用组件分离 ⑤ 配置化：规则引擎驱动，减少硬编码。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">19</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">高并发交易系统，前端如何做防抖、节流和重试？如何保证安全性？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        防抖：提交按钮 loading 状态 + 接口去重（取消重复请求）。节流：限制操作频率。重试：指数退避重试（1s→2s→4s），设置最大重试次数。安全性：① 请求签名（timestamp+nonce+sign）② 幂等性（唯一请求 ID）③ HTTPS ④ Token 认证 ⑤ 关键操作二次验证。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">20</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">金融表单校验（金额、卡号、身份证）如何实现？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        金额：正则 + BigNumber 精度校验，限制小数位数。卡号：Luhn 算法校验 + 银行卡 BIN 识别。身份证：18 位格式校验 + 校验码算法 + 生日合法性。实现：自定义校验规则 + Element Plus 的 FormItem rules，支持异步校验（如卡号实时验证）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">21</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">如何实现多端开发（H5、小程序、React Native）？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① Taro/uni-app：一套代码编译多端 ② 共享逻辑层：TypeScript 工具库/API 封装独立为 npm 包 ③ 组件库适配：抽象组件接口，各端实现 ④ Monorepo 管理：pnpm workspace 共享依赖和类型 ⑤ 条件编译：根据平台差异化处理。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">22</span>
+        <span class="q-tag tag-safe">安全</span>
+      </div>
+      <div class="q-body">金融场景 XSS 防御？如何处理富文本安全？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 输出编码：HTML 实体转义（<code>&amp;lt;</code> <code>&amp;gt;</code> <code>&amp;amp;</code>）② CSP 策略：限制脚本来源 ③ HttpOnly Cookie：防止 JS 读取 ④ 富文本：白名单过滤（DOMPurify），只允许安全标签和属性 ⑤ 避免 innerHTML，用 textContent ⑥ 输入长度限制。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">23</span>
+        <span class="q-tag tag-safe">安全</span>
+      </div>
+      <div class="q-body">CSRF 攻击防御？Axios 中如何统一配置 Token？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        防御：① CSRF Token（服务端种到 Cookie，前端读取放到请求头 X-CSRF-Token）② SameSite=Strict Cookie ③ 验证 Referer/Origin。Axios 配置：<code>axios.interceptors.request.use(config =&gt; { config.headers['X-CSRF-Token'] = getCookie('csrf_token'); return config })</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">24</span>
+        <span class="q-tag tag-safe">安全</span>
+      </div>
+      <div class="q-body">敏感数据（银行卡号、密码）如何加密传输？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① HTTPS 传输层加密 ② 密码：前端 RSA 公钥加密，后端私钥解密 ③ 银行卡号：脱敏显示（6222****1234），传输时加密 ④ 前端不存储明文敏感数据 ⑤ Web Crypto API 进行加密操作 ⑥ 密钥管理：公钥从服务端获取，不硬编码。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">25</span>
+        <span class="q-tag tag-safe">安全</span>
+      </div>
+      <div class="q-body">如何实现 RBAC 权限控制？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        模型：用户→角色→权限。实现：① 登录后获取角色和权限列表 ② 路由权限：根据权限动态 addRoute ③ 菜单权限：过滤菜单树 ④ 按钮权限：自定义指令 <code>v-permission="'order:delete'"</code> ⑤ 接口权限：请求拦截器携带 Token，401 跳转登录。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">26</span>
+        <span class="q-tag tag-perf">性能</span>
+      </div>
+      <div class="q-body">Web Vitals 核心指标？针对金融中台如何优化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        LCP &lt; 2.5s：SSR 首屏、关键资源预加载、图片优化。INP &lt; 200ms：代码分割减小 JS 体积、Web Worker 处理复杂计算。CLS &lt; 0.1：图表/表格预留尺寸、字体 <code>font-display: swap</code>。金融中台重点：大数据表格虚拟滚动、图表按需加载、接口请求合并。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">27</span>
+        <span class="q-tag tag-perf">性能</span>
+      </div>
+      <div class="q-body">大额交易流水列表如何优化渲染性能？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 虚拟滚动：只渲染可视区域（vue-virtual-scroller）② 分页加载：后端分页 + 前端无限滚动 ③ Web Worker：后台处理数据格式化 ④ 防抖搜索/筛选 ⑤ 冻结列优化（减少 DOM 节点）⑥ requestAnimationFrame 批量更新。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">28</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">前端数据埋点和风险行为监控？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        埋点：① 页面浏览（路由变化）② 按钮点击（事件委托）③ 接口请求（Axios 拦截器）④ 异常上报（window.onerror）。风控监控：① 异常操作频率检测 ② 设备指纹采集 ③ 行为轨迹记录（鼠标移动、键盘输入模式）④ 上报：sendBeacon 保证页面关闭时数据不丢失。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">29</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">金融场景大数字精度问题如何解决？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        JS Number 是 IEEE 754 双精度浮点，最大安全整数 2^53-1。解决：① 金额用字符串传输和存储 ② 计算用 BigNumber.js / decimal.js ③ 后端返回 string 类型金额 ④ 展示时格式化（千分位、小数位）⑤ 比较用 BigNumber 的比较方法而非 === 。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">30</span>
+        <span class="q-tag tag-biz">业务</span>
+      </div>
+      <div class="q-body">如何带领团队提升前端开发效率？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 统一技术栈和规范（ESLint/Prettier/TypeScript）② Monorepo 共享组件库和工具库 ③ CI/CD 自动化（lint + test + build + deploy）④ 组件文档化（Storybook）⑤ Code Review 制度 ⑥ 技术分享和知识沉淀 ⑦ 脚手架工具（项目模板、代码生成）。
+      </div>
+    </div>
+  </main>
+
+  <div class="exam-footer">
+    <button type="button" class="btn-show-all" id="showAllAnswers">📖 查看所有标准答案</button>
+  </div>
+</body>
+</html>

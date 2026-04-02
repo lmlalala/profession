@@ -66,6 +66,7 @@
             </tbody>
           </table>
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Vue3 响应式核心：Proxy + Reflect + track/trigger
 const targetMap = new WeakMap()
 let activeEffect = null
@@ -172,6 +173,7 @@ console.log('✅ 深层嵌套 nested.a.b.c=42 → 响应:', nestedLogs.join(' | 
     <section class="section">
       <h2 class="section-title">2. effect / track / trigger 依赖收集 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;
 const targetMap = new WeakMap()
 let activeEffect = null
@@ -259,6 +261,7 @@ console.log('\n依赖图：a→[effect1] | b→[effect1, effect2] | c→[effect2
     <section class="section">
       <h2 class="section-title">3. ref / reactive / computed 实现</h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 依赖收集基础（复用 track/trigger/effect）
 const targetMap = new WeakMap()
 let activeEffect = null
@@ -369,6 +372,7 @@ console.log('watch 变化记录:', watchLogs.join(' | '))</div>
         <div class="grid-2">
           <div>
             <div class="demo-label">Vue2 Options API（按选项组织）</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-readonly style="font-size:0.78rem"><span class="kw">export default</span> {
   data() {
     <span class="kw">return</span> { count: <span class="num">0</span>, name: <span class="str">''</span> }
@@ -387,6 +391,7 @@ console.log('watch 变化记录:', watchLogs.join(' | '))</div>
           </div>
           <div>
             <div class="demo-label">Vue3 Composition API（按逻辑组织）</div>
+            <!-- prettier-ignore -->
             <div class="code-block" data-readonly style="font-size:0.78rem"><span class="kw">import</span> { ref, computed, watch, onMounted } from <span class="str">'vue'</span>
 
 <span class="kw">export default</span> {
@@ -416,6 +421,7 @@ console.log('watch 变化记录:', watchLogs.join(' | '))</div>
     <section class="section">
       <h2 class="section-title">5. Vue3 编译优化 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Vue3 编译优化演示
 
 // ① PatchFlag 模拟：标记动态内容类型，diff 时跳过静态部分

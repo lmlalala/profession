@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>试卷二：Vue3 技术栈 — 前端面试题库</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <script src="../js/exam.js" defer></script>
+  <style>
+    .exam-page {
+      max-width: 900px;
+      margin: 0 auto;
+      padding: 80px 1.5rem 4rem;
+    }
+    .exam-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+      padding-bottom: 1.5rem;
+      border-bottom: 1px solid var(--color-border);
+    }
+    .exam-header h1 {
+      font-size: clamp(1.5rem, 4vw, 2rem);
+      font-weight: 800;
+      margin-bottom: 0.6rem;
+      background: linear-gradient(135deg, #42b883, #3178c6, var(--color-primary-light));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .exam-header .exam-subtitle {
+      color: var(--color-text-muted);
+      font-size: 0.92rem;
+      line-height: 1.6;
+    }
+    .q-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.25rem 1.35rem;
+      margin-bottom: 1.25rem;
+      box-shadow: var(--shadow);
+    }
+    .q-header {
+      display: flex;
+      align-items: center;
+      gap: 0.65rem;
+      flex-wrap: wrap;
+      margin-bottom: 0.85rem;
+    }
+    .q-num {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 2rem;
+      height: 2rem;
+      padding: 0 0.45rem;
+      font-size: 0.85rem;
+      font-weight: 800;
+      color: var(--color-bg);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-primary-light));
+      border-radius: var(--radius-sm);
+    }
+    .q-tag {
+      font-size: 0.68rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      padding: 0.2rem 0.55rem;
+      border-radius: 4px;
+    }
+    .tag-vue {
+      background: rgba(66, 184, 131, 0.2);
+      color: #42b883;
+    }
+    .tag-ts {
+      background: rgba(49, 120, 198, 0.2);
+      color: #3178c6;
+    }
+    .tag-eng {
+      background: rgba(255, 209, 102, 0.18);
+      color: var(--color-warning);
+    }
+    .q-body {
+      color: var(--color-text);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      margin-bottom: 1rem;
+    }
+    .q-input {
+      width: 100%;
+      min-height: 4.5rem;
+      padding: 0.75rem 1rem;
+      font-family: var(--font-sans);
+      font-size: 0.88rem;
+      line-height: 1.6;
+      color: var(--color-text);
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      resize: vertical;
+      margin-bottom: 0.75rem;
+      transition: border-color var(--transition);
+    }
+    .q-input:focus {
+      outline: none;
+      border-color: var(--color-primary);
+    }
+    .q-input::placeholder {
+      color: var(--color-text-muted);
+    }
+    .q-toggle-answer {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.35rem;
+      padding: 0.45rem 0.9rem;
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--color-primary-light);
+      background: transparent;
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: all var(--transition);
+    }
+    .q-toggle-answer:hover {
+      border-color: var(--color-primary);
+      background: rgba(108, 99, 255, 0.08);
+    }
+    .q-answer {
+      margin-top: 1rem;
+      padding: 1rem 1.1rem;
+      font-size: 0.86rem;
+      line-height: 1.75;
+      color: var(--color-text-muted);
+      background: var(--color-surface-2);
+      border-left: 3px solid var(--color-secondary);
+      border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+    }
+    .q-answer strong {
+      color: var(--color-text);
+    }
+    .exam-footer {
+      position: sticky;
+      bottom: 0;
+      z-index: 50;
+      margin-top: 2.5rem;
+      padding: 1.25rem 0 0.5rem;
+      background: linear-gradient(to top, var(--color-bg) 70%, transparent);
+      display: flex;
+      justify-content: center;
+    }
+    .btn-show-all {
+      padding: 0.75rem 1.75rem;
+      font-size: 0.9rem;
+      font-weight: 700;
+      color: var(--color-bg);
+      background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));
+      border: none;
+      border-radius: var(--radius);
+      cursor: pointer;
+      box-shadow: 0 4px 20px rgba(108, 99, 255, 0.35);
+      transition: transform var(--transition), box-shadow var(--transition);
+    }
+    .btn-show-all:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px rgba(108, 99, 255, 0.45);
+    }
+    .btn-show-all:active {
+      transform: translateY(0);
+    }
+  </style>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <main class="exam-page">
+    <header class="exam-header">
+      <h1>试卷二：Vue3 技术栈</h1>
+      <p class="exam-subtitle">Vue3 响应式 · Composition API · Pinia · Vue Router · Vite · TypeScript</p>
+    </header>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">1</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 的响应式原理是什么？对比 Vue2 的 Object.defineProperty 有哪些优势？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Vue3 使用 Proxy 拦截对象操作。优势：① 支持新增/删除属性检测 ② 支持数组下标和 length ③ 懒代理（访问时才递归）④ 支持 Map/Set/WeakMap ⑤ 性能更好（不需要递归遍历所有属性）。依赖收集：WeakMap→Map→Set 三层结构，track 收集 effect，trigger 触发更新。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">2</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">ref 和 reactive 的区别？解构 reactive 对象如何保持响应式？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ref 包装基本类型（通过 .value 访问），也可包装对象；reactive 只能包装对象类型。ref 在模板中自动解包。解构 reactive 会丢失响应式，解决方案：toRefs() 将每个属性转为 ref，或 toRef(obj, 'key') 转单个属性。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">3</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">setup 语法糖（script setup）的优势？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 更简洁，无需 return 暴露变量 ② 更好的 TypeScript 类型推断 ③ 更好的运行时性能（编译为 render 函数的 setup 闭包）④ 支持 defineProps/defineEmits/defineExpose 编译器宏。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">4</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">watch 和 watchEffect 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        watch：需显式指定监听源，可获取新旧值，默认懒执行（首次不触发）；watchEffect：自动追踪回调中用到的响应式依赖，立即执行一次，无法获取旧值。watch 适合需要对比新旧值或条件触发的场景，watchEffect 适合副作用同步。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">5</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 的生命周期钩子有哪些变化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Options API 的 beforeCreate/created 被 setup 替代；beforeMount→onBeforeMount，mounted→onMounted，beforeUpdate→onBeforeUpdate，updated→onUpdated，beforeUnmount→onBeforeUnmount（Vue2 是 beforeDestroy），unmounted→onUnmounted。新增 onRenderTracked/onRenderTriggered 用于调试。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">6</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">defineAsyncComponent 和 Suspense 如何实现组件按需加载？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        defineAsyncComponent(() => import('./Comp.vue')) 定义异步组件，配合 Suspense 的 #default 和 #fallback 插槽显示加载状态。Suspense 还支持嵌套异步组件和 async setup()。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">7</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Teleport 和 Fragment 的作用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Teleport：将组件内容渲染到 DOM 中的其他位置（如 body），适合模态框、通知、tooltip 等需要脱离父组件 DOM 层级的场景。Fragment：组件可以有多个根节点，不再需要包裹 div。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">8</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 的编译优化有哪些？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① PatchFlag：标记动态节点类型（TEXT/CLASS/STYLE/PROPS），diff 时只比较动态部分 ② 静态提升（hoistStatic）：静态节点只创建一次，复用引用 ③ Block Tree：只收集动态子节点到 dynamicChildren 数组，跳过静态节点遍历 ④ 事件缓存（cacheHandlers）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">9</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Pinia 与 Vuex 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 去掉 mutations，只有 state/getters/actions ② 天然支持 TypeScript ③ 支持多个独立 store（无需 modules 嵌套）④ 支持 Composition API 风格 ⑤ 更轻量（约 1KB）⑥ 支持 SSR ⑦ DevTools 集成。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">10</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue Router 4 有哪些新特性？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① Composition API：useRouter()/useRoute() ② 动态路由：addRoute()/removeRoute() ③ 导航守卫返回值替代 next()：return false/return '/path' ④ 支持 TypeScript ⑤ 路由懒加载更简洁。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">11</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">组件通信有哪些方式？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① props/emits（父子）② provide/inject（跨层级）③ v-model 双向绑定 ④ $attrs 透传 ⑤ Pinia 全局状态 ⑥ EventBus（mitt 库）⑦ ref/expose 直接访问子组件。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">12</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">自定义 Hooks（Composables）的最佳实践？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 以 use 开头命名 ② 接收 ref 参数保持响应式 ③ 返回 ref 而非 reactive ④ 处理副作用清理（onUnmounted）⑤ 支持 SSR（避免直接访问 window/document）⑥ 单一职责原则。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">13</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">v-model 在 Vue3 中有什么变化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Vue2 的 v-model 等于 :value + @input；Vue3 改为 :modelValue + @update:modelValue。支持多个 v-model：v-model:title="title" v-model:content="content"。自定义修饰符通过 modelModifiers prop 接收。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">14</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">TypeScript 中 interface 和 type 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        interface 可声明合并（同名自动合并）、支持 extends 继承、可被 class implements；type 支持联合类型、交叉类型、条件类型、映射类型，不可声明合并。推荐：对象形状用 interface，其他用 type。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">15</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">泛型的作用？举例说明在 Vue3 项目中的应用。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        泛型实现类型参数化。应用：① API 请求封装 <code style="font-size:0.85em">function request&lt;T&gt;(url: string): Promise&lt;ApiResponse&lt;T&gt;&gt;</code> ② ref 类型 <code style="font-size:0.85em">ref&lt;User | null&gt;(null)</code> ③ 组件 Props 泛型 ④ 通用工具函数如 <code style="font-size:0.85em">function pick&lt;T, K extends keyof T&gt;(obj: T, keys: K[]): Pick&lt;T, K&gt;</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">16</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">any、unknown、never 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        any：跳过类型检查，可赋值给任何类型（慎用）；unknown：安全的 any，使用前必须类型收窄（typeof/instanceof/类型守卫）；never：永远不会有值（函数抛异常、死循环、穷尽检查）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">17</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">如何实现类型收窄？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① typeof 守卫 ② instanceof 守卫 ③ in 操作符 ④ 自定义类型守卫 <code style="font-size:0.85em">function isString(x: unknown): x is string</code> ⑤ 可辨识联合（Discriminated Union）通过共同的字面量属性（如 kind/type）区分。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">18</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">常用的工具类型有哪些？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Partial&lt;T&gt;（全可选）、Required&lt;T&gt;（全必选）、Readonly&lt;T&gt;（全只读）、Pick&lt;T,K&gt;（选取）、Omit&lt;T,K&gt;（排除）、Record&lt;K,V&gt;（键值映射）、ReturnType&lt;T&gt;（函数返回类型）、Parameters&lt;T&gt;（函数参数类型）、Extract/Exclude（联合类型提取/排除）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">19</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">如何优化 Vue3 应用性能？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 合理使用 v-memo/v-once 缓存 ② 大列表用虚拟滚动 ③ 组件懒加载 defineAsyncComponent ④ 合理拆分组件粒度 ⑤ 使用 shallowRef/shallowReactive 减少深层响应式 ⑥ computed 缓存计算结果 ⑦ 避免不必要的 watch。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">20</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 中如何处理错误？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 组件级：onErrorCaptured 钩子 ② 全局：app.config.errorHandler ③ 异步错误：try/catch + async setup ④ 路由错误：router.onError() ⑤ Suspense 的 onError 事件。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">21</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">Vite 为什么比 Webpack 快？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        开发环境：Vite 利用浏览器原生 ESM，不需要打包，按需编译（请求时才编译模块）；Webpack 需要先打包整个依赖图。Vite 用 esbuild 预构建依赖（Go 编写，比 JS 快 10-100 倍）。HMR：Vite 只更新变更模块，不需要重新构建整个 bundle。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">22</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何在 Vite 中配置环境变量？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        创建 .env / .env.development / .env.production 文件，变量以 VITE_ 前缀命名。代码中通过 import.meta.env.VITE_XXX 访问。vite.config.ts 中通过 loadEnv(mode, process.cwd()) 加载。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">23</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 的 SSR 原理？Nuxt 3 的优势？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        SSR：服务端执行 renderToString() 生成 HTML 字符串，客户端 hydrate 激活事件绑定。Nuxt 3 优势：① 文件系统路由 ② 自动导入 ③ 服务端 API 路由 ④ SSR/SSG/ISR 灵活切换 ⑤ Nitro 服务引擎 ⑥ 丰富的 Modules 生态。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">24</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">如何实现 Vue3 的权限控制？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 路由级：路由 meta 标记权限 + 导航守卫 beforeEach 校验 ② 组件级：自定义指令 v-permission 控制按钮显示 ③ 菜单级：根据角色动态生成菜单（addRoute 动态路由）④ API 级：请求拦截器携带 Token。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">25</span>
+        <span class="q-tag tag-vue">Vue3</span>
+      </div>
+      <div class="q-body">Vue3 中如何实现国际化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        使用 vue-i18n@9，createI18n 配置 locale 和 messages。模板中 $t('key') 或 Composition API 中 useI18n()。支持按需加载语言包（动态 import），支持日期/数字格式化。Nuxt 3 可用 @nuxtjs/i18n 模块。
+      </div>
+    </div>
+
+    <footer class="exam-footer">
+      <button type="button" class="btn-show-all" id="showAllAnswers">📖 查看所有标准答案</button>
+    </footer>
+  </main>
+</body>
+</html>

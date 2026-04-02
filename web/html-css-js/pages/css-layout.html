@@ -34,6 +34,7 @@
           <strong>优先级计算规则（权重）</strong>
           <code>!important</code> &gt; 内联样式(1000) &gt; ID(100) &gt; 类/伪类/属性(10) &gt; 标签/伪元素(1) &gt; 通配符(0)
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 权重示例 */</span>
 <span class="fn">#app</span> .list <span class="fn">li</span>:hover  <span class="cmt">/* 100 + 10 + 1 + 10 = 121 */</span>
 <span class="fn">.nav</span> > <span class="fn">a</span>.<span class="fn">active</span>        <span class="cmt">/* 10 + 1 + 10 = 21 */</span>
@@ -58,6 +59,7 @@
 
       <div class="card">
         <p class="card-title">常用伪类与属性选择器 — 编辑代码查看效果</p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-tabs="html,css" data-mode="dom">
           <div data-tab="html"><p class="first">第一个段落（:first-child → 绿色）</p>
 <p>第二个段落（:nth-child(2) → 黄色）</p>
@@ -101,6 +103,7 @@ ul { margin-top: 0.5rem; padding-left: 1.2rem; }</div>
           <code>content-box</code>（默认）：width = 内容宽，总宽 = width + padding + border<br>
           <code>border-box</code>（推荐）：width = 内容 + padding + border，总宽 = width
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-tabs="html,css" data-mode="dom">
           <div data-tab="html"><div class="box-wrap">
   <div class="label">content-box（默认）</div>
@@ -157,6 +160,7 @@ strong { color: #ffd166; }</div>
           <strong>核心概念</strong>
           父元素设 <code>display: flex</code>，子元素自动成为 flex item。主轴（main axis）默认水平，交叉轴（cross axis）垂直。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-tabs="html,css" data-mode="dom">
           <div data-tab="html"><div class="flex-container">
   <div class="flex-item">1</div>
@@ -208,6 +212,7 @@ strong { color: #ffd166; }</div>
             </tbody>
           </table>
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-lang="css" data-readonly><span class="cmt">/* 子项属性 */</span>
 .item {
   flex: <span class="num">1</span>;         <span class="cmt">/* flex-grow:1 flex-shrink:1 flex-basis:0 */</span>
@@ -224,6 +229,7 @@ strong { color: #ffd166; }</div>
     <section class="section">
       <h2 class="section-title">4. CSS Grid 网格布局 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-tabs="html,css" data-mode="dom">
           <div data-tab="html"><div class="grid-container">
   <div class="grid-cell">1</div>
@@ -258,6 +264,7 @@ strong { color: #ffd166; }</div>
 .grid-cell:nth-child(6) { background: #c678dd; }</div>
         </div>
         <div class="demo-box"></div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-lang="css" data-readonly style="margin-top:0.75rem"><span class="cmt">/* Grid 核心属性 */</span>
 .container {
   display: grid;

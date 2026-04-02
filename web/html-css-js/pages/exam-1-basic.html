@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端基础综合面试试卷 · 卷一</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/exam.js"></script>
+  <style>
+    .exam-header { text-align: center; padding: 4rem 2rem 1.5rem; }
+    .exam-header h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .exam-header p { color: var(--color-text-muted); font-size: 0.85rem; }
+    .exam-body { max-width: 860px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+    .q-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .q-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .q-num {
+      width: 28px; height: 28px;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .q-tag {
+      font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 3px; font-weight: 600;
+    }
+    .tag-html { background: rgba(228,77,38,0.15); color: #e44d26; }
+    .tag-css { background: rgba(38,77,228,0.15); color: #2965f1; }
+    .tag-js { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-es6 { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-ts { background: rgba(49,120,198,0.15); color: #3178c6; }
+    .tag-vue { background: rgba(66,184,131,0.15); color: #42b883; }
+    .tag-react { background: rgba(97,218,251,0.15); color: #0088cc; }
+    .tag-eng { background: rgba(108,99,255,0.15); color: #6c63ff; }
+    .tag-perf { background: rgba(0,212,170,0.15); color: #00d4aa; }
+    .tag-safe { background: rgba(255,101,132,0.15); color: #ff6584; }
+    .tag-biz { background: rgba(255,209,102,0.15); color: #d4a800; }
+    .q-body { font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.75rem; }
+    .q-body code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; }
+    .q-input {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      font-family: inherit; font-size: 0.82rem;
+      resize: vertical; min-height: 60px;
+      margin-bottom: 0.5rem;
+    }
+    .q-input:focus { outline: none; border-color: var(--color-primary); }
+    .q-toggle-answer {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.75rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .q-toggle-answer:hover { border-color: var(--color-primary); color: var(--color-text); }
+    .q-answer {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-code-bg);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--color-text);
+      border-left: 3px solid var(--color-secondary);
+    }
+    .q-answer code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.8rem; }
+    .exam-footer {
+      text-align: center;
+      padding: 2rem 0 4rem;
+    }
+    .btn-show-all {
+      padding: 0.6rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-show-all:hover { background: var(--color-primary-light); }
+  </style>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <header class="exam-header">
+    <h1>前端基础综合面试试卷（卷一）</h1>
+    <p>共 25 题 · 覆盖 HTML / CSS / JavaScript / ES6 · 建议先作答再对照参考答案</p>
+  </header>
+
+  <main class="exam-body">
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">1</span>
+        <span class="q-tag tag-html">HTML</span>
+      </div>
+      <div class="q-body">HTML5 语义化标签有哪些？为什么要使用语义化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>header</code>、<code>nav</code>、<code>main</code>、<code>article</code>、<code>section</code>、<code>aside</code>、<code>footer</code> 等。好处：① 提升 SEO，搜索引擎更好理解页面结构 ② 增强可访问性，屏幕阅读器可正确朗读 ③ 代码可读性和可维护性更好。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">2</span>
+        <span class="q-tag tag-html">HTML</span>
+      </div>
+      <div class="q-body"><code>localStorage</code>、<code>sessionStorage</code> 和 <code>Cookie</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>localStorage</code> 约 5MB、持久存储、不随请求发送；<code>sessionStorage</code> 约 5MB、会话级别（关闭标签页清除）、不随请求发送；<code>Cookie</code> 约 4KB、可设过期时间、每次请求自动携带、可设 <code>HttpOnly</code> / <code>Secure</code> / <code>SameSite</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">3</span>
+        <span class="q-tag tag-html">HTML</span>
+      </div>
+      <div class="q-body"><code>Canvas</code> 和 <code>SVG</code> 的区别？分别适用于什么场景？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Canvas 基于像素（位图），通过 JS API 绘制，适合游戏、图表、图片处理等高性能场景；SVG 基于矢量（XML），支持 DOM 操作和 CSS 样式，适合图标、地图、数据可视化等需要缩放和交互的场景。Canvas 不支持事件绑定到图形元素，SVG 每个元素都是 DOM 节点可绑定事件。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">4</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">请解释 CSS 盒模型，<code>content-box</code> 和 <code>border-box</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        盒模型由 content + padding + border + margin 组成。<code>content-box</code>（默认）：<code>width</code> 只包含内容区，实际占宽 = width + padding + border；<code>border-box</code>：<code>width</code> 包含 content + padding + border，实际占宽 = width。推荐全局设置 <code>* { box-sizing: border-box; }</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">5</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">什么是 BFC？如何触发？有什么作用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        BFC（Block Formatting Context）是独立的渲染区域，内部布局不影响外部。触发方式：<code>overflow: hidden/auto/scroll</code>、<code>display: flex/grid/inline-block</code>、<code>position: absolute/fixed</code>、<code>float: left/right</code>。作用：① 清除浮动（父元素高度塌陷）② 阻止 margin 合并 ③ 阻止元素被浮动元素覆盖。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">6</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">实现水平垂直居中有哪些方案？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① Flex：<code>display:flex; justify-content:center; align-items:center</code><br>
+        ② Grid：<code>display:grid; place-items:center</code><br>
+        ③ absolute + transform：<code>position:absolute; top:50%; left:50%; transform:translate(-50%,-50%)</code><br>
+        ④ absolute + margin:auto：<code>position:absolute; inset:0; margin:auto</code>（需固定宽高）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">7</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">CSS 选择器优先级如何计算？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>!important</code> &gt; 内联样式 (1,0,0,0) &gt; ID (0,1,0,0) &gt; 类/伪类/属性 (0,0,1,0) &gt; 标签/伪元素 (0,0,0,1) &gt; 通配符 (0,0,0,0)。同优先级后写的覆盖先写的。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">8</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">Flexbox 和 Grid 的区别？分别适用于什么场景？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Flexbox 是一维布局（主轴方向），适合导航栏、工具栏、卡片列表等线性排列；Grid 是二维布局（行+列），适合页面整体布局、仪表盘、复杂网格。Flexbox 更灵活适合内容驱动，Grid 更精确适合布局驱动。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">9</span>
+        <span class="q-tag tag-css">CSS</span>
+      </div>
+      <div class="q-body">什么是重排（Reflow）、重绘（Repaint）和合成（Composite）？如何优化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        重排：改变几何属性（width/height/margin/padding）触发，开销最大；重绘：改变外观属性（color/background）触发，中等开销；合成：只改变 <code>transform</code>/<code>opacity</code>，GPU 加速，开销最小。优化：① 用 transform/opacity 做动画 ② 批量修改 DOM ③ 避免频繁读取布局属性 ④ 使用 <code>will-change</code> 提示浏览器。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">10</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">JavaScript 有哪些数据类型？如何准确判断类型？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        7 种原始类型：<code>string</code>、<code>number</code>、<code>boolean</code>、<code>null</code>、<code>undefined</code>、<code>symbol</code>、<code>bigint</code> + 1 种引用类型：<code>object</code>。判断方法：<code>typeof</code>（注意 <code>typeof null === 'object'</code>）、<code>instanceof</code>（判断原型链）、<code>Object.prototype.toString.call()</code>（最准确，返回 <code>'[object Type]'</code>）、<code>Array.isArray()</code>（判断数组）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">11</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">解释闭包及其应用场景。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        闭包是函数能够访问其词法作用域中变量的能力，即使函数在其词法作用域之外执行。应用：① 数据私有化（模拟私有变量）② 函数工厂（createCounter）③ 回调和事件处理 ④ 柯里化和偏函数 ⑤ 模块模式。注意：闭包会保持对外部变量的引用，可能导致内存泄漏。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">12</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">解释 <code>this</code> 的绑定规则，箭头函数的 <code>this</code> 有什么不同？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>this</code> 绑定优先级：<code>new</code> &gt; 显式绑定（call/apply/bind）&gt; 隐式绑定（obj.fn()）&gt; 默认绑定（window/undefined）。箭头函数没有自己的 <code>this</code>，继承外层词法作用域的 <code>this</code>，且无法通过 call/apply/bind 改变。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">13</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">原型链是什么？如何实现继承？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        每个对象都有 <code>__proto__</code> 指向其构造函数的 <code>prototype</code>，形成原型链。属性查找沿链向上直到 <code>null</code>。继承方式：① 原型链继承 ② 借用构造函数 ③ 组合继承 ④ 寄生组合继承 ⑤ ES6 <code>class extends</code>（语法糖，本质是寄生组合继承）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">14</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body"><code>var</code>、<code>let</code>、<code>const</code> 的区别？什么是暂时性死区（TDZ）？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>var</code>：函数作用域，存在变量提升，可重复声明，挂载到 window；<code>let</code>：块级作用域，不可重复声明，存在 TDZ；<code>const</code>：块级作用域，声明时必须赋值，不可重新赋值（引用类型内容可变）。TDZ：<code>let</code>/<code>const</code> 声明的变量在声明语句之前的区域，访问会抛出 <code>ReferenceError</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">15</span>
+        <span class="q-tag tag-es6">ES6</span>
+      </div>
+      <div class="q-body">解构赋值有哪些用法？展开运算符的应用场景？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        数组解构 <code>[a, b, ...rest]</code>、对象解构 <code>{ name, age: myAge = 18 }</code>、参数解构、嵌套解构、交换变量 <code>[a, b] = [b, a]</code>。展开运算符：合并数组 <code>[...a, ...b]</code>、合并对象 <code>{ ...obj1, ...obj2 }</code>、函数参数收集 <code>fn(...args)</code>、浅拷贝。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">16</span>
+        <span class="q-tag tag-es6">ES6</span>
+      </div>
+      <div class="q-body">Promise 的三种状态是什么？<code>Promise.all</code>、<code>Promise.race</code>、<code>Promise.allSettled</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>pending</code>（等待）、<code>fulfilled</code>（成功）、<code>rejected</code>（失败），状态不可逆。<code>all</code>：全部成功才 resolve，一个失败即 reject；<code>race</code>：最先 settle 的结果（不管成败）；<code>allSettled</code>：全部完成后返回所有结果（包含 status 和 value/reason）；<code>any</code>（ES2021）：最先成功的结果。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">17</span>
+        <span class="q-tag tag-es6">ES6</span>
+      </div>
+      <div class="q-body"><code>async/await</code> 的原理是什么？与 Promise 的关系？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <code>async</code> 函数返回 Promise，<code>await</code> 暂停执行等待 Promise resolve。本质是 Generator + 自动执行器的语法糖。<code>await</code> 后的代码相当于 <code>.then()</code> 回调（微任务）。错误处理用 <code>try/catch</code>。并发优化用 <code>Promise.all([p1, p2])</code> 并行等待，而非串行 await。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">18</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">事件循环（Event Loop）的执行顺序是什么？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 执行同步代码（调用栈）② 清空微任务队列（Promise.then、queueMicrotask、MutationObserver、await 后的代码）③ 取一个宏任务执行（setTimeout、setInterval、I/O、requestAnimationFrame）④ 再清空微任务队列 ⑤ 循环。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">19</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">手写一个防抖函数（debounce）。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        <pre style="margin:0.5rem 0 0; font-size:0.78rem; overflow:auto;"><code>function debounce(fn, delay) {
+  let timer = null;
+  return function (...args) {
+    clearTimeout(timer);
+    timer = setTimeout(() =&gt; fn.apply(this, args), delay);
+  };
+}</code></pre>
+        原理：每次触发重置定时器，只有停止触发 delay 毫秒后才执行。应用：搜索框输入、窗口 resize。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">20</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">手写一个深拷贝函数，需要处理循环引用。</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        使用 <code>WeakMap</code> 记录已拷贝对象解决循环引用。递归处理，特殊类型（Date、RegExp、Map、Set）单独处理，用 <code>Reflect.ownKeys</code> 遍历包括 Symbol key。简单场景可用 <code>structuredClone()</code>。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">21</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body"><code>Proxy</code> 和 <code>Object.defineProperty</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Proxy 可拦截 13 种操作（get/set/deleteProperty/has/ownKeys 等），支持数组下标和新增属性；defineProperty 只能劫持已有属性的 get/set。Proxy 是懒代理（访问时才递归），defineProperty 需要递归遍历所有属性。Proxy 是 Vue3 响应式核心，defineProperty 是 Vue2 的。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">22</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">什么是事件委托？有什么优势？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        利用事件冒泡，将子元素的事件监听器绑定到父元素上，通过 <code>event.target</code> 判断实际触发元素。优势：① 减少事件监听器数量，节省内存 ② 动态添加的子元素自动拥有事件处理 ③ 简化代码。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">23</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body"><code>WeakMap</code> 和 <code>Map</code> 的区别？<code>WeakRef</code> 的作用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Map 的 key 可以是任意类型，强引用不会被 GC；WeakMap 的 key 只能是对象，弱引用不阻止 GC，不可遍历。WeakMap 适合缓存、私有数据存储。WeakRef（ES2021）创建对对象的弱引用，<code>deref()</code> 获取对象或 <code>undefined</code>（已被 GC）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">24</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">常见的设计模式有哪些？分别适用于什么场景？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 单例模式：全局唯一实例（弹窗、Store）② 观察者模式：一对多依赖（EventEmitter）③ 发布订阅：有中间调度层（EventBus）④ 策略模式：算法族封装（表单验证规则）⑤ 工厂模式：创建对象（组件工厂）⑥ 装饰器模式：增强功能（HOC、AOP）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">25</span>
+        <span class="q-tag tag-js">JS</span>
+      </div>
+      <div class="q-body">前端有哪些常见的内存泄漏场景？如何排查？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 意外全局变量 ② 未清除的定时器/事件监听 ③ 闭包持有大对象引用 ④ 脱离 DOM 的引用 ⑤ console.log 保留引用。排查：Chrome DevTools → Memory → Heap Snapshot 对比，或 Performance Monitor 观察 JS Heap Size 趋势。
+      </div>
+    </div>
+  </main>
+
+  <div class="exam-footer">
+    <button type="button" class="btn-show-all" id="showAllAnswers">📖 查看所有标准答案</button>
+  </div>
+</body>
+</html>

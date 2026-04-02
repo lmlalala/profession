@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>试卷四：工程化与性能优化 · 面试试卷</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/exam.js"></script>
+  <style>
+    .exam-header { text-align: center; padding: 4rem 2rem 1.5rem; }
+    .exam-header h1 { font-size: 1.5rem; font-weight: 800; margin-bottom: 0.4rem; }
+    .exam-header p { color: var(--color-text-muted); font-size: 0.85rem; }
+    .exam-body { max-width: 860px; margin: 0 auto 3rem; padding: 0 1.5rem; }
+    .q-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1.25rem;
+      margin-bottom: 1rem;
+    }
+    .q-header { display: flex; align-items: center; gap: 0.5rem; margin-bottom: 0.6rem; }
+    .q-num {
+      width: 28px; height: 28px;
+      background: var(--color-primary);
+      color: #fff;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+    }
+    .q-tag {
+      font-size: 0.65rem; padding: 0.1rem 0.45rem; border-radius: 3px; font-weight: 600;
+    }
+    .tag-html { background: rgba(228,77,38,0.15); color: #e44d26; }
+    .tag-css { background: rgba(38,77,228,0.15); color: #2965f1; }
+    .tag-js { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-es6 { background: rgba(247,223,30,0.15); color: #d4a800; }
+    .tag-ts { background: rgba(49,120,198,0.15); color: #3178c6; }
+    .tag-vue { background: rgba(66,184,131,0.15); color: #42b883; }
+    .tag-react { background: rgba(97,218,251,0.15); color: #0088cc; }
+    .tag-eng { background: rgba(108,99,255,0.15); color: #6c63ff; }
+    .tag-perf { background: rgba(0,212,170,0.15); color: #00d4aa; }
+    .tag-safe { background: rgba(255,101,132,0.15); color: #ff6584; }
+    .tag-biz { background: rgba(255,209,102,0.15); color: #d4a800; }
+    .q-body { font-size: 0.88rem; line-height: 1.7; margin-bottom: 0.75rem; }
+    .q-body code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.82rem; }
+    .q-input {
+      width: 100%; padding: 0.6rem 0.75rem;
+      background: var(--color-surface-2);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      color: var(--color-text);
+      font-family: inherit; font-size: 0.82rem;
+      resize: vertical; min-height: 60px;
+      margin-bottom: 0.5rem;
+    }
+    .q-input:focus { outline: none; border-color: var(--color-primary); }
+    .q-toggle-answer {
+      background: transparent;
+      border: 1px solid var(--color-border);
+      color: var(--color-text-muted);
+      padding: 0.3rem 0.75rem;
+      border-radius: var(--radius-sm);
+      cursor: pointer; font-size: 0.75rem;
+      font-family: inherit;
+      transition: all 0.2s;
+    }
+    .q-toggle-answer:hover { border-color: var(--color-primary); color: var(--color-text); }
+    .q-answer {
+      margin-top: 0.75rem;
+      padding: 0.75rem 1rem;
+      background: var(--color-code-bg);
+      border-radius: var(--radius-sm);
+      font-size: 0.82rem;
+      line-height: 1.7;
+      color: var(--color-text);
+      border-left: 3px solid var(--color-secondary);
+    }
+    .q-answer code { background: var(--color-surface-2); padding: 0.1rem 0.35rem; border-radius: 3px; font-size: 0.8rem; }
+    .exam-footer {
+      text-align: center;
+      padding: 2rem 0 4rem;
+    }
+    .btn-show-all {
+      padding: 0.6rem 1.5rem;
+      background: var(--color-primary);
+      color: #fff;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 0.9rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background 0.2s;
+    }
+    .btn-show-all:hover { background: var(--color-primary-light); }
+  </style>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <header class="exam-header">
+    <h1>试卷四：工程化与性能优化</h1>
+    <p>共 25 题 · Vite/Webpack · 代码规范 · CI/CD · Web Vitals · 渲染优化 · 前端安全 · 建议先作答再对照参考答案</p>
+  </header>
+
+  <main class="exam-body">
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">1</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">Vite 为什么比 Webpack 快？核心原理是什么？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        开发环境：Vite 利用浏览器原生 ESM 按需编译（请求时才编译），不需要打包整个依赖图；用 esbuild（Go 编写）预构建依赖，比 JS 打包器快 10-100 倍。生产环境：用 Rollup 打包，Tree Shaking 更彻底。HMR：只更新变更模块及其依赖链，不重新构建整个 bundle。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">2</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">Webpack 中 <code>loader</code> 和 <code>plugin</code> 的区别？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        loader 是文件转换器，将非 JS 文件转为 JS 模块（如 <code>babel-loader</code> 转 ES6、<code>css-loader</code> 处理 CSS、<code>file-loader</code> 处理图片）。plugin 是功能扩展，在打包生命周期的各个钩子执行任务（如 <code>HtmlWebpackPlugin</code> 生成 HTML、<code>MiniCssExtractPlugin</code> 提取 CSS、<code>DefinePlugin</code> 定义环境变量）。loader 在 <code>module.rules</code> 配置，plugin 在 <code>plugins</code> 数组配置。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">3</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">Webpack 的 Tree Shaking 原理？什么情况下会失效？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        基于 ES Module 的静态分析，标记未使用的 export 为 unused，然后由 Terser 删除。失效情况：① CommonJS 模块（动态 <code>require</code>）② 有副作用的模块（未配置 <code>sideEffects: false</code>）③ 动态导入 ④ 导出对象的属性（只能整体引入）。解决：使用 ESM、配置 <code>sideEffects</code>、按需导入。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">4</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何实现代码分割（Code Splitting）？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 入口分割：多入口配置 ② 动态导入：<code>import()</code> 语法，Webpack 自动分割 chunk ③ 路由懒加载：<code>React.lazy</code> / <code>defineAsyncComponent</code> ④ <code>SplitChunksPlugin</code>：提取公共依赖 ⑤ Vite 的 <code>manualChunks</code> 手动分包。目标：减小首屏 bundle 体积，按需加载。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">5</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">ESLint 和 Prettier 的区别？如何配合使用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ESLint 检查代码质量和潜在错误（未使用变量、类型错误等）；Prettier 只负责代码格式化（缩进、引号、分号等）。配合：<code>eslint-config-prettier</code> 关闭 ESLint 中与 Prettier 冲突的格式规则，让 Prettier 专管格式，ESLint 专管质量。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">6</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何配置 Git Hooks 实现代码提交规范？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        husky 管理 Git Hooks + lint-staged 只检查暂存文件 + commitlint 校验提交信息格式。<code>pre-commit</code> 钩子：lint-staged 执行 ESLint + Prettier 格式化。<code>commit-msg</code> 钩子：commitlint 校验 Conventional Commits 格式（feat/fix/docs 等前缀）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">7</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">Monorepo 的优缺点？常用工具有哪些？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        优点：代码共享、统一版本管理、原子提交、统一 CI/CD。缺点：仓库体积大、构建复杂、权限管理困难。工具：pnpm workspace（推荐）、Turborepo（构建缓存和并行）、Nx（智能构建）、Lerna（版本管理）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">8</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">微前端是什么？有哪些实现方案？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        将大型前端应用拆分为多个独立开发、部署的子应用。方案：① qiankun（基于 single-spa，JS 沙箱 + CSS 隔离）② Module Federation（Webpack 5 模块联邦）③ iframe（天然隔离但体验差）④ Web Components ⑤ micro-app。选择依据：团队规模、技术栈差异、隔离需求。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">9</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">Web Vitals 核心指标有哪些？如何优化？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        LCP（Largest Contentful Paint）最大内容绘制 &lt; 2.5s：优化关键资源加载、图片优化、SSR。INP（Interaction to Next Paint）交互响应 &lt; 200ms：减少主线程阻塞、代码分割。CLS（Cumulative Layout Shift）布局偏移 &lt; 0.1：预留图片/广告尺寸、避免动态插入内容。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">10</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">首屏加载优化有哪些手段？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        网络层：CDN、HTTP/2、Gzip/Brotli 压缩、预加载（<code>preload</code>/<code>prefetch</code>）、DNS 预解析。资源层：代码分割、Tree Shaking、图片优化（WebP/AVIF、懒加载、响应式图片）。渲染层：SSR/SSG、关键 CSS 内联、骨架屏、字体优化（<code>font-display: swap</code>）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">11</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">如何实现虚拟滚动？原理是什么？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        只渲染可视区域内的列表项，通过计算滚动位置动态替换 DOM 节点。原理：① 计算可视区域能显示的条目数 ② 监听滚动事件计算起始索引 ③ 只渲染 <code>startIndex</code> ~ <code>endIndex</code> 的数据 ④ 用 padding/transform 撑开容器模拟完整高度。库：react-virtualized、vue-virtual-scroller。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">12</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">图片优化有哪些手段？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 格式选择：WebP/AVIF 比 JPEG/PNG 小 25-50% ② 响应式图片：<code>srcset</code> + <code>sizes</code> ③ 懒加载：<code>loading="lazy"</code> 或 Intersection Observer ④ CDN 图片处理（裁剪、压缩、格式转换）⑤ CSS Sprite / SVG 图标 ⑥ Base64 内联小图片 ⑦ 预加载关键图片。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">13</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">如何减少 JavaScript 执行时间？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 代码分割，减小主 bundle ② Web Worker 处理 CPU 密集任务 ③ 防抖节流减少高频操作 ④ <code>requestAnimationFrame</code> 替代 <code>setTimeout</code> 做动画 ⑤ 避免长任务（&gt; 50ms），拆分为微任务 ⑥ 使用 <code>requestIdleCallback</code> 处理低优先级任务。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">14</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">如何监控前端性能？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① Performance API（<code>performance.timing</code>、<code>PerformanceObserver</code>）② Web Vitals 库（web-vitals）③ Lighthouse CI 自动化审计 ④ 错误监控（Sentry）⑤ 自定义打点（首屏时间、接口耗时、资源加载）⑥ Real User Monitoring（RUM）。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">15</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">HTTP 缓存策略有哪些？如何配置？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        强缓存：<code>Cache-Control: max-age=31536000</code>（不发请求）；协商缓存：<code>ETag</code>/<code>If-None-Match</code> 或 <code>Last-Modified</code>/<code>If-Modified-Since</code>（304 响应）。最佳实践：HTML 不缓存或短缓存，JS/CSS/图片带 hash 强缓存一年，API 按业务设置。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">16</span>
+        <span class="q-tag tag-safe">Safe</span>
+      </div>
+      <div class="q-body">XSS 攻击有哪些类型？如何防御？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 存储型：恶意脚本存入数据库 ② 反射型：URL 参数注入 ③ DOM 型：前端直接操作 DOM 注入。防御：① 输出编码（HTML 实体转义）② CSP（Content-Security-Policy）③ HttpOnly Cookie ④ 避免 <code>innerHTML</code>，用 <code>textContent</code> ⑤ 输入验证和过滤。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">17</span>
+        <span class="q-tag tag-safe">Safe</span>
+      </div>
+      <div class="q-body">CSRF 攻击原理和防御？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        利用用户已登录的身份，在第三方网站发起恶意请求。防御：① CSRF Token（服务端生成，前端携带）② SameSite Cookie（Strict/Lax）③ 验证 Referer/Origin ④ 关键操作二次验证。Axios 拦截器统一添加 Token。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">18</span>
+        <span class="q-tag tag-safe">Safe</span>
+      </div>
+      <div class="q-body">前端如何保证接口安全？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① HTTPS 加密传输 ② JWT Token 认证（存 httpOnly Cookie 或内存）③ 请求签名（timestamp + nonce + sign）④ 敏感数据加密（RSA 公钥加密）⑤ 接口限流 ⑥ 参数校验 ⑦ CORS 白名单。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">19</span>
+        <span class="q-tag tag-safe">Safe</span>
+      </div>
+      <div class="q-body">如何实现前端权限控制？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 路由权限：动态路由（根据角色 <code>addRoute</code>）+ 导航守卫 ② 按钮权限：自定义指令 <code>v-permission</code> 或组件封装 ③ 接口权限：请求拦截器携带 Token，401 跳转登录 ④ 数据权限：后端控制返回数据范围。RBAC 模型：用户→角色→权限。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">20</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">CI/CD 流程如何设计？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        CI（持续集成）：代码提交 → lint 检查 → 单元测试 → 构建 → 产物上传。CD（持续部署）：自动/手动触发 → 部署到测试环境 → 自动化测试 → 部署到生产环境。工具：GitHub Actions、GitLab CI、Jenkins。关键：自动化测试覆盖率、构建缓存、灰度发布。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">21</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何实现灰度发布？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 按用户比例：负载均衡分流（Nginx upstream weight）② 按用户特征：Cookie/Header 标记 ③ 按地域/IP ④ Feature Flag（功能开关）⑤ 蓝绿部署（两套环境切换）⑥ 金丝雀发布（逐步扩大流量）。前端配合：版本号管理、资源路径区分。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">22</span>
+        <span class="q-tag tag-ts">TS</span>
+      </div>
+      <div class="q-body">TypeScript 在大型项目中的最佳实践？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 开启 <code>strict</code> 模式 ② 避免 <code>any</code>，用 <code>unknown</code> + 类型守卫 ③ 善用工具类型减少重复 ④ 接口定义与后端同步（OpenAPI 自动生成）⑤ 泛型封装通用逻辑 ⑥ 声明文件管理第三方库类型 ⑦ 路径别名（<code>@/</code>）提升可读性。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">23</span>
+        <span class="q-tag tag-perf">Perf</span>
+      </div>
+      <div class="q-body">Service Worker 和 PWA 的作用？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        Service Worker 是浏览器后台线程，可拦截网络请求、缓存资源、推送通知。PWA（Progressive Web App）利用 SW 实现：① 离线访问 ② 资源缓存策略（Cache First/Network First/Stale While Revalidate）③ 后台同步 ④ 推送通知 ⑤ 安装到桌面。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">24</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何处理前端日志和错误监控？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 全局错误捕获：<code>window.onerror</code>、<code>unhandledrejection</code> ② 框架错误：Vue <code>errorHandler</code>、React Error Boundary ③ 接口错误：Axios 拦截器 ④ 上报：Sentry/自建平台，包含错误堆栈、用户信息、页面 URL ⑤ Source Map 上传用于还原压缩代码。
+      </div>
+    </div>
+
+    <div class="q-card">
+      <div class="q-header">
+        <span class="q-num">25</span>
+        <span class="q-tag tag-eng">Eng</span>
+      </div>
+      <div class="q-body">如何设计前端埋点方案？</div>
+      <textarea class="q-input" placeholder="在此写下你的答案..." rows="3"></textarea>
+      <button type="button" class="q-toggle-answer">▼ 查看答案</button>
+      <div class="q-answer" style="display:none">
+        <strong>参考答案：</strong><br>
+        ① 代码埋点：手动调用 <code>track()</code> 函数（精确但侵入性强）② 无埋点/全埋点：自动采集点击/曝光事件（覆盖广但数据量大）③ 可视化埋点：通过可视化工具圈选元素配置（灵活但依赖工具）。技术实现：Intersection Observer 监听曝光、事件委托监听点击、<code>sendBeacon</code> 上报、<code>requestIdleCallback</code> 延迟处理。
+      </div>
+    </div>
+  </main>
+
+  <div class="exam-footer">
+    <button type="button" class="btn-show-all" id="showAllAnswers">📖 查看所有标准答案</button>
+  </div>
+</body>
+</html>

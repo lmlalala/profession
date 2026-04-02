@@ -195,7 +195,7 @@ function runConsole(code, outputEl) {
   hijack();
   try {
     // 用 async Function 支持顶层 await
-    const result = new Function(`return (async () => { ${code} })()`)(); // eslint-disable-line no-new-func
+    const result = new Function(`return (async () => { ${code} })()`)();
     if (result && typeof result.then === 'function') {
       result.catch((e) => writeToConsole(outputEl, [`❌ ${e.message}`], 'error')).finally(restore);
     } else {
@@ -212,7 +212,7 @@ function runCanvas(code, canvasEl) {
   ctx.clearRect(0, 0, canvasEl.width, canvasEl.height);
   try {
     // 只注入 canvas，ctx 由代码自行获取，避免与代码中的 const ctx 重复声明冲突
-    new Function('canvas', code)(canvasEl); // eslint-disable-line no-new-func
+    new Function('canvas', code)(canvasEl);
   } catch (e) {
     ctx.fillStyle = '#ff6584';
     ctx.font = '13px monospace';
@@ -501,6 +501,7 @@ async function initCodeBlock(codeBlockEl) {
   const lang = codeBlockEl.dataset.lang || 'javascript';
   const mode = codeBlockEl.dataset.mode || 'console';
   const readonly = codeBlockEl.hasAttribute('data-readonly');
+  const autoRun = codeBlockEl.hasAttribute('data-auto-run');
   const langCfg = LANG_CONFIG[lang] || LANG_CONFIG.javascript;
 
   // 计算编辑器高度
@@ -622,8 +623,8 @@ async function initCodeBlock(codeBlockEl) {
     });
   }
 
-  // 非只读模式：初始化完成后自动运行一次，展示默认效果
-  if (!readonly) run();
+  // 初始化完成后自动运行一次
+  if (autoRun) run();
 
   return { editor, run };
 }

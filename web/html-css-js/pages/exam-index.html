@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>前端面试题库</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <style>
+    .exam-hero {
+      text-align: center;
+      padding: 5rem 2rem 2rem;
+    }
+    .exam-hero h1 {
+      font-size: clamp(1.6rem, 4vw, 2.4rem);
+      font-weight: 900;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, var(--color-accent), var(--color-primary-light), var(--color-secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .exam-hero p { color: var(--color-text-muted); font-size: 0.9rem; }
+    .exam-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 1.25rem;
+      max-width: 1100px;
+      margin: 2rem auto 4rem;
+      padding: 0 1.5rem;
+    }
+    .exam-card {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      text-decoration: none;
+      color: var(--color-text);
+      transition: all var(--transition);
+      display: flex;
+      flex-direction: column;
+      gap: 0.6rem;
+      position: relative;
+      overflow: hidden;
+    }
+    .exam-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0;
+      height: 3px;
+    }
+    .exam-card:nth-child(1)::before { background: linear-gradient(90deg, #f7df1e, #e44d26); }
+    .exam-card:nth-child(2)::before { background: linear-gradient(90deg, #42b883, #3178c6); }
+    .exam-card:nth-child(3)::before { background: linear-gradient(90deg, #61dafb, #3178c6); }
+    .exam-card:nth-child(4)::before { background: linear-gradient(90deg, #6c63ff, #00d4aa); }
+    .exam-card:nth-child(5)::before { background: linear-gradient(90deg, #ff6584, #ffd166); }
+    .exam-card:hover {
+      border-color: var(--color-primary);
+      transform: translateY(-3px);
+      box-shadow: 0 8px 32px rgba(108,99,255,0.2);
+    }
+    .exam-icon { font-size: 2rem; }
+    .exam-title { font-size: 1.05rem; font-weight: 700; }
+    .exam-desc { font-size: 0.82rem; color: var(--color-text-muted); line-height: 1.5; }
+    .exam-meta { display: flex; gap: 0.5rem; flex-wrap: wrap; margin-top: 0.25rem; }
+    .exam-meta span {
+      font-size: 0.7rem;
+      padding: 0.15rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+    }
+    .meta-count { background: rgba(108,99,255,0.15); color: var(--color-primary-light); }
+    .meta-time { background: rgba(0,212,170,0.15); color: var(--color-secondary); }
+    .meta-level { background: rgba(255,101,132,0.15); color: var(--color-accent); }
+    .exam-tip {
+      max-width: 1100px;
+      margin: 0 auto 2rem;
+      padding: 0 1.5rem;
+    }
+    .exam-tip .callout {
+      background: var(--color-surface);
+      border: 1px solid var(--color-border);
+      border-radius: var(--radius-sm);
+      padding: 1rem 1.25rem;
+      font-size: 0.82rem;
+      color: var(--color-text-muted);
+      line-height: 1.6;
+    }
+    .exam-tip .callout strong { color: var(--color-text); }
+  </style>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <section class="exam-hero">
+    <h1>前端面试题库</h1>
+    <p>5 套岗位面试卷 · 每题可作答 · 附标准答案 · 覆盖全栈知识点</p>
+  </section>
+
+  <div class="exam-tip">
+    <div class="callout">
+      <strong>使用说明：</strong>
+      选择一套试卷开始作答，每道题下方有输入框可以写下你的答案。
+      完成后点击底部「查看标准答案」按钮，展开所有参考答案进行对比。
+      建议先独立作答再查看答案，效果更佳。
+    </div>
+  </div>
+
+  <div class="exam-grid">
+    <a href="exam-1-basic.html" class="exam-card">
+      <span class="exam-icon">📝</span>
+      <span class="exam-title">试卷一：前端基础综合</span>
+      <span class="exam-desc">HTML5 语义化 · CSS 布局与动画 · JavaScript 核心 · ES6+ 语法 · 异步编程 · 手写实现</span>
+      <div class="exam-meta">
+        <span class="meta-count">25 题</span>
+        <span class="meta-time">约 90 分钟</span>
+        <span class="meta-level">初级 ~ 中级</span>
+      </div>
+    </a>
+
+    <a href="exam-2-vue.html" class="exam-card">
+      <span class="exam-icon">💚</span>
+      <span class="exam-title">试卷二：Vue3 技术栈</span>
+      <span class="exam-desc">Vue3 响应式原理 · Composition API · Pinia · Vue Router · Vite · TypeScript 集成</span>
+      <div class="exam-meta">
+        <span class="meta-count">25 题</span>
+        <span class="meta-time">约 90 分钟</span>
+        <span class="meta-level">中级 ~ 高级</span>
+      </div>
+    </a>
+
+    <a href="exam-3-react.html" class="exam-card">
+      <span class="exam-icon">⚛️</span>
+      <span class="exam-title">试卷三：React 技术栈</span>
+      <span class="exam-desc">Hooks 原理 · Fiber 架构 · Redux Toolkit · Next.js SSR · React 性能优化 · TypeScript</span>
+      <div class="exam-meta">
+        <span class="meta-count">25 题</span>
+        <span class="meta-time">约 90 分钟</span>
+        <span class="meta-level">中级 ~ 高级</span>
+      </div>
+    </a>
+
+    <a href="exam-4-engineering.html" class="exam-card">
+      <span class="exam-icon">🔧</span>
+      <span class="exam-title">试卷四：工程化与性能优化</span>
+      <span class="exam-desc">Vite/Webpack · 代码规范 · CI/CD · Web Vitals · 渲染优化 · 前端安全 · 监控体系</span>
+      <div class="exam-meta">
+        <span class="meta-count">25 题</span>
+        <span class="meta-time">约 90 分钟</span>
+        <span class="meta-level">高级</span>
+      </div>
+    </a>
+
+    <a href="exam-5-finance.html" class="exam-card">
+      <span class="exam-icon">🏦</span>
+      <span class="exam-title">试卷五：金融/支付中台方向</span>
+      <span class="exam-desc">Vue3 + TS 深度 · 金融安全 · 大数精度 · 高并发 · 权限控制 · 多端开发 · 综合实战</span>
+      <div class="exam-meta">
+        <span class="meta-count">30 题</span>
+        <span class="meta-time">约 120 分钟</span>
+        <span class="meta-level">高级 · 实战</span>
+      </div>
+    </a>
+  </div>
+</body>
+</html>

@@ -24,6 +24,7 @@
           原始（值类型）：<code>string number boolean null undefined symbol bigint</code><br>
           引用类型：<code>object</code>（包含 Array、Function、Date、RegExp 等）
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// typeof 返回值
 console.log('typeof "hello":', typeof 'hello')
 console.log('typeof 42:', typeof 42)
@@ -47,6 +48,7 @@ console.log('[] instanceof Object:', [] instanceof Object)</div>
 
       <div class="card">
         <p class="card-title">== vs === 与隐式类型转换 <span class="tag-badge interview">面试必考</span></p>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// == 会进行隐式类型转换
 console.log('0 == "":', 0 == '')
 console.log('0 == "0":', 0 == '0')
@@ -84,6 +86,7 @@ console.log('Number.isNaN("NaN"):', Number.isNaN('NaN'), '← 不转换，更严
             </tbody>
           </table>
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// var 提升：声明提升，值为 undefined
 console.log('var a before declare:', typeof a_var) // undefined
 var a_var = 1
@@ -118,6 +121,7 @@ var sayBye = function() { return 'Bye!' }</div>
     <section class="section">
       <h2 class="section-title">3. 作用域链与闭包 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 作用域链：从内向外查找变量
 const x = 'global'
 function outer() {
@@ -174,6 +178,7 @@ console.log('私有 _age 无法直接访问:', person._age)</div>
           <strong>this 的四种绑定规则（优先级从高到低）</strong><br>
           ① new 绑定 &gt; ② 显式绑定（call/apply/bind）&gt; ③ 隐式绑定（对象方法）&gt; ④ 默认绑定（全局/undefined）
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// ① 隐式绑定：谁调用，this 指向谁
 const obj = { name: 'Alice', greet() { return this.name } }
 console.log('隐式绑定:', obj.greet())
@@ -209,6 +214,7 @@ timer.start()</div>
     <section class="section">
       <h2 class="section-title">5. 原型链与继承 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 原型链查找：obj → obj.__proto__ → ... → Object.prototype → null
 function Animal(name) { this.name = name }
 Animal.prototype.speak = function() { return `${this.name} 发出声音` }

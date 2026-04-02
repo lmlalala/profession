@@ -72,6 +72,7 @@
           <strong>核心思路</strong>：遍历 data 的每个属性，用 <code>Object.defineProperty</code> 将其转为 getter/setter。
           getter 中收集依赖（Dep.depend），setter 中通知更新（Dep.notify）。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Dep：依赖收集器（每个响应式属性对应一个 Dep）
 class Dep {
   constructor() { this.subs = new Set() }
@@ -158,6 +159,7 @@ console.log('最终 name:', data.name)</div>
         <div class="callout warn">
           <strong>Object.defineProperty 的缺陷</strong>：只能劫持已存在的属性，无法检测属性的新增和删除，也无法检测数组下标直接赋值。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// 响应式基础（复用上面的 Dep/Watcher/observe）
 class Dep {
   constructor() { this.subs = new Set() }
@@ -224,6 +226,7 @@ console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')</div>
         <div class="callout info">
           <strong>核心思想</strong>：用 JS 对象描述 DOM 结构（VNode），数据变化时先对比新旧 VNode（diff），再将最小差异更新到真实 DOM。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// VNode 结构：用 JS 对象描述 DOM
 function h(tag, props, ...children) {
   return { tag, props: props || {}, children: children.flat().filter(c => c != null) }
@@ -278,6 +281,7 @@ console.log(JSON.stringify(vnodeToSimple(vnode), null, 2))</div>
           <strong>Vue2 diff 策略</strong>：同层比较，不跨层。使用双端指针（头头/尾尾/头尾/尾头）对比，再用 key 建立映射表。
           时间复杂度 O(n)。
         </div>
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// diff 算法：分析新旧列表的差异
 function diffLists(oldList, newList) {
   const oldMap = new Map(oldList.map((v, i) => [v, i]))
@@ -338,6 +342,7 @@ console.log('有 key：建立 key→index 映射，O(1) 查找复用节点')</di
     <section class="section">
       <h2 class="section-title">5. Mini Vue2 完整实现</h2>
       <div class="card">
+        <!-- prettier-ignore -->
         <div class="code-block" data-mode="console">// Mini Vue2：响应式 + computed + watch + 渲染
 class Dep {
   constructor() { this.subs = new Set() }
