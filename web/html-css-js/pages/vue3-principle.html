@@ -67,11 +67,18 @@
           </table>
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Vue3 响应式核心：Proxy + Reflect + track/trigger
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// Vue3 响应式核心：Proxy + Reflect + track/trigger
 const targetMap = new WeakMap()
 let activeEffect = null
 const effectStack = []
 
+/**
+ * 收集依赖：将当前 activeEffect 添加到 target[key] 的依赖集合中。
+ * @param {Object} target - 被代理的原始对象
+ * @param {string|symbol} key - 被访问的属性名
+ * @returns {void}
+ */
 function track(target, key) {
   if (!activeEffect) return
   let depsMap = targetMap.get(target)
@@ -81,17 +88,29 @@ function track(target, key) {
   dep.add(activeEffect)
 }
 
+/**
+ * 触发更新：执行 target[key] 的所有依赖副作用函数。
+ * @param {Object} target - 被代理的原始对象
+ * @param {'ADD'|'SET'|'DELETE'} type - 操作类型
+ * @param {string|symbol} key - 被修改的属性名
+ * @returns {void}
+ */
 function trigger(target, type, key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) return
   const effects = new Set()
-  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
-  if (type === 'ADD' || type === 'DELETE') depsMap.get('length')?.forEach(e => effects.add(e))
-  effects.forEach(e => e())
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  if (type === 'ADD' || type === 'DELETE') depsMap.get('length')?.forEach(e =&gt; effects.add(e))
+  effects.forEach(e =&gt; e())
 }
 
+/**
+ * 注册副作用函数，立即执行一次以收集依赖。
+ * @param {Function} fn - 副作用函数
+ * @returns {Function} 包装后的 effectFn
+ */
 function effect(fn) {
-  const effectFn = () => {
+  const effectFn = () =&gt; {
     effectStack.push(effectFn); activeEffect = effectFn
     const result = fn()
     effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
@@ -103,13 +122,19 @@ function effect(fn) {
 }
 
 const reactiveMap = new WeakMap()
+
+/**
+ * 将普通对象转为响应式代理，支持深层懒代理。
+ * @param {Object} raw - 原始对象
+ * @returns {Proxy} 响应式代理对象
+ */
 function reactive(raw) {
   if (reactiveMap.has(raw)) return reactiveMap.get(raw)
   const proxy = new Proxy(raw, {
     get(target, key, receiver) {
       track(target, key)
       const res = Reflect.get(target, key, receiver)
-      return res && typeof res === 'object' ? reactive(res) : res
+      return res &amp;&amp; typeof res === 'object' ? reactive(res) : res
     },
     set(target, key, value, receiver) {
       const hadKey = Object.hasOwn(target, key)
@@ -133,36 +158,129 @@ function reactive(raw) {
 // ── 演示 ──
 const state = reactive({ name: 'Alice', age: 25 })
 const logs = []
-effect(() => { logs.push(`name=${state.name}`) })
+effect(() =&gt; { logs.push(`name=${state.name}`) })
 
 state.name = 'Bob'
 console.log('修改已有属性 name=Bob → 响应:', logs.join(' | '))
 
 // ✅ 新增属性（Vue2 无法检测，Vue3 可以）
 const logs2 = []
-effect(() => { logs2.push(`city=${state.city ?? 'undefined'}`) })
+effect(() =&gt; { logs2.push(`city=${state.city ?? 'undefined'}`) })
 state.city = 'Beijing'
 console.log('✅ 新增属性 city=Beijing → 响应:', logs2.join(' | '))
 
 // ✅ 删除属性
 const logs3 = []
-effect(() => { logs3.push(`age=${state.age ?? 'deleted'}`) })
+effect(() =&gt; { logs3.push(`age=${state.age ?? 'deleted'}`) })
 delete state.age
 console.log('✅ 删除属性 age → 响应:', logs3.join(' | '))
 
 // ✅ 数组下标赋值
 const arr = reactive([1, 2, 3])
 const arrLogs = []
-effect(() => { arrLogs.push(`arr[0]=${arr[0]}`) })
+effect(() =&gt; { arrLogs.push(`arr[0]=${arr[0]}`) })
 arr[0] = 99
 console.log('✅ 数组下标赋值 arr[0]=99 → 响应:', arrLogs.join(' | '))
 
 // ✅ 深层嵌套（懒代理）
 const nested = reactive({ a: { b: { c: 1 } } })
 const nestedLogs = []
-effect(() => { nestedLogs.push(`c=${nested.a.b.c}`) })
+effect(() =&gt; { nestedLogs.push(`c=${nested.a.b.c}`) })
 nested.a.b.c = 42
 console.log('✅ 深层嵌套 nested.a.b.c=42 → 响应:', nestedLogs.join(' | '))</div>
+<div data-tab="typescript">// Vue3 响应式核心：Proxy + Reflect + track/trigger
+
+type EffectFn = {
+  (): any
+  deps: Set&lt;Set&lt;EffectFn&gt;&gt;
+}
+
+type TriggerType = 'ADD' | 'SET' | 'DELETE'
+
+const targetMap = new WeakMap&lt;object, Map&lt;string | symbol, Set&lt;EffectFn&gt;&gt;&gt;()
+let activeEffect: EffectFn | null = null
+const effectStack: EffectFn[] = []
+
+/**
+ * 收集依赖：将当前 activeEffect 添加到 target[key] 的依赖集合中。
+ * @param target - 被代理的原始对象
+ * @param key - 被访问的属性名
+ */
+function track(target: object, key: string | symbol): void {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
+}
+
+/**
+ * 触发更新：执行 target[key] 的所有依赖副作用函数。
+ * @param target - 被代理的原始对象
+ * @param type - 操作类型
+ * @param key - 被修改的属性名
+ */
+function trigger(target: object, type: TriggerType, key: string | symbol): void {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set&lt;EffectFn&gt;()
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  if (type === 'ADD' || type === 'DELETE') depsMap.get('length')?.forEach(e =&gt; effects.add(e))
+  effects.forEach(e =&gt; e())
+}
+
+/**
+ * 注册副作用函数，立即执行一次以收集依赖。
+ * @param fn - 副作用函数
+ * @returns 包装后的 effectFn
+ */
+function effect(fn: () =&gt; any): EffectFn {
+  const effectFn: EffectFn = () =&gt; {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
+  }
+  effectFn.deps = new Set()
+  effectFn()
+  return effectFn
+}
+
+const reactiveMap = new WeakMap&lt;object, object&gt;()
+
+/**
+ * 将普通对象转为响应式代理，支持深层懒代理。
+ * @param raw - 原始对象
+ * @returns 响应式代理对象
+ */
+function reactive&lt;T extends object&gt;(raw: T): T {
+  if (reactiveMap.has(raw)) return reactiveMap.get(raw) as T
+  const proxy = new Proxy(raw, {
+    get(target, key, receiver) {
+      track(target, key)
+      const res = Reflect.get(target, key, receiver)
+      return res &amp;&amp; typeof res === 'object' ? reactive(res as object) : res
+    },
+    set(target, key, value, receiver) {
+      const hadKey = Object.hasOwn(target, key)
+      const oldVal = (target as any)[key]
+      const result = Reflect.set(target, key, value, receiver)
+      if (!hadKey) trigger(target, 'ADD', key)
+      else if (value !== oldVal) trigger(target, 'SET', key)
+      return result
+    },
+    deleteProperty(target, key) {
+      const hadKey = Object.hasOwn(target, key)
+      const result = Reflect.deleteProperty(target, key)
+      if (hadKey) trigger(target, 'DELETE', key)
+      return result
+    }
+  })
+  reactiveMap.set(raw, proxy)
+  return proxy as T
+}</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="proxyOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -174,12 +292,18 @@ console.log('✅ 深层嵌套 nested.a.b.c=42 → 响应:', nestedLogs.join(' | 
       <h2 class="section-title">2. effect / track / trigger 依赖收集 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;
 const targetMap = new WeakMap()
 let activeEffect = null
 const effectStack = []
 
-// track：在 getter 中收集当前 activeEffect
+/**
+ * 在 getter 中收集当前 activeEffect 到依赖集合。
+ * @param {Object} target - 被代理的原始对象
+ * @param {string|symbol} key - 被访问的属性名
+ * @returns {void}
+ */
 function track(target, key) {
   if (!activeEffect) return
   let depsMap = targetMap.get(target)
@@ -189,18 +313,31 @@ function track(target, key) {
   dep.add(activeEffect)
 }
 
-// trigger：在 setter 中触发所有依赖该属性的 effect
+/**
+ * 在 setter 中触发所有依赖该属性的 effect，支持 scheduler 调度。
+ * @param {Object} target - 被代理的原始对象
+ * @param {'ADD'|'SET'|'DELETE'} type - 操作类型
+ * @param {string|symbol} key - 被修改的属性名
+ * @returns {void}
+ */
 function trigger(target, type, key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) return
   const effects = new Set()
-  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
-  effects.forEach(e => e.options?.scheduler ? e.options.scheduler(e) : e())
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e =&gt; e.options?.scheduler ? e.options.scheduler(e) : e())
 }
 
-// effect：注册副作用函数，执行时自动收集依赖
+/**
+ * 注册副作用函数，支持 lazy 和 scheduler 选项。
+ * @param {Function} fn - 副作用函数
+ * @param {Object} [options={}] - 配置项
+ * @param {boolean} [options.lazy] - 为 true 时不立即执行
+ * @param {Function} [options.scheduler] - 自定义调度器
+ * @returns {Function} 包装后的 effectFn
+ */
 function effect(fn, options = {}) {
-  const effectFn = () => {
+  const effectFn = () =&gt; {
     effectStack.push(effectFn); activeEffect = effectFn
     const result = fn()
     effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
@@ -212,7 +349,11 @@ function effect(fn, options = {}) {
   return effectFn
 }
 
-// reactive（简化版）
+/**
+ * 创建响应式代理（简化版，仅拦截 get/set）。
+ * @param {Object} raw - 原始对象
+ * @returns {Proxy} 响应式代理对象
+ */
 function reactive(raw) {
   return new Proxy(raw, {
     get(target, key, receiver) {
@@ -231,11 +372,11 @@ function reactive(raw) {
 const state = reactive({ a: 1, b: 2, c: 3 })
 
 const e1Logs = []
-effect(() => { e1Logs.push(state.a + state.b) })
+effect(() =&gt; { e1Logs.push(state.a + state.b) })
 console.log('effect1 依赖 a+b，初始值:', e1Logs.at(-1))
 
 const e2Logs = []
-effect(() => { e2Logs.push(state.b + state.c) })
+effect(() =&gt; { e2Logs.push(state.b + state.c) })
 console.log('effect2 依赖 b+c，初始值:', e2Logs.at(-1))
 
 // 修改 a → 只触发 effect1
@@ -251,6 +392,91 @@ state.c = 30
 console.log('修改 c=30 → effect2 触发:', e2Logs.at(-1), '| effect1 未触发:', e1Logs.length === 3)
 
 console.log('\n依赖图：a→[effect1] | b→[effect1, effect2] | c→[effect2]')</div>
+<div data-tab="typescript">// 全局依赖图：WeakMap&lt;target, Map&lt;key, Set&lt;effect&gt;&gt;&gt;
+
+interface ReactiveEffect {
+  (): any
+  deps: Set&lt;Set&lt;ReactiveEffect&gt;&gt;
+  options: EffectOptions
+}
+
+interface EffectOptions {
+  lazy?: boolean
+  scheduler?: (effect: ReactiveEffect) =&gt; void
+}
+
+type TriggerType = 'ADD' | 'SET' | 'DELETE'
+
+const targetMap = new WeakMap&lt;object, Map&lt;string | symbol, Set&lt;ReactiveEffect&gt;&gt;&gt;()
+let activeEffect: ReactiveEffect | null = null
+const effectStack: ReactiveEffect[] = []
+
+/**
+ * 在 getter 中收集当前 activeEffect 到依赖集合。
+ * @param target - 被代理的原始对象
+ * @param key - 被访问的属性名
+ */
+function track(target: object, key: string | symbol): void {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
+}
+
+/**
+ * 在 setter 中触发所有依赖该属性的 effect，支持 scheduler 调度。
+ * @param target - 被代理的原始对象
+ * @param type - 操作类型
+ * @param key - 被修改的属性名
+ */
+function trigger(target: object, type: TriggerType, key: string | symbol): void {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set&lt;ReactiveEffect&gt;()
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e =&gt; e.options?.scheduler ? e.options.scheduler(e) : e())
+}
+
+/**
+ * 注册副作用函数，支持 lazy 和 scheduler 选项。
+ * @param fn - 副作用函数
+ * @param options - 配置项
+ * @returns 包装后的 ReactiveEffect
+ */
+function effect(fn: () =&gt; any, options: EffectOptions = {}): ReactiveEffect {
+  const effectFn = (() =&gt; {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
+  }) as ReactiveEffect
+  effectFn.deps = new Set()
+  effectFn.options = options
+  if (!options.lazy) effectFn()
+  return effectFn
+}
+
+/**
+ * 创建响应式代理（简化版，仅拦截 get/set）。
+ * @param raw - 原始对象
+ * @returns 响应式代理对象
+ */
+function reactive&lt;T extends object&gt;(raw: T): T {
+  return new Proxy(raw, {
+    get(target, key, receiver) {
+      track(target, key)
+      return Reflect.get(target, key, receiver)
+    },
+    set(target, key, value, receiver) {
+      const result = Reflect.set(target, key, value, receiver)
+      trigger(target, 'SET', key)
+      return result
+    }
+  }) as T
+}</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="effectOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -262,10 +488,13 @@ console.log('\n依赖图：a→[effect1] | b→[effect1, effect2] | c→[effect2
       <h2 class="section-title">3. ref / reactive / computed 实现</h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// 依赖收集基础（复用 track/trigger/effect）
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// 依赖收集基础（复用 track/trigger/effect）
 const targetMap = new WeakMap()
 let activeEffect = null
 const effectStack = []
+
+/** @param {Object} target @param {string|symbol} key @returns {void} */
 function track(target, key) {
   if (!activeEffect) return
   let depsMap = targetMap.get(target)
@@ -274,15 +503,19 @@ function track(target, key) {
   if (!dep) depsMap.set(key, dep = new Set())
   dep.add(activeEffect)
 }
+
+/** @param {Object} target @param {string} type @param {string|symbol} key @returns {void} */
 function trigger(target, type, key) {
   const depsMap = targetMap.get(target)
   if (!depsMap) return
   const effects = new Set()
-  depsMap.get(key)?.forEach(e => { if (e !== activeEffect) effects.add(e) })
-  effects.forEach(e => e.options?.scheduler ? e.options.scheduler(e) : e())
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e =&gt; e.options?.scheduler ? e.options.scheduler(e) : e())
 }
+
+/** @param {Function} fn @param {Object} [options={}] @returns {Function} */
 function effect(fn, options = {}) {
-  const effectFn = () => {
+  const effectFn = () =&gt; {
     effectStack.push(effectFn); activeEffect = effectFn
     const result = fn()
     effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
@@ -293,7 +526,11 @@ function effect(fn, options = {}) {
   return effectFn
 }
 
-// ref：包装基本类型（通过 .value 访问）
+/**
+ * 包装基本类型为响应式引用，通过 .value 访问。
+ * @param {*} raw - 初始值
+ * @returns {{ __v_isRef: true, value: * }} ref 对象
+ */
 function ref(raw) {
   const r = {
     __v_isRef: true,
@@ -303,7 +540,11 @@ function ref(raw) {
   return r
 }
 
-// computed：带缓存的计算属性
+/**
+ * 创建带缓存的计算属性，依赖变化时标记为脏，读取时才重算。
+ * @param {Function} getter - 计算函数
+ * @returns {{ __v_isRef: true, value: * }} computed 对象
+ */
 function computed(getter) {
   let dirty = true, _value
   const effectFn = effect(getter, {
@@ -313,7 +554,7 @@ function computed(getter) {
   const obj = {
     __v_isRef: true,
     get value() {
-      if (dirty) { _value = effectFn(); dirty = false }  // 脏时重算
+      if (dirty) { _value = effectFn(); dirty = false }
       track(obj, 'value')
       return _value
     }
@@ -321,11 +562,18 @@ function computed(getter) {
   return obj
 }
 
-// watch：监听响应式数据变化
+/**
+ * 监听响应式数据变化，变化时执行回调。
+ * @param {Function|Object} source - 监听源（函数或 ref）
+ * @param {Function} cb - 回调函数 (newVal, oldVal)
+ * @param {Object} [options={}] - 配置项
+ * @param {boolean} [options.immediate] - 是否立即执行
+ * @returns {void}
+ */
 function watch(source, cb, options = {}) {
-  let getter = typeof source === 'function' ? source : () => source.value
+  let getter = typeof source === 'function' ? source : () =&gt; source.value
   let oldValue
-  const job = () => {
+  const job = () =&gt; {
     const newValue = effectFn()
     if (newValue !== oldValue) { cb(newValue, oldValue); oldValue = newValue }
   }
@@ -338,7 +586,7 @@ function watch(source, cb, options = {}) {
 // ref
 const count = ref(0)
 const logs = []
-effect(() => { logs.push(`count=${count.value}`) })
+effect(() =&gt; { logs.push(`count=${count.value}`) })
 count.value++; count.value++
 console.log('ref count 变化:', logs.join(' → '))
 
@@ -346,7 +594,7 @@ console.log('ref count 变化:', logs.join(' → '))
 const price = ref(100)
 const quantity = ref(3)
 let computeCount = 0
-const total = computed(() => { computeCount++; return price.value * quantity.value })
+const total = computed(() =&gt; { computeCount++; return price.value * quantity.value })
 console.log('computed total:', total.value, '(计算次数:', computeCount, ')')
 console.log('再次读取 total（缓存）:', total.value, '(计算次数:', computeCount, ')')
 price.value = 200
@@ -356,9 +604,121 @@ console.log('再次读取（缓存）:', total.value, '(计算次数:', computeC
 // watch
 const name = ref('Alice')
 const watchLogs = []
-watch(name, (newVal, oldVal) => { watchLogs.push(`${oldVal}→${newVal}`) })
+watch(name, (newVal, oldVal) =&gt; { watchLogs.push(`${oldVal}→${newVal}`) })
 name.value = 'Bob'; name.value = 'Charlie'
 console.log('watch 变化记录:', watchLogs.join(' | '))</div>
+<div data-tab="typescript">// 依赖收集基础（复用 track/trigger/effect）
+
+interface ReactiveEffect {
+  (): any
+  deps: Set&lt;Set&lt;ReactiveEffect&gt;&gt;
+  options: EffectOptions
+}
+
+interface EffectOptions {
+  lazy?: boolean
+  scheduler?: (effect: ReactiveEffect) =&gt; void
+}
+
+interface Ref&lt;T&gt; {
+  __v_isRef: true
+  value: T
+}
+
+interface ComputedRef&lt;T&gt; extends Ref&lt;T&gt; {
+  readonly value: T
+}
+
+const targetMap = new WeakMap&lt;object, Map&lt;string | symbol, Set&lt;ReactiveEffect&gt;&gt;&gt;()
+let activeEffect: ReactiveEffect | null = null
+const effectStack: ReactiveEffect[] = []
+
+function track(target: object, key: string | symbol): void {
+  if (!activeEffect) return
+  let depsMap = targetMap.get(target)
+  if (!depsMap) targetMap.set(target, depsMap = new Map())
+  let dep = depsMap.get(key)
+  if (!dep) depsMap.set(key, dep = new Set())
+  dep.add(activeEffect)
+}
+
+function trigger(target: object, type: string, key: string | symbol): void {
+  const depsMap = targetMap.get(target)
+  if (!depsMap) return
+  const effects = new Set&lt;ReactiveEffect&gt;()
+  depsMap.get(key)?.forEach(e =&gt; { if (e !== activeEffect) effects.add(e) })
+  effects.forEach(e =&gt; e.options?.scheduler ? e.options.scheduler(e) : e())
+}
+
+function effect(fn: () =&gt; any, options: EffectOptions = {}): ReactiveEffect {
+  const effectFn = (() =&gt; {
+    effectStack.push(effectFn); activeEffect = effectFn
+    const result = fn()
+    effectStack.pop(); activeEffect = effectStack[effectStack.length - 1] ?? null
+    return result
+  }) as ReactiveEffect
+  effectFn.deps = new Set(); effectFn.options = options
+  if (!options.lazy) effectFn()
+  return effectFn
+}
+
+/**
+ * 包装基本类型为响应式引用，通过 .value 访问。
+ * @param raw - 初始值
+ * @returns ref 对象
+ */
+function ref&lt;T&gt;(raw: T): Ref&lt;T&gt; {
+  let _value = raw
+  const r: Ref&lt;T&gt; = {
+    __v_isRef: true,
+    get value() { track(r as any, 'value'); return _value },
+    set value(newVal: T) { if (newVal !== _value) { _value = newVal; trigger(r as any, 'SET', 'value') } }
+  }
+  return r
+}
+
+/**
+ * 创建带缓存的计算属性，依赖变化时标记为脏，读取时才重算。
+ * @param getter - 计算函数
+ * @returns computed 对象
+ */
+function computed&lt;T&gt;(getter: () =&gt; T): ComputedRef&lt;T&gt; {
+  let dirty = true, _value: T
+  const effectFn = effect(getter, {
+    lazy: true,
+    scheduler() { if (!dirty) { dirty = true; trigger(obj as any, 'SET', 'value') } }
+  })
+  const obj: ComputedRef&lt;T&gt; = {
+    __v_isRef: true,
+    get value() {
+      if (dirty) { _value = effectFn(); dirty = false }
+      track(obj as any, 'value')
+      return _value
+    }
+  }
+  return obj
+}
+
+type WatchSource&lt;T&gt; = (() =&gt; T) | Ref&lt;T&gt;
+
+/**
+ * 监听响应式数据变化，变化时执行回调。
+ * @param source - 监听源（函数或 ref）
+ * @param cb - 回调函数
+ * @param options - 配置项
+ */
+function watch&lt;T&gt;(source: WatchSource&lt;T&gt;, cb: (newVal: T, oldVal: T) =&gt; void, options: { immediate?: boolean } = {}): void {
+  const getter = typeof source === 'function' ? source as () =&gt; T : () =&gt; (source as Ref&lt;T&gt;).value
+  let oldValue: T
+  const job = () =&gt; {
+    const newValue = effectFn() as T
+    if (newValue !== oldValue) { cb(newValue, oldValue); oldValue = newValue }
+  }
+  const effectFn = effect(getter, { lazy: true, scheduler: job })
+  if (options.immediate) job()
+  else oldValue = effectFn() as T
+}</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="refOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -422,10 +782,21 @@ console.log('watch 变化记录:', watchLogs.join(' | '))</div>
       <h2 class="section-title">5. Vue3 编译优化 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Vue3 编译优化演示
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// Vue3 编译优化演示
 
 // ① PatchFlag 模拟：标记动态内容类型，diff 时跳过静态部分
 const PatchFlags = { TEXT: 1, CLASS: 2, STYLE: 4, PROPS: 8, FULL_PROPS: 16 }
+
+/**
+ * 创建虚拟节点，携带 patchFlag 标记动态内容类型。
+ * @param {string} type - 元素标签名
+ * @param {Object|null} props - 属性对象
+ * @param {*} children - 子节点
+ * @param {number} [patchFlag=0] - 动态标记（0=静态）
+ * @param {string[]|null} [dynamicProps=null] - 动态属性名列表
+ * @returns {{ type: string, props: Object, children: *, patchFlag: number, dynamicProps: string[]|null, _isVNode: true }}
+ */
 function createVNode(type, props, children, patchFlag = 0, dynamicProps = null) {
   return { type, props, children, patchFlag, dynamicProps, _isVNode: true }
 }
@@ -438,7 +809,13 @@ console.log('动态class patchFlag:', vnode3.patchFlag, '(2=只diff class)')
 
 // ② 静态提升模拟：静态节点只创建一次
 let renderCount = 0
-const _hoisted = createVNode('span', null, '静态内容')  // 只创建一次
+const _hoisted = createVNode('span', null, '静态内容')
+
+/**
+ * 渲染函数，静态节点 _hoisted 被提升到函数外，避免重复创建。
+ * @param {string} dynamic - 动态文本内容
+ * @returns {Object} 虚拟节点树
+ */
 function render(dynamic) {
   renderCount++
   return createVNode('div', null, [_hoisted, createVNode('span', null, dynamic, PatchFlags.TEXT)])
@@ -448,9 +825,24 @@ console.log(`静态提升：渲染 3 次，静态节点只创建 1 次（renderC
 
 // ③ Block Tree 模拟：收集动态节点，diff 时只对比动态节点
 const dynamicNodes = []
+
+/** 开启新 Block，清空动态节点收集器。 @returns {void} */
 function openBlock() { dynamicNodes.length = 0 }
+
+/**
+ * 关闭 Block，将收集到的动态节点挂载到 vnode 上。
+ * @param {Object} vnode - 根虚拟节点
+ * @returns {Object} 带 dynamicChildren 的虚拟节点
+ */
 function closeBlock(vnode) { vnode.dynamicChildren = [...dynamicNodes]; return vnode }
+
+/**
+ * 追踪动态节点，patchFlag 非 0 时加入收集器。
+ * @param {Object} vnode - 虚拟节点
+ * @returns {Object} 原虚拟节点
+ */
 function trackDynamic(vnode) { if (vnode.patchFlag) dynamicNodes.push(vnode); return vnode }
+
 openBlock()
 const block = closeBlock(createVNode('div', null, [
   trackDynamic(createVNode('span', null, '静态', 0)),
@@ -458,7 +850,85 @@ const block = closeBlock(createVNode('div', null, [
   trackDynamic(createVNode('span', null, '动态2', PatchFlags.CLASS)),
 ]))
 console.log('Block Tree 动态子节点数:', block.dynamicChildren.length, '(跳过静态节点)')
-console.log('动态节点 patchFlags:', block.dynamicChildren.map(n => n.patchFlag).join(', '))</div>
+console.log('动态节点 patchFlags:', block.dynamicChildren.map(n =&gt; n.patchFlag).join(', '))</div>
+<div data-tab="typescript">// Vue3 编译优化演示
+
+const enum PatchFlags {
+  TEXT = 1,
+  CLASS = 2,
+  STYLE = 4,
+  PROPS = 8,
+  FULL_PROPS = 16
+}
+
+interface VNode {
+  type: string
+  props: Record&lt;string, any&gt; | null
+  children: VNode[] | string | null
+  patchFlag: PatchFlags | 0
+  dynamicProps: string[] | null
+  dynamicChildren?: VNode[]
+  _isVNode: true
+}
+
+/**
+ * 创建虚拟节点，携带 patchFlag 标记动态内容类型。
+ * @param type - 元素标签名
+ * @param props - 属性对象
+ * @param children - 子节点
+ * @param patchFlag - 动态标记（0=静态）
+ * @param dynamicProps - 动态属性名列表
+ * @returns 虚拟节点对象
+ */
+function createVNode(
+  type: string,
+  props: Record&lt;string, any&gt; | null,
+  children: VNode[] | string | null,
+  patchFlag: PatchFlags | 0 = 0,
+  dynamicProps: string[] | null = null
+): VNode {
+  return { type, props, children, patchFlag, dynamicProps, _isVNode: true }
+}
+
+/**
+ * 渲染函数，静态节点 _hoisted 被提升到函数外，避免重复创建。
+ * @param dynamic - 动态文本内容
+ * @returns 虚拟节点树
+ */
+function render(dynamic: string): VNode {
+  return createVNode('div', null, [
+    _hoisted,
+    createVNode('span', null, dynamic, PatchFlags.TEXT)
+  ])
+}
+
+const _hoisted: VNode = createVNode('span', null, '静态内容')
+
+let dynamicNodes: VNode[] = []
+
+/** 开启新 Block，清空动态节点收集器。 */
+function openBlock(): void { dynamicNodes.length = 0 }
+
+/**
+ * 关闭 Block，将收集到的动态节点挂载到 vnode 上。
+ * @param vnode - 根虚拟节点
+ * @returns 带 dynamicChildren 的虚拟节点
+ */
+function closeBlock(vnode: VNode): VNode {
+  vnode.dynamicChildren = [...dynamicNodes]
+  return vnode
+}
+
+/**
+ * 追踪动态节点，patchFlag 非 0 时加入收集器。
+ * @param vnode - 虚拟节点
+ * @returns 原虚拟节点
+ */
+function trackDynamic(vnode: VNode): VNode {
+  if (vnode.patchFlag) dynamicNodes.push(vnode)
+  return vnode
+}</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="optOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>

@@ -39,7 +39,11 @@ console.log('对象解构 name,age,city:', name, age, city)
 const { name: userName, role: userRole = 'user' } = { name: 'Bob' }
 console.log('重命名 userName,userRole:', userName, userRole)
 
-// 函数参数解构
+/**
+ * 使用参数解构的问候函数
+ * @param {{ name: string, greeting?: string }} options - 配置对象
+ * @returns {string} 拼接后的问候语
+ */
 function greet({ name, greeting = 'Hello' }) { return `${greeting}, ${name}!` }
 console.log('参数解构:', greet({ name: 'Charlie' }))
 
@@ -65,31 +69,62 @@ console.log('解构交换变量 x,y:', x, y)</div>
         <h2 class="section-title">2. 模板字符串与标签模板</h2>
         <div class="card">
           <!-- prettier-ignore -->
-          <div class="code-block" data-mode="console">const name = 'Alice', age = 25
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">const name = 'Alice', age = 25
 console.log(`模板字符串: Hello, ${name}! 明年 ${age + 1} 岁`)
 
 // 多行字符串
 const html = `
-  <div>
-    <h1>${name}</h1>
-  </div>
+  &lt;div&gt;
+    &lt;h1&gt;${name}&lt;/h1&gt;
+  &lt;/div&gt;
 `
 console.log('多行字符串:', html.trim())
 
-// 标签模板（Tagged Template）
+/**
+ * 标签模板 —— 将插值用【】高亮包裹
+ * @param {TemplateStringsArray} strings - 模板静态部分
+ * @param {...*} values - 模板插值部分
+ * @returns {string} 高亮后的字符串
+ */
 function highlight(strings, ...values) {
-  return strings.reduce((acc, str, i) =>
+  return strings.reduce((acc, str, i) =&gt;
     acc + str + (values[i] !== undefined ? `【${values[i]}】` : ''), '')
 }
 console.log('标签模板:', highlight`姓名: ${name}, 年龄: ${age}`)
 
-// 安全 HTML 转义（防 XSS）
+/**
+ * 安全 HTML 转义标签模板（防 XSS）
+ * @param {TemplateStringsArray} strings - 模板静态部分
+ * @param {...*} values - 需要转义的插值
+ * @returns {string} 转义后的 HTML 字符串
+ */
 function safeHtml(strings, ...values) {
-  const escape = s => String(s).replace(/&/g,'&amp;').replace(/&lt;/g,'&lt;').replace(/&gt;/g,'&gt;')
-  return strings.reduce((acc, str, i) => acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
+  const escape = s =&gt; String(s).replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;')
+  return strings.reduce((acc, str, i) =&gt; acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
 }
 const userInput = '&lt;script&gt;alert("xss")&lt;/script&gt;'
 console.log('安全 HTML:', safeHtml`&lt;p&gt;${userInput}&lt;/p&gt;`)</div>
+<div data-tab="typescript">const name: string = 'Alice', age: number = 25
+console.log(`模板字符串: Hello, ${name}! 明年 ${age + 1} 岁`)
+
+/** 标签模板 —— 将插值用【】高亮包裹 */
+function highlight(strings: TemplateStringsArray, ...values: unknown[]): string {
+  return strings.reduce((acc: string, str: string, i: number) =&gt;
+    acc + str + (values[i] !== undefined ? `【${values[i]}】` : ''), '')
+}
+console.log('标签模板:', highlight`姓名: ${name}, 年龄: ${age}`)
+
+/** 安全 HTML 转义标签模板（防 XSS） */
+function safeHtml(strings: TemplateStringsArray, ...values: unknown[]): string {
+  const escape = (s: unknown): string =&gt;
+    String(s).replace(/&amp;/g,'&amp;amp;').replace(/&lt;/g,'&amp;lt;').replace(/&gt;/g,'&amp;gt;')
+  return strings.reduce((acc: string, str: string, i: number) =&gt;
+    acc + str + (values[i] !== undefined ? escape(values[i]) : ''), '')
+}
+const userInput: string = '&lt;script&gt;alert("xss")&lt;/script&gt;'
+console.log('安全 HTML:', safeHtml`&lt;p&gt;${userInput}&lt;/p&gt;`)</div>
+</div>
           <div class="demo-box">
             <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -101,7 +136,8 @@ console.log('安全 HTML:', safeHtml`&lt;p&gt;${userInput}&lt;/p&gt;`)</div>
         <h2 class="section-title">3. Symbol <span class="tag-badge interview">面试高频</span></h2>
         <div class="card">
           <!-- prettier-ignore -->
-          <div class="code-block" data-mode="console">// Symbol：唯一标识符
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// Symbol：唯一标识符
 const s1 = Symbol('id'), s2 = Symbol('id')
 console.log('Symbol 唯一性 s1===s2:', s1 === s2)
 
@@ -115,9 +151,21 @@ console.log('Object.keys（不含Symbol）:', JSON.stringify(Object.keys(user)))
 console.log('Symbol key 访问:', user[ID])
 console.log('getOwnPropertySymbols 数量:', Object.getOwnPropertySymbols(user).length)
 
-// Symbol.toPrimitive 自定义类型转换
+/**
+ * 支持 Symbol.toPrimitive 的货币类
+ * @class Money
+ */
 class Money {
+  /**
+   * @param {number} amount - 金额
+   * @param {string} currency - 货币代码
+   */
   constructor(amount, currency) { this.amount = amount; this.currency = currency }
+  /**
+   * 自定义类型转换
+   * @param {string} hint - 转换提示（'number' | 'string' | 'default'）
+   * @returns {number|string} 转换后的值
+   */
   [Symbol.toPrimitive](hint) {
     if (hint === 'number') return this.amount
     if (hint === 'string') return `${this.amount} ${this.currency}`
@@ -127,6 +175,39 @@ class Money {
 const price = new Money(99.9, 'CNY')
 console.log('Symbol.toPrimitive number:', +price)
 console.log('Symbol.toPrimitive string:', `${price}`)</div>
+<div data-tab="typescript">// Symbol：唯一标识符
+const s1: symbol = Symbol('id'), s2: symbol = Symbol('id')
+console.log('Symbol 唯一性 s1===s2:', s1 === s2)
+
+// 全局 Symbol（Symbol.for 共享）
+console.log('Symbol.for 共享:', Symbol.for('x') === Symbol.for('x'))
+
+// Symbol 作为对象 key（不被枚举）
+const ID: unique symbol = Symbol('id')
+interface UserWithSymbol { [ID]: number; name: string; role: string }
+const user: UserWithSymbol = { [ID]: 42, name: 'Alice', role: 'admin' }
+console.log('Object.keys（不含Symbol）:', JSON.stringify(Object.keys(user)))
+console.log('Symbol key 访问:', user[ID])
+console.log('getOwnPropertySymbols 数量:', Object.getOwnPropertySymbols(user).length)
+
+/** 支持 Symbol.toPrimitive 的货币类 */
+class Money {
+  readonly amount: number
+  readonly currency: string
+  constructor(amount: number, currency: string) {
+    this.amount = amount
+    this.currency = currency
+  }
+  [Symbol.toPrimitive](hint: string): number | string {
+    if (hint === 'number') return this.amount
+    if (hint === 'string') return `${this.amount} ${this.currency}`
+    return this.amount
+  }
+}
+const price = new Money(99.9, 'CNY')
+console.log('Symbol.toPrimitive number:', +price)
+console.log('Symbol.toPrimitive string:', `${price}`)</div>
+</div>
           <div class="demo-box">
             <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -140,7 +221,13 @@ console.log('Symbol.toPrimitive string:', `${price}`)</div>
         </h2>
         <div class="card">
           <!-- prettier-ignore -->
-          <div class="code-block" data-mode="console">// 迭代器协议：对象有 next() 方法，返回 { value, done }
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 创建可迭代的数字范围对象（迭代器协议）
+ * @param {number} start - 起始值
+ * @param {number} end - 结束值（含）
+ * @returns {Iterable&lt;number&gt; &amp; Iterator&lt;number&gt;} 可迭代对象
+ */
 function createRange(start, end) {
   let current = start
   return {
@@ -154,26 +241,43 @@ function createRange(start, end) {
 }
 console.log('自定义迭代器:', JSON.stringify([...createRange(1, 5)]))
 
-// 生成器函数（function*）
+/**
+ * 斐波那契数列生成器（无限序列）
+ * @yields {number} 下一个斐波那契数
+ */
 function* fibonacci() {
   let [a, b] = [0, 1]
   while (true) { yield a; [a, b] = [b, a + b] }
 }
 const fib = fibonacci()
-const first8 = Array.from({ length: 8 }, () => fib.next().value)
+const first8 = Array.from({ length: 8 }, () =&gt; fib.next().value)
 console.log('Fibonacci 前8项:', JSON.stringify(first8))
 
-// 生成器实现 range
+/**
+ * 生成器实现的 range 函数
+ * @param {number} start - 起始值
+ * @param {number} end - 结束值（含）
+ * @param {number} [step=1] - 步长
+ * @yields {number} 范围内的每个值
+ */
 function* range(start, end, step = 1) {
   for (let i = start; i &lt;= end; i += step) yield i
 }
 console.log('range(1,10,2):', JSON.stringify([...range(1, 10, 2)]))
 
-// yield* 委托
+/**
+ * 拼接多个可迭代对象（yield* 委托）
+ * @param {...Iterable} iters - 可迭代对象列表
+ * @yields {*} 各迭代器的值
+ */
 function* concat(...iters) { for (const iter of iters) yield* iter }
 console.log('yield* concat:', JSON.stringify([...concat([1,2], [3,4], [5])]))
 
-// 生成器双向通信（send value via next）
+/**
+ * 累加计算器生成器（双向通信）
+ * @yields {number} 当前累加结果
+ * @returns {number} 最终结果
+ */
 function* calculator() {
   let result = 0
   while (true) {
@@ -189,6 +293,58 @@ calc.next(10)    // result = 10
 calc.next(20)    // result = 30
 const final = calc.next(5)  // result = 35
 console.log('生成器双向通信 result:', final.value)</div>
+<div data-tab="typescript">/** 创建可迭代的数字范围对象（迭代器协议） */
+function createRange(start: number, end: number): IterableIterator&lt;number&gt; {
+  let current = start
+  return {
+    [Symbol.iterator]() { return this },
+    next(): IteratorResult&lt;number&gt; {
+      return current &lt;= end
+        ? { value: current++, done: false }
+        : { value: undefined as any, done: true }
+    }
+  }
+}
+console.log('自定义迭代器:', JSON.stringify([...createRange(1, 5)]))
+
+/** 斐波那契数列生成器（无限序列） */
+function* fibonacci(): Generator&lt;number, void, unknown&gt; {
+  let [a, b] = [0, 1]
+  while (true) { yield a; [a, b] = [b, a + b] }
+}
+const fib = fibonacci()
+const first8: number[] = Array.from({ length: 8 }, () =&gt; fib.next().value as number)
+console.log('Fibonacci 前8项:', JSON.stringify(first8))
+
+/** 生成器实现的 range 函数 */
+function* range(start: number, end: number, step: number = 1): Generator&lt;number&gt; {
+  for (let i = start; i &lt;= end; i += step) yield i
+}
+console.log('range(1,10,2):', JSON.stringify([...range(1, 10, 2)]))
+
+/** 拼接多个可迭代对象（yield* 委托） */
+function* concat&lt;T&gt;(...iters: Iterable&lt;T&gt;[]): Generator&lt;T&gt; {
+  for (const iter of iters) yield* iter
+}
+console.log('yield* concat:', JSON.stringify([...concat([1,2], [3,4], [5])]))
+
+/** 累加计算器生成器（双向通信） */
+function* calculator(): Generator&lt;number, number, number | null&gt; {
+  let result: number = 0
+  while (true) {
+    const input: number | null = yield result
+    if (input === null) break
+    result += input
+  }
+  return result
+}
+const calc = calculator()
+calc.next()      // 启动
+calc.next(10)    // result = 10
+calc.next(20)    // result = 30
+const final = calc.next(5)  // result = 35
+console.log('生成器双向通信 result:', final.value)</div>
+</div>
           <div class="demo-box">
             <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>
@@ -203,10 +359,11 @@ console.log('生成器双向通信 result:', final.value)</div>
             <strong>Proxy</strong> 拦截对象的基本操作（读取、赋值、删除等），是 Vue3 响应式系统的核心。
           </div>
           <!-- prettier-ignore -->
-          <div class="code-block" data-mode="console">// 数据验证代理
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// 数据验证代理
 const validator = {
   set(target, key, value) {
-    if (key === 'age' && (typeof value !== 'number' || value &lt; 0))
+    if (key === 'age' &amp;&amp; (typeof value !== 'number' || value &lt; 0))
       throw new TypeError('age 必须是非负数字')
     target[key] = value
     return true
@@ -217,7 +374,11 @@ person.age = 25
 console.log('Proxy 验证通过 age:', person.age)
 try { person.age = -1 } catch(e) { console.warn('Proxy 验证失败:', e.message) }
 
-// 响应式代理（Vue3 原理简化版）
+/**
+ * 响应式代理（Vue3 原理简化版）
+ * @param {Object} obj - 需要代理的原始对象
+ * @returns {Proxy} 带 get/set 拦截的响应式代理
+ */
 const logs = []
 function reactive(obj) {
   return new Proxy(obj, {
@@ -230,7 +391,12 @@ state.count++
 const _name = state.name
 console.log('Proxy 响应式日志:', JSON.stringify(logs))
 
-// 函数调用追踪
+/**
+ * 函数调用追踪代理
+ * @param {Function} fn - 需要追踪的函数
+ * @param {string} name - 函数名称（用于日志）
+ * @returns {Proxy} 带 apply 拦截的代理函数
+ */
 function traceFunction(fn, name) {
   return new Proxy(fn, {
     apply(target, thisArg, args) {
@@ -241,8 +407,57 @@ function traceFunction(fn, name) {
     }
   })
 }
-const tracedAdd = traceFunction((a, b) => a + b, 'add')
+const tracedAdd = traceFunction((a, b) =&gt; a + b, 'add')
 tracedAdd(3, 4)</div>
+<div data-tab="typescript">// 数据验证代理
+const validator: ProxyHandler&lt;Record&lt;string, unknown&gt;&gt; = {
+  set(target, key: string, value: unknown): boolean {
+    if (key === 'age' &amp;&amp; (typeof value !== 'number' || value &lt; 0))
+      throw new TypeError('age 必须是非负数字')
+    target[key] = value
+    return true
+  }
+}
+const person = new Proxy&lt;Record&lt;string, unknown&gt;&gt;({}, validator)
+person.age = 25
+console.log('Proxy 验证通过 age:', person.age)
+try { person.age = -1 } catch(e) { console.warn('Proxy 验证失败:', (e as Error).message) }
+
+/** 响应式代理（Vue3 原理简化版） */
+const logs: string[] = []
+function reactive&lt;T extends object&gt;(obj: T): T {
+  return new Proxy(obj, {
+    get(target, key: string | symbol) {
+      logs.push(`get:${String(key)}`)
+      return Reflect.get(target, key)
+    },
+    set(target, key: string | symbol, value: unknown) {
+      logs.push(`set:${String(key)}=${value}`)
+      return Reflect.set(target, key, value)
+    }
+  })
+}
+const state = reactive({ count: 0, name: 'Alice' })
+state.count++
+const _name = state.name
+console.log('Proxy 响应式日志:', JSON.stringify(logs))
+
+/** 函数调用追踪代理 */
+function traceFunction&lt;A extends unknown[], R&gt;(
+  fn: (...args: A) =&gt; R, name: string
+): (...args: A) =&gt; R {
+  return new Proxy(fn, {
+    apply(target, thisArg, args: A) {
+      console.log(`调用 ${name}(${(args as unknown[]).join(',')})`)
+      const result = Reflect.apply(target, thisArg, args) as R
+      console.log(`${name} 返回:`, result)
+      return result
+    }
+  }) as (...args: A) =&gt; R
+}
+const tracedAdd = traceFunction((a: number, b: number) =&gt; a + b, 'add')
+tracedAdd(3, 4)</div>
+</div>
           <div class="demo-box">
             <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
           </div>

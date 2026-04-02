@@ -94,6 +94,9 @@ console.log('var a after declare:', a_var)
 
 // 函数声明整体提升（优先级高于 var）
 console.log('sayHi() before declare:', sayHi())
+/**
+ * @returns {string} 问候语
+ */
 function sayHi() { return 'Hi! 函数声明整体提升' }
 
 // let TDZ（暂时性死区）
@@ -110,6 +113,9 @@ try {
 } catch(e) {
   console.warn('函数表达式不提升:', e.message)
 }
+/**
+ * @returns {string} 告别语
+ */
 var sayBye = function() { return 'Bye!' }</div>
         <div class="demo-box">
           <div class="console-output" id="out2"><span class="info">点击运行或按 Ctrl+Enter</span></div>
@@ -122,10 +128,17 @@ var sayBye = function() { return 'Bye!' }</div>
       <h2 class="section-title">3. 作用域链与闭包 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// 作用域链：从内向外查找变量
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// 作用域链：从内向外查找变量
 const x = 'global'
+/**
+ * @returns {void}
+ */
 function outer() {
   const x = 'outer'
+  /**
+   * @returns {void}
+   */
   function inner() {
     const x = 'inner'
     console.log('inner x:', x) // "inner"（就近原则）
@@ -137,12 +150,16 @@ outer()
 console.log('global x:', x)
 
 // 闭包：函数 + 其词法环境
+/**
+ * @param {number} [start=0] - 计数器初始值
+ * @returns {{ increment: () =&gt; number, decrement: () =&gt; number, getCount: () =&gt; number }} 计数器对象
+ */
 function makeCounter(start = 0) {
   let count = start
   return {
-    increment: () => ++count,
-    decrement: () => --count,
-    getCount:  () => count,
+    increment: () =&gt; ++count,
+    decrement: () =&gt; --count,
+    getCount:  () =&gt; count,
   }
 }
 const c = makeCounter(10)
@@ -152,18 +169,77 @@ console.log('counter decrement:', c.decrement())
 console.log('counter getCount:', c.getCount())
 
 // 闭包实现私有变量
+/**
+ * @param {string} name - 姓名
+ * @returns {{ getName: () =&gt; string, getAge: () =&gt; number, birthday: () =&gt; string }} 人员对象
+ */
 function createPerson(name) {
   let _age = 0
   return {
-    getName: () => name,
-    getAge: () => _age,
-    birthday: () => { _age++; return `${name} 现在 ${_age} 岁` }
+    getName: () =&gt; name,
+    getAge: () =&gt; _age,
+    birthday: () =&gt; { _age++; return `${name} 现在 ${_age} 岁` }
   }
 }
 const person = createPerson('Alice')
 console.log(person.birthday())
 console.log(person.birthday())
 console.log('私有 _age 无法直接访问:', person._age)</div>
+<div data-tab="typescript">// 作用域链：从内向外查找变量
+const x: string = 'global'
+function outer(): void {
+  const x: string = 'outer'
+  function inner(): void {
+    const x: string = 'inner'
+    console.log('inner x:', x)
+  }
+  inner()
+  console.log('outer x:', x)
+}
+outer()
+console.log('global x:', x)
+
+// 闭包：函数 + 其词法环境
+interface Counter {
+  increment: () =&gt; number
+  decrement: () =&gt; number
+  getCount:  () =&gt; number
+}
+
+function makeCounter(start: number = 0): Counter {
+  let count = start
+  return {
+    increment: () =&gt; ++count,
+    decrement: () =&gt; --count,
+    getCount:  () =&gt; count,
+  }
+}
+const c = makeCounter(10)
+console.log('counter increment:', c.increment())
+console.log('counter increment:', c.increment())
+console.log('counter decrement:', c.decrement())
+console.log('counter getCount:', c.getCount())
+
+// 闭包实现私有变量
+interface PersonAPI {
+  getName:  () =&gt; string
+  getAge:   () =&gt; number
+  birthday: () =&gt; string
+}
+
+function createPerson(name: string): PersonAPI {
+  let _age = 0
+  return {
+    getName:  () =&gt; name,
+    getAge:   () =&gt; _age,
+    birthday: () =&gt; { _age++; return `${name} 现在 ${_age} 岁` }
+  }
+}
+const person = createPerson('Alice')
+console.log(person.birthday())
+console.log(person.birthday())
+console.log('私有 _age 无法直接访问:', (person as any)._age)</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="out3"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -179,8 +255,13 @@ console.log('私有 _age 无法直接访问:', person._age)</div>
           ① new 绑定 &gt; ② 显式绑定（call/apply/bind）&gt; ③ 隐式绑定（对象方法）&gt; ④ 默认绑定（全局/undefined）
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// ① 隐式绑定：谁调用，this 指向谁
-const obj = { name: 'Alice', greet() { return this.name } }
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// ① 隐式绑定：谁调用，this 指向谁
+const obj = {
+  name: 'Alice',
+  /** @returns {string} 当前对象的 name */
+  greet() { return this.name }
+}
 console.log('隐式绑定:', obj.greet())
 
 // 隐式丢失：赋值给变量后 this 丢失
@@ -191,6 +272,10 @@ const bound = fn.bind({ name: 'Charlie' })
 console.log('bind 绑定:', bound())
 
 // ② new 绑定：this 指向新创建的实例
+/**
+ * @constructor
+ * @param {string} name - 姓名
+ */
 function Person(name) { this.name = name }
 const p = new Person('Dave')
 console.log('new 绑定:', p.name)
@@ -198,12 +283,50 @@ console.log('new 绑定:', p.name)
 // ③ 箭头函数：没有自己的 this，继承外层词法 this
 const timer = {
   name: 'Timer',
+  /** @returns {void} */
   start() {
-    const arrow = () => this.name  // this = timer ✅
+    const arrow = () =&gt; this.name  // this = timer ✅
     console.log('箭头函数 this:', arrow())
   }
 }
 timer.start()</div>
+<div data-tab="typescript">// ① 隐式绑定：谁调用，this 指向谁
+interface Greeter {
+  name: string
+  greet(): string
+}
+
+const obj: Greeter = {
+  name: 'Alice',
+  greet() { return this.name }
+}
+console.log('隐式绑定:', obj.greet())
+
+// 隐式丢失：赋值给变量后 this 丢失
+const fn = obj.greet
+console.log('call 绑定:', fn.call(obj))
+console.log('apply 绑定:', fn.apply({ name: 'Bob' }))
+const bound = fn.bind({ name: 'Charlie' })
+console.log('bind 绑定:', bound())
+
+// ② new 绑定：this 指向新创建的实例（TS 推荐用 class）
+class Person {
+  name: string
+  constructor(name: string) { this.name = name }
+}
+const p = new Person('Dave')
+console.log('new 绑定:', p.name)
+
+// ③ 箭头函数：没有自己的 this，继承外层词法 this
+const timer = {
+  name: 'Timer',
+  start(): void {
+    const arrow = (): string =&gt; this.name
+    console.log('箭头函数 this:', arrow())
+  }
+}
+timer.start()</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="out4"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -215,17 +338,33 @@ timer.start()</div>
       <h2 class="section-title">5. 原型链与继承 <span class="tag-badge interview">面试必考</span></h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// 原型链查找：obj → obj.__proto__ → ... → Object.prototype → null
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">// 原型链查找：obj → obj.__proto__ → ... → Object.prototype → null
+/**
+ * @constructor
+ * @param {string} name - 动物名称
+ */
 function Animal(name) { this.name = name }
+/**
+ * @returns {string} 动物发出的声音描述
+ */
 Animal.prototype.speak = function() { return `${this.name} 发出声音` }
 
+/**
+ * @constructor
+ * @param {string} name - 狗的名称
+ * @param {string} breed - 品种
+ */
 function Dog(name, breed) {
-  Animal.call(this, name) // 借用构造函数
+  Animal.call(this, name)
   this.breed = breed
 }
 // 原型链继承
 Dog.prototype = Object.create(Animal.prototype)
 Dog.prototype.constructor = Dog
+/**
+ * @returns {string} 狗叫声描述
+ */
 Dog.prototype.bark = function() { return `${this.name}: 汪汪！` }
 
 const dog = new Dog('Rex', 'Labrador')
@@ -238,7 +377,14 @@ console.log('hasOwnProperty("speak"):', dog.hasOwnProperty('speak'))
 
 // ES6 class 语法糖（本质相同）
 class Cat extends Animal {
+  /**
+   * @param {string} name - 猫的名称
+   * @param {string} color - 毛色
+   */
   constructor(name, color) { super(name); this.color = color }
+  /**
+   * @returns {string} 猫叫声描述
+   */
   meow() { return `${this.name}(${this.color}): 喵喵！` }
 }
 const cat = new Cat('Kitty', '白色')
@@ -246,6 +392,45 @@ console.log('cat.speak():', cat.speak())
 console.log('cat.meow():', cat.meow())
 console.log('cat instanceof Animal:', cat instanceof Animal)
 console.log('原型链:', Object.getPrototypeOf(dog) === Dog.prototype)</div>
+<div data-tab="typescript">// 原型链查找：obj → obj.__proto__ → ... → Object.prototype → null
+class Animal {
+  name: string
+  constructor(name: string) { this.name = name }
+  speak(): string { return `${this.name} 发出声音` }
+}
+
+class Dog extends Animal {
+  breed: string
+  constructor(name: string, breed: string) {
+    super(name)
+    this.breed = breed
+  }
+  bark(): string { return `${this.name}: 汪汪！` }
+}
+
+const dog = new Dog('Rex', 'Labrador')
+console.log('dog.speak():', dog.speak())
+console.log('dog.bark():', dog.bark())
+console.log('dog instanceof Dog:', dog instanceof Dog)
+console.log('dog instanceof Animal:', dog instanceof Animal)
+console.log('hasOwnProperty("name"):', dog.hasOwnProperty('name'))
+console.log('hasOwnProperty("speak"):', dog.hasOwnProperty('speak'))
+
+// ES6 class 语法糖（TS 中 class 是一等公民）
+class Cat extends Animal {
+  color: string
+  constructor(name: string, color: string) {
+    super(name)
+    this.color = color
+  }
+  meow(): string { return `${this.name}(${this.color}): 喵喵！` }
+}
+const cat = new Cat('Kitty', '白色')
+console.log('cat.speak():', cat.speak())
+console.log('cat.meow():', cat.meow())
+console.log('cat instanceof Animal:', cat instanceof Animal)
+console.log('原型链:', Object.getPrototypeOf(dog) === Dog.prototype)</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>

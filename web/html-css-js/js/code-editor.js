@@ -329,12 +329,18 @@ function createMonacoEditor(monaco, el, code, lang, readonly) {
 async function initMultiTabCodeBlock(codeBlockEl) {
   const monaco = await loadMonaco();
 
-  // 解析 tab 列表，如 "html,css" 或 "html,css,js"
   const tabsAttr = codeBlockEl.dataset.tabs;
   const tabLangs = tabsAttr.split(',').map((s) => s.trim().toLowerCase());
+  const mode = codeBlockEl.dataset.mode || 'dom';
+  const isConsoleMode = mode === 'console';
+  const readonlyLangs = new Set(
+    (codeBlockEl.dataset.readonlyTabs || '')
+      .split(',')
+      .map((s) => s.trim())
+      .filter(Boolean)
+  );
+  if (isConsoleMode) tabLangs.filter((l) => l === 'typescript').forEach((l) => readonlyLangs.add(l));
 
-  // 从子元素 [data-tab="xxx"] 中提取各 tab 的原始代码
-  // html tab 保留标签结构，css/js tab 用纯文本提取
   const originalCodes = {};
   tabLangs.forEach((lang) => {
     const tabEl = codeBlockEl.querySelector(`[data-tab="${lang}"]`);
@@ -345,11 +351,9 @@ async function initMultiTabCodeBlock(codeBlockEl) {
     originalCodes[lang] = lang === 'html' ? extractHtmlCode(tabEl) : extractCode(tabEl);
   });
 
-  // ── 构建 wrapper ──────────────────────────────────────────────────────────
   const wrapper = document.createElement('div');
   wrapper.className = 'monaco-editor-wrapper monaco-multitab-wrapper';
 
-  // ── 工具栏（含 Tab 切换按钮） ─────────────────────────────────────────────
   const toolbar = document.createElement('div');
   toolbar.className = 'monaco-toolbar';
 
@@ -357,22 +361,24 @@ async function initMultiTabCodeBlock(codeBlockEl) {
     .map((lang, i) => {
       const cfg = LANG_CONFIG[lang] || LANG_CONFIG.javascript;
       const activeClass = i === 0 ? ' active' : '';
-      return `<button class="monaco-tab${activeClass}" data-tab-lang="${lang}" style="--tab-color:${cfg.text}">${cfg.label}</button>`;
+      const roLabel = readonlyLangs.has(lang) ? ' <span style="font-size:0.6rem;opacity:0.6">(对照)</span>' : '';
+      return `<button class="monaco-tab${activeClass}" data-tab-lang="${lang}" style="--tab-color:${cfg.text}">${cfg.label}${roLabel}</button>`;
     })
     .join('');
 
+  const runnableLang = tabLangs.find((l) => !readonlyLangs.has(l) && (l === 'javascript' || l === 'js'));
+  const showRunBtn = isConsoleMode ? !!runnableLang : true;
+
   toolbar.innerHTML = `
     <div class="monaco-tabs">${tabsHtml}</div>
-    <span class="monaco-hint">Ctrl+Enter 运行</span>
+    <span class="monaco-hint">${showRunBtn ? 'Ctrl+Enter 运行' : '只读对照'}</span>
     <button class="monaco-btn-reset" title="重置代码">↺ 重置</button>
-    <button class="monaco-btn-run">▶ 运行</button>
+    ${showRunBtn ? '<button class="monaco-btn-run">▶ 运行</button>' : ''}
   `;
 
-  // ── 编辑器面板容器 ────────────────────────────────────────────────────────
   const panelsContainer = document.createElement('div');
   panelsContainer.className = 'monaco-panels';
 
-  // 为每个 tab 创建独立的编辑器面板
   const editors = {};
   const panelEls = {};
 
@@ -396,27 +402,26 @@ async function initMultiTabCodeBlock(codeBlockEl) {
   wrapper.appendChild(toolbar);
   wrapper.appendChild(panelsContainer);
 
-  // 替换原 .code-block
   codeBlockEl.replaceWith(wrapper);
 
-  // 初始化各 tab 的 Monaco 实例
   tabLangs.forEach((lang) => {
     const code = originalCodes[lang];
     const { editorEl } = panelEls[lang];
-    const editor = createMonacoEditor(monaco, editorEl, code, lang, false);
+    const isRo = readonlyLangs.has(lang);
+    const editor = createMonacoEditor(monaco, editorEl, code, lang, isRo);
 
-    // 自动调整高度
-    editor.onDidChangeModelContent(() => {
-      const lineCount = editor.getModel().getLineCount();
-      const newH = Math.min(Math.max(lineCount * 20 + 24, 80), 520);
-      editorEl.style.height = `${newH}px`;
-      editor.layout();
-    });
+    if (!isRo) {
+      editor.onDidChangeModelContent(() => {
+        const lineCount = editor.getModel().getLineCount();
+        const newH = Math.min(Math.max(lineCount * 20 + 24, 80), 520);
+        editorEl.style.height = `${newH}px`;
+        editor.layout();
+      });
+    }
 
     editors[lang] = editor;
   });
 
-  // 主题跟随切换
   const themeObserver = new MutationObserver(() => {
     monaco.editor.setTheme(getMonacoTheme());
   });
@@ -425,7 +430,6 @@ async function initMultiTabCodeBlock(codeBlockEl) {
     attributeFilter: ['data-theme'],
   });
 
-  // ── Tab 切换逻辑 ──────────────────────────────────────────────────────────
   let activeTab = tabLangs[0];
   toolbar.querySelectorAll('.monaco-tab').forEach((btn) => {
     btn.addEventListener('click', () => {
@@ -433,52 +437,53 @@ async function initMultiTabCodeBlock(codeBlockEl) {
       if (lang === activeTab) return;
       activeTab = lang;
 
-      // 切换 tab 激活状态
       toolbar.querySelectorAll('.monaco-tab').forEach((b) => b.classList.remove('active'));
       btn.classList.add('active');
 
-      // 切换面板显示
       tabLangs.forEach((l) => {
         panelEls[l].panel.style.display = l === lang ? 'block' : 'none';
       });
 
-      // 触发 layout 确保编辑器尺寸正确
       editors[lang]?.layout();
     });
   });
 
-  // ── 找到对应的 demo-box，创建 iframe ─────────────────────────────────────
   const demoBox = wrapper.nextElementSibling;
   let iframeEl = null;
+  let consoleOutputEl = null;
 
-  if (demoBox && demoBox.classList.contains('demo-box')) {
+  if (isConsoleMode && demoBox && demoBox.classList.contains('demo-box')) {
+    consoleOutputEl = demoBox.querySelector('.console-output');
+  } else if (demoBox && demoBox.classList.contains('demo-box')) {
     iframeEl = demoBox.querySelector('iframe');
     if (!iframeEl) {
       iframeEl = document.createElement('iframe');
       iframeEl.style.cssText = 'width:100%;border:none;min-height:160px;display:block;border-radius:4px;';
       iframeEl.sandbox = 'allow-scripts';
-      // 清空 demo-box 原有静态内容，换成 iframe
       demoBox.innerHTML = '<div class="demo-label">预览效果</div>';
       demoBox.appendChild(iframeEl);
     }
   }
 
-  // ── 运行函数 ──────────────────────────────────────────────────────────────
   function run() {
-    if (iframeEl) {
+    if (isConsoleMode && runnableLang && editors[runnableLang] && consoleOutputEl) {
+      runConsole(editors[runnableLang].getValue(), consoleOutputEl);
+    } else if (iframeEl) {
       runMultiTab(editors, iframeEl);
     }
   }
 
-  // 页面加载后自动运行一次，展示默认效果
   run();
 
-  // Ctrl+Enter 快捷键（对所有 tab 的编辑器都生效）
   tabLangs.forEach((lang) => {
-    editors[lang]?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, run);
+    if (!readonlyLangs.has(lang)) {
+      editors[lang]?.addCommand(monaco.KeyMod.CtrlCmd | monaco.KeyCode.Enter, run);
+    }
   });
 
-  toolbar.querySelector('.monaco-btn-run').addEventListener('click', run);
+  if (showRunBtn) {
+    toolbar.querySelector('.monaco-btn-run')?.addEventListener('click', run);
+  }
   toolbar.querySelector('.monaco-btn-reset').addEventListener('click', () => {
     tabLangs.forEach((lang) => {
       editors[lang]?.setValue(originalCodes[lang]);

@@ -83,21 +83,28 @@
           </div>
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console" style="margin-top:0.75rem">// createElement 返回 VNode 对象
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console" style="margin-top:0.75rem">
+<div data-tab="javascript">/**
+ * 创建虚拟 DOM 节点（VNode），模拟 React.createElement。
+ *
+ * @param {string|Function} type - 元素类型或组件函数
+ * @param {Object|null} props - 属性对象
+ * @param {...*} children - 子节点列表
+ * @returns {{ type: string|Function, props: Object, key: string|null, ref: *|null, $$typeof: symbol }} VNode 对象
+ */
 function createElement(type, props, ...children) {
   return {
-    type,           // 'div' | 'p' | MyComponent
+    type,
     props: {
       ...(props || {}),
       children: children.length === 1 ? children[0] : children
     },
     key:  props?.key  ?? null,
     ref:  props?.ref  ?? null,
-    $$typeof: Symbol.for('react.element')  // 防 XSS
+    $$typeof: Symbol.for('react.element')
   }
 }
 
-// 模拟 JSX 编译结果
 const element = createElement('div', { className: 'app' },
   createElement('h1', null, 'Hello React'),
   createElement('p', { style: { color: 'red' } }, 'World'),
@@ -110,7 +117,54 @@ console.log('VNode type:', element.type)
 console.log('VNode props.className:', element.props.className)
 console.log('VNode children count:', element.props.children.length)
 console.log('VNode $$typeof:', element.$$typeof.toString())
-console.log('完整 VNode:', JSON.stringify(element, (k, v) => typeof v === 'symbol' ? v.toString() : v, 2).slice(0, 300) + '...')</div>
+console.log('完整 VNode:', JSON.stringify(element, (k, v) =&gt; typeof v === 'symbol' ? v.toString() : v, 2).slice(0, 300) + '...')</div>
+<div data-tab="typescript">interface VNode {
+  type: string | Function
+  props: Record&lt;string, any&gt; &amp; { children: VNode | VNode[] }
+  key: string | null
+  ref: any | null
+  $$typeof: symbol
+}
+
+/**
+ * 创建虚拟 DOM 节点（VNode），模拟 React.createElement。
+ *
+ * @param type - 元素类型或组件函数
+ * @param props - 属性对象
+ * @param children - 子节点列表
+ * @returns VNode 对象
+ */
+function createElement(
+  type: string | Function,
+  props: Record&lt;string, any&gt; | null,
+  ...children: any[]
+): VNode {
+  return {
+    type,
+    props: {
+      ...(props || {}),
+      children: children.length === 1 ? children[0] : children
+    },
+    key:  props?.key  ?? null,
+    ref:  props?.ref  ?? null,
+    $$typeof: Symbol.for('react.element')
+  }
+}
+
+const element: VNode = createElement('div', { className: 'app' },
+  createElement('h1', null, 'Hello React'),
+  createElement('p', { style: { color: 'red' } }, 'World'),
+  createElement('ul', null,
+    createElement('li', { key: '1' }, 'Item 1'),
+    createElement('li', { key: '2' }, 'Item 2'),
+  )
+)
+console.log('VNode type:', element.type)
+console.log('VNode props.className:', element.props.className)
+console.log('VNode children count:', element.props.children.length)
+console.log('VNode $$typeof:', element.$$typeof.toString())
+console.log('完整 VNode:', JSON.stringify(element, (k, v) =&gt; typeof v === 'symbol' ? v.toString() : v, 2).slice(0, 300) + '...')</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="jsxOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -127,39 +181,56 @@ console.log('完整 VNode:', JSON.stringify(element, (k, v) => typeof v === 'sym
           React 16 引入 Fiber，将渲染工作拆分为可中断的小单元，利用浏览器空闲时间（requestIdleCallback）执行。
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Fiber 架构：时间切片调度模拟
-// 模拟 Fiber 工作单元
-const components = ['App', 'Header', 'Nav', 'Main', 'Article', 'Sidebar', 'Footer']
-const workUnits = components.map((name, i) => ({
-  name, index: i,
-  work: () => `beginWork(${name}) → completeWork(${name})`
-}))
-
-// 模拟分片执行（每帧处理 2 个工作单元）
-const results = []
-let frame = 0
-const frameSize = 2
-const remaining = [...workUnits]
-while (remaining.length > 0) {
-  frame++
-  const batch = remaining.splice(0, frameSize)
-  results.push({ frame, names: batch.map(u => u.name) })
-  console.log(`帧 ${frame}（时间切片）:`, batch.map(u => u.name).join(', '))
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 创建 Fiber 工作单元，模拟组件渲染任务。
+ *
+ * @param {string} name - 组件名称
+ * @param {number} index - 组件在队列中的索引
+ * @returns {{ name: string, index: number, work: Function }} 工作单元对象
+ */
+function createWorkUnit(name, index) {
+  return { name, index, work: () =&gt; `beginWork(${name}) → completeWork(${name})` }
 }
-console.log(`共 ${frame} 帧完成渲染，每帧最多处理 ${frameSize} 个 Fiber 节点`)
+
+const components = ['App', 'Header', 'Nav', 'Main', 'Article', 'Sidebar', 'Footer']
+const workUnits = components.map((name, i) =&gt; createWorkUnit(name, i))
+
+/**
+ * 模拟 Fiber 时间切片调度，将工作拆分为多帧执行。
+ *
+ * @param {Array} units - 待处理的工作单元列表
+ * @param {number} frameSize - 每帧最多处理的单元数
+ * @returns {{ frame: number, results: Array }} 调度结果
+ */
+function scheduleWork(units, frameSize) {
+  const results = []
+  let frame = 0
+  const remaining = [...units]
+  while (remaining.length &gt; 0) {
+    frame++
+    const batch = remaining.splice(0, frameSize)
+    results.push({ frame, names: batch.map(u =&gt; u.name) })
+    console.log(`帧 ${frame}（时间切片）:`, batch.map(u =&gt; u.name).join(', '))
+  }
+  return { frame, results }
+}
+
+const { frame } = scheduleWork(workUnits, 2)
+console.log(`共 ${frame} 帧完成渲染，每帧最多处理 2 个 Fiber 节点`)
 console.log('commit 阶段：一次性提交所有 DOM 变更（不可中断）')
 
 // Fiber 节点结构示例
 const fiberNode = {
   type: 'div',
   props: { className: 'app' },
-  stateNode: null,         // 对应真实 DOM
-  child: null,             // 第一个子节点
-  sibling: null,           // 下一个兄弟节点
-  return: null,            // 父节点
-  alternate: null,         // work-in-progress 双缓冲
-  effectTag: 'PLACEMENT',  // 'PLACEMENT' | 'UPDATE' | 'DELETION'
-  memoizedState: null,     // Hooks 链表
+  stateNode: null,
+  child: null,
+  sibling: null,
+  return: null,
+  alternate: null,
+  effectTag: 'PLACEMENT',
+  memoizedState: null,
 }
 console.log('\nFiber 节点结构（三指针树）:')
 console.log('  child → 第一个子节点')
@@ -167,6 +238,87 @@ console.log('  sibling → 下一个兄弟节点')
 console.log('  return → 父节点')
 console.log('  alternate → work-in-progress 双缓冲')
 console.log('effectTag:', fiberNode.effectTag)</div>
+<div data-tab="typescript">type EffectTag = 'PLACEMENT' | 'UPDATE' | 'DELETION'
+
+interface FiberNode {
+  type: string | Function
+  props: Record&lt;string, any&gt;
+  stateNode: HTMLElement | Text | null
+  child: FiberNode | null
+  sibling: FiberNode | null
+  return: FiberNode | null
+  alternate: FiberNode | null
+  effectTag: EffectTag
+  memoizedState: any
+}
+
+interface WorkUnit {
+  name: string
+  index: number
+  work: () =&gt; string
+}
+
+interface ScheduleResult {
+  frame: number
+  results: Array&lt;{ frame: number; names: string[] }&gt;
+}
+
+/**
+ * 创建 Fiber 工作单元，模拟组件渲染任务。
+ *
+ * @param name - 组件名称
+ * @param index - 组件在队列中的索引
+ * @returns 工作单元对象
+ */
+function createWorkUnit(name: string, index: number): WorkUnit {
+  return { name, index, work: () =&gt; `beginWork(${name}) → completeWork(${name})` }
+}
+
+const components: string[] = ['App', 'Header', 'Nav', 'Main', 'Article', 'Sidebar', 'Footer']
+const workUnits: WorkUnit[] = components.map((name, i) =&gt; createWorkUnit(name, i))
+
+/**
+ * 模拟 Fiber 时间切片调度，将工作拆分为多帧执行。
+ *
+ * @param units - 待处理的工作单元列表
+ * @param frameSize - 每帧最多处理的单元数
+ * @returns 调度结果，包含帧数和每帧处理的组件
+ */
+function scheduleWork(units: WorkUnit[], frameSize: number): ScheduleResult {
+  const results: Array&lt;{ frame: number; names: string[] }&gt; = []
+  let frame = 0
+  const remaining = [...units]
+  while (remaining.length &gt; 0) {
+    frame++
+    const batch = remaining.splice(0, frameSize)
+    results.push({ frame, names: batch.map(u =&gt; u.name) })
+    console.log(`帧 ${frame}（时间切片）:`, batch.map(u =&gt; u.name).join(', '))
+  }
+  return { frame, results }
+}
+
+const { frame } = scheduleWork(workUnits, 2)
+console.log(`共 ${frame} 帧完成渲染，每帧最多处理 2 个 Fiber 节点`)
+console.log('commit 阶段：一次性提交所有 DOM 变更（不可中断）')
+
+const fiberNode: FiberNode = {
+  type: 'div',
+  props: { className: 'app' },
+  stateNode: null,
+  child: null,
+  sibling: null,
+  return: null,
+  alternate: null,
+  effectTag: 'PLACEMENT',
+  memoizedState: null,
+}
+console.log('\nFiber 节点结构（三指针树）:')
+console.log('  child → 第一个子节点')
+console.log('  sibling → 下一个兄弟节点')
+console.log('  return → 父节点')
+console.log('  alternate → work-in-progress 双缓冲')
+console.log('effectTag:', fiberNode.effectTag)</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="fiberOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -248,14 +400,25 @@ console.log('effectTag:', fiberNode.effectTag)</div>
           这就是为什么 Hooks 不能在条件语句中调用——顺序必须固定！
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Mini Hooks 实现（fiber.memoizedState 链表）
-let currentFiber = null
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">let currentFiber = null
 let hookIndex = 0
 
+/**
+ * 创建模拟 Fiber 节点，用于挂载 Hooks 链表。
+ *
+ * @returns {{ hooks: Array, renderCount: number }} Fiber 对象
+ */
 function createFiber() {
   return { hooks: [], renderCount: 0 }
 }
 
+/**
+ * 模拟 React.useState，基于 Fiber hooks 链表实现状态管理。
+ *
+ * @param {*} initial - 初始状态值或惰性初始化函数
+ * @returns {[*, Function]} [当前状态, setState 函数]
+ */
 function useState(initial) {
   const fiber = currentFiber
   const idx = hookIndex++
@@ -267,25 +430,39 @@ function useState(initial) {
     const action = hook.queue.shift()
     hook.state = typeof action === 'function' ? action(hook.state) : action
   }
-  const setState = (action) => { hook.queue.push(action); render() }
+  const setState = (action) =&gt; { hook.queue.push(action); render() }
   return [hook.state, setState]
 }
 
+/**
+ * 模拟 React.useReducer，通过 reducer 函数管理复杂状态。
+ *
+ * @param {Function} reducer - 状态归约函数 (state, action) =&gt; newState
+ * @param {*} initial - 初始状态
+ * @returns {[*, Function]} [当前状态, dispatch 函数]
+ */
 function useReducer(reducer, initial) {
   const fiber = currentFiber
   const idx = hookIndex++
   if (fiber.hooks[idx] === undefined) fiber.hooks[idx] = { state: initial, queue: [] }
   const hook = fiber.hooks[idx]
   while (hook.queue.length) hook.state = reducer(hook.state, hook.queue.shift())
-  const dispatch = (action) => { hook.queue.push(action); render() }
+  const dispatch = (action) =&gt; { hook.queue.push(action); render() }
   return [hook.state, dispatch]
 }
 
+/**
+ * 模拟 React.useMemo，依赖未变化时返回缓存值。
+ *
+ * @param {Function} factory - 计算函数
+ * @param {Array} deps - 依赖数组
+ * @returns {*} 缓存或重新计算的值
+ */
 function useMemo(factory, deps) {
   const fiber = currentFiber
   const idx = hookIndex++
   const prev = fiber.hooks[idx]
-  const hasChanged = !prev || deps.some((d, i) => d !== prev.deps[i])
+  const hasChanged = !prev || deps.some((d, i) =&gt; d !== prev.deps[i])
   if (hasChanged) {
     const value = factory()
     fiber.hooks[idx] = { value, deps }
@@ -294,7 +471,6 @@ function useMemo(factory, deps) {
   return prev.value
 }
 
-// 模拟组件
 const fiber = createFiber()
 const renderLog = []
 
@@ -302,39 +478,34 @@ function render() {
   currentFiber = fiber; hookIndex = 0; fiber.renderCount++
   const [count, setCount] = useState(0)
   const [name, setName] = useState('Alice')
-  const [state, dispatch] = useReducer((s, a) => {
+  const [state, dispatch] = useReducer((s, a) =&gt; {
     if (a.type === 'INC') return { ...s, n: s.n + 1 }
     if (a.type === 'DEC') return { ...s, n: s.n - 1 }
     return s
   }, { n: 10 })
-  const doubled = useMemo(() => count * 2, [count])
+  const doubled = useMemo(() =&gt; count * 2, [count])
   renderLog.push({ count, name, reducerN: state.n, doubled })
   return { count, name, state, doubled, setCount, setName, dispatch }
 }
 
-// 第一次渲染
 let result = render()
 console.log('初始渲染:', JSON.stringify(renderLog.at(-1)))
 
-// 更新 count
 result.setCount(1); result = render()
 console.log('setCount(1):', JSON.stringify(renderLog.at(-1)))
 
-// 函数式更新
-result.setCount(c => c + 1); result = render()
-console.log('setCount(c=>c+1):', JSON.stringify(renderLog.at(-1)))
+result.setCount(c =&gt; c + 1); result = render()
+console.log('setCount(c=&gt;c+1):', JSON.stringify(renderLog.at(-1)))
 
-// useReducer
 result.dispatch({ type: 'INC' }); result.dispatch({ type: 'INC' }); result = render()
 console.log('dispatch INC×2:', JSON.stringify(renderLog.at(-1)))
 
-// useMemo 缓存验证
 let memoCalcCount = 0
 const fiber2 = createFiber()
 function renderWithMemo(count) {
   currentFiber = fiber2; hookIndex = 0
   const [c] = useState(count)
-  const expensive = useMemo(() => { memoCalcCount++; return c * 100 }, [c])
+  const expensive = useMemo(() =&gt; { memoCalcCount++; return c * 100 }, [c])
   return expensive
 }
 renderWithMemo(5); renderWithMemo(5); renderWithMemo(5)
@@ -342,6 +513,137 @@ console.log('useMemo 相同deps，计算次数:', memoCalcCount, '(应为1，后
 renderWithMemo(6)
 console.log('useMemo deps变化，计算次数:', memoCalcCount, '(应为2)')
 console.log('总渲染次数:', fiber.renderCount)</div>
+<div data-tab="typescript">interface Hook&lt;T = any&gt; {
+  state: T
+  queue: Array&lt;T | ((prev: T) =&gt; T)&gt;
+}
+
+interface MemoHook&lt;T = any&gt; {
+  value: T
+  deps: any[]
+}
+
+interface Fiber {
+  hooks: Array&lt;Hook | MemoHook&gt;
+  renderCount: number
+}
+
+let currentFiber: Fiber | null = null
+let hookIndex = 0
+
+/**
+ * 创建模拟 Fiber 节点，用于挂载 Hooks 链表。
+ *
+ * @returns Fiber 对象
+ */
+function createFiber(): Fiber {
+  return { hooks: [], renderCount: 0 }
+}
+
+/**
+ * 模拟 React.useState，基于 Fiber hooks 链表实现状态管理。
+ *
+ * @param initial - 初始状态值或惰性初始化函数
+ * @returns [当前状态, setState 函数]
+ */
+function useState&lt;T&gt;(initial: T | (() =&gt; T)): [T, (action: T | ((prev: T) =&gt; T)) =&gt; void] {
+  const fiber = currentFiber!
+  const idx = hookIndex++
+  if (fiber.hooks[idx] === undefined) {
+    fiber.hooks[idx] = {
+      state: typeof initial === 'function' ? (initial as () =&gt; T)() : initial,
+      queue: []
+    } as Hook&lt;T&gt;
+  }
+  const hook = fiber.hooks[idx] as Hook&lt;T&gt;
+  while (hook.queue.length) {
+    const action = hook.queue.shift()!
+    hook.state = typeof action === 'function' ? (action as (prev: T) =&gt; T)(hook.state) : action
+  }
+  const setState = (action: T | ((prev: T) =&gt; T)): void =&gt; { hook.queue.push(action); render() }
+  return [hook.state, setState]
+}
+
+/**
+ * 模拟 React.useReducer，通过 reducer 函数管理复杂状态。
+ *
+ * @param reducer - 状态归约函数
+ * @param initial - 初始状态
+ * @returns [当前状态, dispatch 函数]
+ */
+function useReducer&lt;S, A&gt;(reducer: (state: S, action: A) =&gt; S, initial: S): [S, (action: A) =&gt; void] {
+  const fiber = currentFiber!
+  const idx = hookIndex++
+  if (fiber.hooks[idx] === undefined) fiber.hooks[idx] = { state: initial, queue: [] } as Hook&lt;S&gt;
+  const hook = fiber.hooks[idx] as Hook&lt;S&gt;
+  while (hook.queue.length) hook.state = reducer(hook.state, hook.queue.shift() as unknown as A)
+  const dispatch = (action: A): void =&gt; { hook.queue.push(action as any); render() }
+  return [hook.state, dispatch]
+}
+
+/**
+ * 模拟 React.useMemo，依赖未变化时返回缓存值。
+ *
+ * @param factory - 计算函数
+ * @param deps - 依赖数组
+ * @returns 缓存或重新计算的值
+ */
+function useMemo&lt;T&gt;(factory: () =&gt; T, deps: any[]): T {
+  const fiber = currentFiber!
+  const idx = hookIndex++
+  const prev = fiber.hooks[idx] as MemoHook&lt;T&gt; | undefined
+  const hasChanged = !prev || deps.some((d, i) =&gt; d !== prev.deps[i])
+  if (hasChanged) {
+    const value = factory()
+    fiber.hooks[idx] = { value, deps }
+    return value
+  }
+  return prev.value
+}
+
+const fiber = createFiber()
+const renderLog: Array&lt;Record&lt;string, any&gt;&gt; = []
+
+function render() {
+  currentFiber = fiber; hookIndex = 0; fiber.renderCount++
+  const [count, setCount] = useState&lt;number&gt;(0)
+  const [name, setName] = useState&lt;string&gt;('Alice')
+  const [state, dispatch] = useReducer((s: { n: number }, a: { type: string }) =&gt; {
+    if (a.type === 'INC') return { ...s, n: s.n + 1 }
+    if (a.type === 'DEC') return { ...s, n: s.n - 1 }
+    return s
+  }, { n: 10 })
+  const doubled = useMemo(() =&gt; count * 2, [count])
+  renderLog.push({ count, name, reducerN: state.n, doubled })
+  return { count, name, state, doubled, setCount, setName, dispatch }
+}
+
+let result = render()
+console.log('初始渲染:', JSON.stringify(renderLog.at(-1)))
+
+result.setCount(1); result = render()
+console.log('setCount(1):', JSON.stringify(renderLog.at(-1)))
+
+result.setCount(c =&gt; c + 1); result = render()
+console.log('setCount(c=&gt;c+1):', JSON.stringify(renderLog.at(-1)))
+
+result.dispatch({ type: 'INC' }); result.dispatch({ type: 'INC' }); result = render()
+console.log('dispatch INC×2:', JSON.stringify(renderLog.at(-1)))
+
+let memoCalcCount = 0
+const fiber2 = createFiber()
+function renderWithMemo(count: number): number {
+  currentFiber = fiber2; hookIndex = 0
+  const [c] = useState&lt;number&gt;(count)
+  const expensive = useMemo&lt;number&gt;(() =&gt; { memoCalcCount++; return c * 100 }, [c])
+  return expensive
+}
+renderWithMemo(5); renderWithMemo(5); renderWithMemo(5)
+console.log('useMemo 相同deps，计算次数:', memoCalcCount, '(应为1，后两次缓存)')
+renderWithMemo(6)
+console.log('useMemo deps变化，计算次数:', memoCalcCount, '(应为2)')
+console.log('总渲染次数:', fiber.renderCount)</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="hooksOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>

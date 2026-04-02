@@ -73,27 +73,45 @@
           getter 中收集依赖（Dep.depend），setter 中通知更新（Dep.notify）。
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Dep：依赖收集器（每个响应式属性对应一个 Dep）
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 依赖收集器，每个响应式属性对应一个 Dep 实例。
+ * 通过 depend 收集当前 Watcher，通过 notify 触发所有 Watcher 更新。
+ */
 class Dep {
   constructor() { this.subs = new Set() }
+  /** 将当前活跃的 Watcher 添加到订阅集合 */
   depend()  { if (Dep.target) this.subs.add(Dep.target) }
-  notify()  { this.subs.forEach(watcher => watcher.update()) }
+  /** 通知所有订阅的 Watcher 执行更新 */
+  notify()  { this.subs.forEach(watcher =&gt; watcher.update()) }
 }
-Dep.target = null  // 当前正在计算的 Watcher
+Dep.target = null
 
-// Watcher：观察者，封装更新逻辑
+/**
+ * 观察者，封装依赖收集与更新回调逻辑。
+ */
 class Watcher {
+  /**
+   * @param {Object} vm - 关联的视图模型实例
+   * @param {Function|string} expOrFn - 取值函数或属性路径
+   * @param {Function} cb - 值变化时的回调函数
+   */
   constructor(vm, expOrFn, cb) {
     this.vm = vm; this.cb = cb
-    this.getter = typeof expOrFn === 'function' ? expOrFn : () => vm[expOrFn]
-    this.value = this.get()  // 初始化时触发 getter，完成依赖收集
+    this.getter = typeof expOrFn === 'function' ? expOrFn : () =&gt; vm[expOrFn]
+    this.value = this.get()
   }
+  /**
+   * 执行 getter 并收集依赖。
+   * @returns {*} getter 的返回值
+   */
   get() {
-    Dep.target = this           // 标记当前 Watcher
-    const value = this.getter() // 触发 getter → dep.depend()
+    Dep.target = this
+    const value = this.getter()
     Dep.target = null
     return value
   }
+  /** 重新求值并触发回调 */
   update() {
     const newVal = this.get()
     this.cb(newVal, this.value)
@@ -101,44 +119,138 @@ class Watcher {
   }
 }
 
-// observe：将对象属性转为响应式
+/**
+ * 将对象的单个属性转为响应式。
+ * @param {Object} obj - 目标对象
+ * @param {string} key - 属性名
+ * @param {*} val - 属性初始值
+ */
 function defineReactive(obj, key, val) {
   const dep = new Dep()
-  if (val && typeof val === 'object') observe(val)  // 递归
+  if (val &amp;&amp; typeof val === 'object') observe(val)
   Object.defineProperty(obj, key, {
     get() { dep.depend(); return val },
     set(newVal) {
       if (newVal === val) return
       val = newVal
       if (typeof newVal === 'object') observe(newVal)
-      dep.notify()  // 通知所有 Watcher 更新
+      dep.notify()
     }
   })
 }
+
+/**
+ * 递归遍历对象，将所有属性转为响应式。
+ * @param {Object} obj - 需要观察的对象
+ */
 function observe(obj) {
   if (!obj || typeof obj !== 'object') return
-  Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
 }
 
 // 测试响应式系统
 const data = { name: 'Alice', age: 25, address: { city: 'Beijing' } }
 observe(data)
 
-// 创建 Watcher，监听 name 变化
-new Watcher(data, () => data.name, (newVal, oldVal) => {
+new Watcher(data, () =&gt; data.name, (newVal, oldVal) =&gt; {
   console.log(`[Watcher] name: "${oldVal}" → "${newVal}"`)
 })
-// 监听嵌套属性
-new Watcher(data, () => data.address.city, (newVal, oldVal) => {
+new Watcher(data, () =&gt; data.address.city, (newVal, oldVal) =&gt; {
   console.log(`[Watcher] address.city: "${oldVal}" → "${newVal}"`)
 })
 
-// 触发响应式更新
 console.log('初始 name:', data.name)
-data.name = 'Bob'     // 触发 Watcher 回调
+data.name = 'Bob'
 data.name = 'Charlie'
-data.address.city = 'Shanghai'  // 嵌套属性也响应
+data.address.city = 'Shanghai'
 console.log('最终 name:', data.name)</div>
+<div data-tab="typescript">/** Watcher 回调函数类型 */
+type WatcherCallback&lt;T&gt; = (newVal: T, oldVal: T) =&gt; void
+
+/** 当前活跃的依赖收集目标 */
+type DepTarget = Watcher&lt;any&gt; | null
+
+/**
+ * 依赖收集器，每个响应式属性对应一个 Dep 实例。
+ */
+class Dep {
+  static target: DepTarget = null
+  private subs: Set&lt;Watcher&lt;any&gt;&gt; = new Set()
+
+  /** 将当前活跃的 Watcher 添加到订阅集合 */
+  depend(): void { if (Dep.target) this.subs.add(Dep.target) }
+  /** 通知所有订阅的 Watcher 执行更新 */
+  notify(): void { this.subs.forEach(w =&gt; w.update()) }
+}
+
+/**
+ * 观察者，封装依赖收集与更新回调逻辑。
+ */
+class Watcher&lt;T&gt; {
+  private vm: Record&lt;string, any&gt;
+  private cb: WatcherCallback&lt;T&gt;
+  private getter: () =&gt; T
+  public value: T
+
+  /**
+   * @param vm - 关联的视图模型实例
+   * @param expOrFn - 取值函数或属性路径
+   * @param cb - 值变化时的回调函数
+   */
+  constructor(vm: Record&lt;string, any&gt;, expOrFn: (() =&gt; T) | string, cb: WatcherCallback&lt;T&gt;) {
+    this.vm = vm; this.cb = cb
+    this.getter = typeof expOrFn === 'function' ? expOrFn : () =&gt; vm[expOrFn]
+    this.value = this.get()
+  }
+
+  /**
+   * 执行 getter 并收集依赖。
+   * @returns getter 的返回值
+   */
+  get(): T {
+    Dep.target = this
+    const value = this.getter()
+    Dep.target = null
+    return value
+  }
+
+  /** 重新求值并触发回调 */
+  update(): void {
+    const newVal = this.get()
+    this.cb(newVal, this.value)
+    this.value = newVal
+  }
+}
+
+/**
+ * 将对象的单个属性转为响应式。
+ * @param obj - 目标对象
+ * @param key - 属性名
+ * @param val - 属性初始值
+ */
+function defineReactive(obj: Record&lt;string, any&gt;, key: string, val: any): void {
+  const dep = new Dep()
+  if (val &amp;&amp; typeof val === 'object') observe(val)
+  Object.defineProperty(obj, key, {
+    get(): any { dep.depend(); return val },
+    set(newVal: any) {
+      if (newVal === val) return
+      val = newVal
+      if (typeof newVal === 'object') observe(newVal)
+      dep.notify()
+    }
+  })
+}
+
+/**
+ * 递归遍历对象，将所有属性转为响应式。
+ * @param obj - 需要观察的对象
+ */
+function observe(obj: Record&lt;string, any&gt;): void {
+  if (!obj || typeof obj !== 'object') return
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
+}</div>
+</div>
         <div class="demo-box">
           <div class="demo-label">响应式演示：修改数据自动触发回调</div>
           <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem">
@@ -160,21 +272,40 @@ console.log('最终 name:', data.name)</div>
           <strong>Object.defineProperty 的缺陷</strong>：只能劫持已存在的属性，无法检测属性的新增和删除，也无法检测数组下标直接赋值。
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// 响应式基础（复用上面的 Dep/Watcher/observe）
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/** 依赖收集器（简化版） */
 class Dep {
   constructor() { this.subs = new Set() }
+  /** 收集当前 Watcher */
   depend()  { if (Dep.target) this.subs.add(Dep.target) }
-  notify()  { this.subs.forEach(w => w.update()) }
+  /** 通知所有 Watcher 更新 */
+  notify()  { this.subs.forEach(w =&gt; w.update()) }
 }
 Dep.target = null
+
+/** 观察者（简化版） */
 class Watcher {
+  /**
+   * @param {Object} vm - 视图模型
+   * @param {Function} getter - 取值函数
+   * @param {Function} cb - 变化回调
+   */
   constructor(vm, getter, cb) {
     this.vm = vm; this.cb = cb; this.getter = getter
     this.value = this.get()
   }
+  /** @returns {*} getter 返回值 */
   get() { Dep.target = this; const v = this.getter(); Dep.target = null; return v }
+  /** 重新求值并触发回调 */
   update() { const n = this.get(); this.cb(n, this.value); this.value = n }
 }
+
+/**
+ * 将对象单个属性转为响应式。
+ * @param {Object} obj - 目标对象
+ * @param {string} key - 属性名
+ * @param {*} val - 初始值
+ */
 function defineReactive(obj, key, val) {
   const dep = new Dep()
   Object.defineProperty(obj, key, {
@@ -182,15 +313,20 @@ function defineReactive(obj, key, val) {
     set(newVal) { if (newVal !== val) { val = newVal; dep.notify() } }
   })
 }
+
+/**
+ * 递归将对象所有属性转为响应式。
+ * @param {Object} obj - 目标对象
+ */
 function observe(obj) {
   if (!obj || typeof obj !== 'object') return
-  Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
 }
 
 const data = { name: 'Alice', list: [1, 2, 3] }
 observe(data)
 const changes = []
-new Watcher(data, () => data.name, (n, o) => changes.push(`name: ${o}→${n}`))
+new Watcher(data, () =&gt; data.name, (n, o) =&gt; changes.push(`name: ${o}→${n}`))
 
 // ✅ 正常响应：修改已有属性
 data.name = 'Bob'
@@ -213,6 +349,57 @@ console.log('list:', JSON.stringify(data.list))
 
 console.log('\n💡 Vue2 解决方案：Vue.set(obj, key, val) / vm.$set')
 console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')</div>
+<div data-tab="typescript">/** Watcher 回调类型 */
+type WatcherCallback&lt;T&gt; = (newVal: T, oldVal: T) =&gt; void
+
+/** 依赖收集器（简化版） */
+class Dep {
+  static target: Watcher&lt;any&gt; | null = null
+  private subs: Set&lt;Watcher&lt;any&gt;&gt; = new Set()
+
+  depend(): void { if (Dep.target) this.subs.add(Dep.target) }
+  notify(): void { this.subs.forEach(w =&gt; w.update()) }
+}
+
+/** 观察者（简化版） */
+class Watcher&lt;T&gt; {
+  private vm: Record&lt;string, any&gt;
+  private cb: WatcherCallback&lt;T&gt;
+  private getter: () =&gt; T
+  public value: T
+
+  constructor(vm: Record&lt;string, any&gt;, getter: () =&gt; T, cb: WatcherCallback&lt;T&gt;) {
+    this.vm = vm; this.cb = cb; this.getter = getter
+    this.value = this.get()
+  }
+
+  get(): T { Dep.target = this; const v = this.getter(); Dep.target = null; return v }
+  update(): void { const n = this.get(); this.cb(n, this.value); this.value = n }
+}
+
+/**
+ * 将对象单个属性转为响应式。
+ * @param obj - 目标对象
+ * @param key - 属性名
+ * @param val - 初始值
+ */
+function defineReactive(obj: Record&lt;string, any&gt;, key: string, val: any): void {
+  const dep = new Dep()
+  Object.defineProperty(obj, key, {
+    get(): any { dep.depend(); return val },
+    set(newVal: any) { if (newVal !== val) { val = newVal; dep.notify() } }
+  })
+}
+
+/**
+ * 递归将对象所有属性转为响应式。
+ * @param obj - 目标对象
+ */
+function observe(obj: Record&lt;string, any&gt;): void {
+  if (!obj || typeof obj !== 'object') return
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
+}</div>
+</div>
         <div class="demo-box">
           <div class="console-output" id="limOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
@@ -227,12 +414,18 @@ console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')</div>
           <strong>核心思想</strong>：用 JS 对象描述 DOM 结构（VNode），数据变化时先对比新旧 VNode（diff），再将最小差异更新到真实 DOM。
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// VNode 结构：用 JS 对象描述 DOM
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 创建虚拟 DOM 节点（VNode）。
+ * @param {string} tag - 标签名
+ * @param {Object|null} props - 属性对象
+ * @param {...(Object|string)} children - 子节点列表
+ * @returns {Object} VNode 对象
+ */
 function h(tag, props, ...children) {
-  return { tag, props: props || {}, children: children.flat().filter(c => c != null) }
+  return { tag, props: props || {}, children: children.flat().filter(c =&gt; c != null) }
 }
 
-// 示例 VNode 树
 const vnode = h('div', { id: 'app', class: 'container' },
   h('h1', null, 'Hello Vue'),
   h('ul', null,
@@ -242,25 +435,87 @@ const vnode = h('div', { id: 'app', class: 'container' },
   )
 )
 
-// 打印 VNode 结构
+/**
+ * 递归打印 VNode 树结构到控制台。
+ * @param {Object|string} node - VNode 节点或文本
+ * @param {number} [depth=0] - 当前缩进深度
+ */
 function printVNode(node, depth = 0) {
   const indent = '  '.repeat(depth)
   if (typeof node === 'string') { console.log(`${indent}"${node}"`); return }
-  const props = Object.entries(node.props).map(([k,v]) => `${k}="${v}"`).join(' ')
+  const props = Object.entries(node.props).map(([k,v]) =&gt; `${k}="${v}"`).join(' ')
   console.log(`${indent}&lt;${node.tag}${props ? ' ' + props : ''}&gt;`)
-  node.children.forEach(c => printVNode(c, depth + 1))
+  node.children.forEach(c =&gt; printVNode(c, depth + 1))
   console.log(`${indent}&lt;/${node.tag}&gt;`)
 }
 console.log('VNode 树结构：')
 printVNode(vnode)
 
-// VNode 转 JSON（数据结构）
-console.log('\nVNode JSON（简化）:')
+/**
+ * 将 VNode 转为简化的纯数据对象（用于 JSON 序列化）。
+ * @param {Object|string} node - VNode 节点或文本
+ * @returns {Object|string} 简化后的对象
+ */
 function vnodeToSimple(node) {
   if (typeof node === 'string') return node
   return { tag: node.tag, props: node.props, children: node.children.map(vnodeToSimple) }
 }
+console.log('\nVNode JSON（简化）:')
 console.log(JSON.stringify(vnodeToSimple(vnode), null, 2))</div>
+<div data-tab="typescript">/** VNode 属性类型 */
+interface VNodeProps {
+  [key: string]: string | number | boolean | Record&lt;string, string&gt;
+}
+
+/** 虚拟 DOM 节点 */
+interface VNode {
+  tag: string
+  props: VNodeProps
+  children: Array&lt;VNode | string&gt;
+}
+
+/** 简化后的 VNode（用于序列化） */
+type SimpleVNode = string | {
+  tag: string
+  props: VNodeProps
+  children: SimpleVNode[]
+}
+
+/**
+ * 创建虚拟 DOM 节点（VNode）。
+ * @param tag - 标签名
+ * @param props - 属性对象
+ * @param children - 子节点列表
+ * @returns VNode 对象
+ */
+function h(tag: string, props: VNodeProps | null, ...children: Array&lt;VNode | string | null&gt;): VNode {
+  return { tag, props: props || {}, children: children.flat().filter((c): c is VNode | string =&gt; c != null) }
+}
+
+/**
+ * 递归打印 VNode 树结构到控制台。
+ * @param node - VNode 节点或文本
+ * @param depth - 当前缩进深度
+ */
+function printVNode(node: VNode | string, depth: number = 0): void {
+  const indent = '  '.repeat(depth)
+  if (typeof node === 'string') { console.log(`${indent}"${node}"`); return }
+  const props = Object.entries(node.props).map(([k, v]) =&gt; `${k}="${v}"`).join(' ')
+  console.log(`${indent}&lt;${node.tag}${props ? ' ' + props : ''}&gt;`)
+  node.children.forEach(c =&gt; printVNode(c, depth + 1))
+  console.log(`${indent}&lt;/${node.tag}&gt;`)
+}
+
+/**
+ * 将 VNode 转为简化的纯数据对象。
+ * @param node - VNode 节点或文本
+ * @returns 简化后的对象
+ */
+function vnodeToSimple(node: VNode | string): SimpleVNode {
+  if (typeof node === 'string') return node
+  return { tag: node.tag, props: node.props, children: node.children.map(vnodeToSimple) }
+}</div>
+</div>
         <div class="demo-box">
           <div class="demo-label">VNode 树可视化</div>
           <div id="vnodeTree" class="vdom-tree" style="padding:0.75rem;background:var(--color-code-bg);border-radius:4px"></div>
@@ -282,15 +537,21 @@ console.log(JSON.stringify(vnodeToSimple(vnode), null, 2))</div>
           时间复杂度 O(n)。
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// diff 算法：分析新旧列表的差异
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 分析新旧列表的差异，返回删除、新增、移动、不变四类结果。
+ * @param {string[]} oldList - 旧列表
+ * @param {string[]} newList - 新列表
+ * @returns {{removed: string[], added: string[], moved: string[], same: string[]}} diff 结果
+ */
 function diffLists(oldList, newList) {
-  const oldMap = new Map(oldList.map((v, i) => [v, i]))
-  const newMap = new Map(newList.map((v, i) => [v, i]))
+  const oldMap = new Map(oldList.map((v, i) =&gt; [v, i]))
+  const newMap = new Map(newList.map((v, i) =&gt; [v, i]))
 
-  const removed = oldList.filter(v => !newMap.has(v))
-  const added   = newList.filter(v => !oldMap.has(v))
-  const moved   = newList.filter(v => oldMap.has(v) && newMap.get(v) !== oldMap.get(v))
-  const same    = newList.filter(v => oldMap.has(v) && newMap.get(v) === oldMap.get(v))
+  const removed = oldList.filter(v =&gt; !newMap.has(v))
+  const added   = newList.filter(v =&gt; !oldMap.has(v))
+  const moved   = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) !== oldMap.get(v))
+  const same    = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) === oldMap.get(v))
 
   return { removed, added, moved, same }
 }
@@ -315,11 +576,40 @@ console.log('新列表:', new2.join(', '))
 console.log('删除:', result2.removed.join(', '))
 console.log('新增:', result2.added.join(', '))
 
-// 双端指针策略说明
 console.log('\n双端指针策略（Vue2 核心）：')
 console.log('oldStart↔newStart  oldEnd↔newEnd')
 console.log('oldStart↔newEnd    oldEnd↔newStart')
 console.log('有 key：建立 key→index 映射，O(1) 查找复用节点')</div>
+<div data-tab="typescript">/** diff 算法的比较结果 */
+interface DiffResult&lt;T&gt; {
+  /** 旧列表中有、新列表中无的元素 */
+  removed: T[]
+  /** 新列表中有、旧列表中无的元素 */
+  added: T[]
+  /** key 相同但位置发生变化的元素 */
+  moved: T[]
+  /** key 和位置都未变的元素 */
+  same: T[]
+}
+
+/**
+ * 分析新旧列表的差异，返回删除、新增、移动、不变四类结果。
+ * @param oldList - 旧列表
+ * @param newList - 新列表
+ * @returns diff 结果对象
+ */
+function diffLists&lt;T&gt;(oldList: T[], newList: T[]): DiffResult&lt;T&gt; {
+  const oldMap = new Map&lt;T, number&gt;(oldList.map((v, i) =&gt; [v, i]))
+  const newMap = new Map&lt;T, number&gt;(newList.map((v, i) =&gt; [v, i]))
+
+  const removed = oldList.filter(v =&gt; !newMap.has(v))
+  const added   = newList.filter(v =&gt; !oldMap.has(v))
+  const moved   = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) !== oldMap.get(v))
+  const same    = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) === oldMap.get(v))
+
+  return { removed, added, moved, same }
+}</div>
+</div>
         <div class="demo-box">
           <div class="demo-label">diff 可视化演示</div>
           <div class="grid-2" style="margin-bottom:0.75rem">
@@ -343,65 +633,99 @@ console.log('有 key：建立 key→index 映射，O(1) 查找复用节点')</di
       <h2 class="section-title">5. Mini Vue2 完整实现</h2>
       <div class="card">
         <!-- prettier-ignore -->
-        <div class="code-block" data-mode="console">// Mini Vue2：响应式 + computed + watch + 渲染
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/** 依赖收集器 */
 class Dep {
   constructor() { this.subs = new Set() }
+  /** 收集当前 Watcher */
   depend() { if (Dep.target) this.subs.add(Dep.target) }
-  notify() { this.subs.forEach(w => w.update()) }
+  /** 通知所有 Watcher 更新 */
+  notify() { this.subs.forEach(w =&gt; w.update()) }
 }
 Dep.target = null
+
+/**
+ * 观察者，支持 lazy 模式（用于 computed）。
+ */
 class Watcher {
+  /**
+   * @param {Object} vm - Vue 实例
+   * @param {Function} getter - 取值函数
+   * @param {Function} cb - 变化回调
+   * @param {boolean} [lazy=false] - 是否延迟求值（computed 使用）
+   */
   constructor(vm, getter, cb, lazy = false) {
     this.vm = vm; this.cb = cb; this.getter = getter; this.lazy = lazy; this.dirty = lazy
     this.value = lazy ? undefined : this.get()
   }
+  /** @returns {*} getter 返回值 */
   get() { Dep.target = this; const v = this.getter.call(this.vm); Dep.target = null; return v }
+  /** 触发更新，lazy 模式下仅标记 dirty */
   update() { if (this.lazy) { this.dirty = true } else { const n = this.get(); this.cb(n, this.value); this.value = n } }
+  /** 手动求值并清除 dirty 标记（computed 专用） */
   evaluate() { this.value = this.get(); this.dirty = false }
 }
+
+/**
+ * 将对象单个属性转为响应式。
+ * @param {Object} obj - 目标对象
+ * @param {string} key - 属性名
+ * @param {*} val - 初始值
+ */
 function defineReactive(obj, key, val) {
   const dep = new Dep()
-  if (val && typeof val === 'object') observe(val)
+  if (val &amp;&amp; typeof val === 'object') observe(val)
   Object.defineProperty(obj, key, {
     get() { dep.depend(); return val },
     set(newVal) { if (newVal !== val) { val = newVal; dep.notify() } }
   })
 }
+
+/**
+ * 递归将对象所有属性转为响应式。
+ * @param {Object} obj - 目标对象
+ */
 function observe(obj) {
   if (!obj || typeof obj !== 'object') return
-  Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
 }
 
-// Mini Vue2 核心
+/**
+ * Mini Vue2 核心类，实现响应式 data、computed、watch、methods。
+ */
 class MiniVue {
+  /**
+   * @param {Object} options - 配置项
+   * @param {Function|Object} options.data - 数据（函数或对象）
+   * @param {Object} [options.computed] - 计算属性
+   * @param {Object} [options.watch] - 侦听器
+   * @param {Object} [options.methods] - 方法
+   * @param {Function} [options.created] - 生命周期钩子
+   */
   constructor(options) {
     this.$data = typeof options.data === 'function' ? options.data() : options.data
     observe(this.$data)
-    // proxy：this.name → this.$data.name
-    Object.keys(this.$data).forEach(key => {
+    Object.keys(this.$data).forEach(key =&gt; {
       Object.defineProperty(this, key, {
         get() { return this.$data[key] },
         set(v) { this.$data[key] = v }
       })
     })
-    // computed
     if (options.computed) {
-      Object.keys(options.computed).forEach(key => {
-        const watcher = new Watcher(this, options.computed[key], () => {}, true)
+      Object.keys(options.computed).forEach(key =&gt; {
+        const watcher = new Watcher(this, options.computed[key], () =&gt; {}, true)
         Object.defineProperty(this, key, {
           get() { if (watcher.dirty) watcher.evaluate(); return watcher.value }
         })
       })
     }
-    // watch
     if (options.watch) {
-      Object.keys(options.watch).forEach(key => {
-        new Watcher(this, () => this.$data[key], options.watch[key].bind(this))
+      Object.keys(options.watch).forEach(key =&gt; {
+        new Watcher(this, () =&gt; this.$data[key], options.watch[key].bind(this))
       })
     }
-    // methods
     if (options.methods) {
-      Object.keys(options.methods).forEach(k => { this[k] = options.methods[k].bind(this) })
+      Object.keys(options.methods).forEach(k =&gt; { this[k] = options.methods[k].bind(this) })
     }
     options.created?.call(this)
   }
@@ -435,6 +759,98 @@ console.log('doubleCount:', vm.doubleCount)
 
 vm.setName('Bob')
 console.log('修改 name 后 greeting:', vm.greeting)</div>
+<div data-tab="typescript">/** Watcher 回调类型 */
+type WatcherCallback&lt;T&gt; = (newVal: T, oldVal: T) =&gt; void
+
+/** MiniVue 配置项 */
+interface MiniVueOptions {
+  data: (() =&gt; Record&lt;string, any&gt;) | Record&lt;string, any&gt;
+  computed?: Record&lt;string, () =&gt; any&gt;
+  watch?: Record&lt;string, WatcherCallback&lt;any&gt;&gt;
+  methods?: Record&lt;string, (...args: any[]) =&gt; any&gt;
+  created?: () =&gt; void
+}
+
+/** 依赖收集器 */
+class Dep {
+  static target: Watcher&lt;any&gt; | null = null
+  private subs: Set&lt;Watcher&lt;any&gt;&gt; = new Set()
+
+  depend(): void { if (Dep.target) this.subs.add(Dep.target) }
+  notify(): void { this.subs.forEach(w =&gt; w.update()) }
+}
+
+/**
+ * 观察者，支持 lazy 模式（用于 computed）。
+ */
+class Watcher&lt;T&gt; {
+  private vm: Record&lt;string, any&gt;
+  private cb: WatcherCallback&lt;T&gt;
+  private getter: () =&gt; T
+  private lazy: boolean
+  public dirty: boolean
+  public value: T | undefined
+
+  constructor(vm: Record&lt;string, any&gt;, getter: () =&gt; T, cb: WatcherCallback&lt;T&gt;, lazy: boolean = false) {
+    this.vm = vm; this.cb = cb; this.getter = getter; this.lazy = lazy; this.dirty = lazy
+    this.value = lazy ? undefined : this.get()
+  }
+
+  get(): T { Dep.target = this; const v = this.getter.call(this.vm); Dep.target = null; return v }
+  update(): void { if (this.lazy) { this.dirty = true } else { const n = this.get(); this.cb(n, this.value as T); this.value = n } }
+  evaluate(): void { this.value = this.get(); this.dirty = false }
+}
+
+function defineReactive(obj: Record&lt;string, any&gt;, key: string, val: any): void {
+  const dep = new Dep()
+  if (val &amp;&amp; typeof val === 'object') observe(val)
+  Object.defineProperty(obj, key, {
+    get(): any { dep.depend(); return val },
+    set(newVal: any) { if (newVal !== val) { val = newVal; dep.notify() } }
+  })
+}
+
+function observe(obj: Record&lt;string, any&gt;): void {
+  if (!obj || typeof obj !== 'object') return
+  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
+}
+
+/**
+ * Mini Vue2 核心类，实现响应式 data、computed、watch、methods。
+ */
+class MiniVue {
+  $data: Record&lt;string, any&gt;;
+  [key: string]: any
+
+  constructor(options: MiniVueOptions) {
+    this.$data = typeof options.data === 'function' ? options.data() : options.data
+    observe(this.$data)
+    Object.keys(this.$data).forEach(key =&gt; {
+      Object.defineProperty(this, key, {
+        get() { return this.$data[key] },
+        set(v: any) { this.$data[key] = v }
+      })
+    })
+    if (options.computed) {
+      Object.keys(options.computed).forEach(key =&gt; {
+        const watcher = new Watcher(this, options.computed![key], () =&gt; {}, true)
+        Object.defineProperty(this, key, {
+          get() { if (watcher.dirty) watcher.evaluate(); return watcher.value }
+        })
+      })
+    }
+    if (options.watch) {
+      Object.keys(options.watch).forEach(key =&gt; {
+        new Watcher(this, () =&gt; this.$data[key], options.watch![key].bind(this))
+      })
+    }
+    if (options.methods) {
+      Object.keys(options.methods).forEach(k =&gt; { this[k] = options.methods![k].bind(this) })
+    }
+    options.created?.call(this)
+  }
+}</div>
+</div>
         <div class="demo-box">
           <div class="demo-label">Mini Vue2 运行效果</div>
           <div id="miniVue2App"></div>
