@@ -1089,11 +1089,16 @@ async function safeAsync&lt;T&gt;(promise: Promise&lt;T&gt;): Promise&lt;Result&
 
     <script>
       // 防抖节流交互演示（独立于 Monaco 编辑器）
-      function debounce(fn, delay) {
+      // 演示侧 delay/interval 用 500ms 便于观察；上方代码块内测试用 100ms。
+      function debounce(fn, delay, immediate = false) {
         let timer = null;
         return function (...args) {
-          clearTimeout(timer);
-          timer = setTimeout(() => fn.apply(this, args), delay);
+          if (timer) clearTimeout(timer);
+          if (immediate && !timer) fn.apply(this, args);
+          timer = setTimeout(() => {
+            if (!immediate) fn.apply(this, args);
+            timer = null;
+          }, delay);
         };
       }
       function throttle(fn, interval) {

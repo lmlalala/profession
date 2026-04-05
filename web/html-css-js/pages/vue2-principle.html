@@ -539,76 +539,163 @@ function vnodeToSimple(node: VNode | string): SimpleVNode {
         <!-- prettier-ignore -->
         <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
 <div data-tab="javascript">/**
- * 分析新旧列表的差异，返回删除、新增、移动、不变四类结果。
- * @param {string[]} oldList - 旧列表
- * @param {string[]} newList - 新列表
- * @returns {{removed: string[], added: string[], moved: string[], same: string[]}} diff 结果
+ * Vue2 双端指针 diff 算法（简化版，操作 key 字符串列表）。
+ * 策略：头头/尾尾/头尾/尾头 四种对比，命中则复用并移动指针；
+ * 都不命中时用 key→index 映射表 O(1) 查找旧节点。
+ *
+ * @param {string[]} oldList - 旧子节点 key 列表
+ * @param {string[]} newList - 新子节点 key 列表
+ * @returns {{ ops: string[], result: string[] }} 操作日志与最终顺序
  */
-function diffLists(oldList, newList) {
-  const oldMap = new Map(oldList.map((v, i) =&gt; [v, i]))
-  const newMap = new Map(newList.map((v, i) =&gt; [v, i]))
+function vue2Diff(oldList, newList) {
+  // 用数组模拟可变的旧列表（patch 时会移动/删除元素）
+  const old = [...oldList]
+  const ops = []
 
-  const removed = oldList.filter(v =&gt; !newMap.has(v))
-  const added   = newList.filter(v =&gt; !oldMap.has(v))
-  const moved   = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) !== oldMap.get(v))
-  const same    = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) === oldMap.get(v))
+  let oldStart = 0, oldEnd = old.length - 1
+  let newStart = 0, newEnd = newList.length - 1
 
-  return { removed, added, moved, same }
+  while (oldStart &lt;= oldEnd &amp;&amp; newStart &lt;= newEnd) {
+    const oS = old[oldStart], oE = old[oldEnd]
+    const nS = newList[newStart], nE = newList[newEnd]
+
+    if (oS === undefined) { oldStart++; continue }
+    if (oE === undefined) { oldEnd--;   continue }
+
+    if (oS === nS) {
+      // ① 头头相同：直接复用，双端指针同时向内移动
+      ops.push(`复用 ${nS}（头头）`)
+      oldStart++; newStart++
+    } else if (oE === nE) {
+      // ② 尾尾相同
+      ops.push(`复用 ${nE}（尾尾）`)
+      oldEnd--; newEnd--
+    } else if (oS === nE) {
+      // ③ 旧头 = 新尾：旧头节点移到旧尾之后
+      ops.push(`移动 ${oS}（旧头→新尾）`)
+      oldStart++; newEnd--
+    } else if (oE === nS) {
+      // ④ 旧尾 = 新头：旧尾节点移到旧头之前
+      ops.push(`移动 ${oE}（旧尾→新头）`)
+      oldEnd--; newStart++
+    } else {
+      // ⑤ 四种都不命中：用 key 映射表查找
+      const keyMap = new Map(old.map((k, i) =&gt; [k, i]))
+      const idxInOld = keyMap.get(nS)
+      if (idxInOld !== undefined) {
+        ops.push(`移动 ${nS}（key 映射）`)
+        old[idxInOld] = undefined  // 标记已处理
+      } else {
+        ops.push(`新增 ${nS}`)
+      }
+      newStart++
+    }
+  }
+
+  // 处理剩余节点
+  while (newStart &lt;= newEnd) { ops.push(`新增 ${newList[newStart++]}`) }
+  while (oldStart &lt;= oldEnd) {
+    if (old[oldStart] !== undefined) ops.push(`删除 ${old[oldStart]}`)
+    oldStart++
+  }
+
+  return { ops, result: newList }
 }
 
-// 测试 1：基本 diff
-const old1 = ['A', 'B', 'C', 'D', 'E']
-const new1 = ['A', 'C', 'E', 'B', 'D']
-const result1 = diffLists(old1, new1)
-console.log('旧列表:', old1.join(', '))
-console.log('新列表:', new1.join(', '))
-console.log('复用（位置不变）:', result1.same.join(', ') || '无')
-console.log('移动（key相同位置变）:', result1.moved.join(', ') || '无')
-console.log('删除:', result1.removed.join(', ') || '无')
-console.log('新增:', result1.added.join(', ') || '无')
+// 测试 1：纯移动（无增删）
+const r1 = vue2Diff(['A','B','C','D','E'], ['A','C','E','B','D'])
+console.log('=== 测试1：纯移动 ===')
+console.log('旧: A B C D E  →  新: A C E B D')
+r1.ops.forEach(op =&gt; console.log(' ', op))
 
 // 测试 2：有新增和删除
-const old2 = ['A', 'B', 'C']
-const new2 = ['B', 'C', 'D', 'E']
-const result2 = diffLists(old2, new2)
-console.log('\n旧列表:', old2.join(', '))
-console.log('新列表:', new2.join(', '))
-console.log('删除:', result2.removed.join(', '))
-console.log('新增:', result2.added.join(', '))
+const r2 = vue2Diff(['A','B','C'], ['B','C','D','E'])
+console.log('\n=== 测试2：增删 ===')
+console.log('旧: A B C  →  新: B C D E')
+r2.ops.forEach(op =&gt; console.log(' ', op))
 
-console.log('\n双端指针策略（Vue2 核心）：')
-console.log('oldStart↔newStart  oldEnd↔newEnd')
-console.log('oldStart↔newEnd    oldEnd↔newStart')
-console.log('有 key：建立 key→index 映射，O(1) 查找复用节点')</div>
-<div data-tab="typescript">/** diff 算法的比较结果 */
-interface DiffResult&lt;T&gt; {
-  /** 旧列表中有、新列表中无的元素 */
-  removed: T[]
-  /** 新列表中有、旧列表中无的元素 */
-  added: T[]
-  /** key 相同但位置发生变化的元素 */
-  moved: T[]
-  /** key 和位置都未变的元素 */
-  same: T[]
+// 测试 3：头尾互换（经典双端命中场景）
+const r3 = vue2Diff(['A','B','C','D'], ['D','C','B','A'])
+console.log('\n=== 测试3：完全反转 ===')
+console.log('旧: A B C D  →  新: D C B A')
+r3.ops.forEach(op =&gt; console.log(' ', op))</div>
+<div data-tab="typescript">/** 双端 diff 操作日志与结果 */
+interface DiffResult {
+  /** 每一步操作的文字描述 */
+  ops: string[]
+  /** diff 后的最终顺序（即 newList） */
+  result: string[]
 }
 
 /**
- * 分析新旧列表的差异，返回删除、新增、移动、不变四类结果。
- * @param oldList - 旧列表
- * @param newList - 新列表
- * @returns diff 结果对象
+ * Vue2 双端指针 diff 算法（简化版，操作 key 字符串列表）。
+ * 策略：头头/尾尾/头尾/尾头 四种对比，命中则复用并移动指针；
+ * 都不命中时用 key→index 映射表 O(1) 查找旧节点。
+ *
+ * @param oldList - 旧子节点 key 列表
+ * @param newList - 新子节点 key 列表
+ * @returns 操作日志与最终顺序
  */
-function diffLists&lt;T&gt;(oldList: T[], newList: T[]): DiffResult&lt;T&gt; {
-  const oldMap = new Map&lt;T, number&gt;(oldList.map((v, i) =&gt; [v, i]))
-  const newMap = new Map&lt;T, number&gt;(newList.map((v, i) =&gt; [v, i]))
+function vue2Diff(oldList: string[], newList: string[]): DiffResult {
+  const old: (string | undefined)[] = [...oldList]
+  const ops: string[] = []
 
-  const removed = oldList.filter(v =&gt; !newMap.has(v))
-  const added   = newList.filter(v =&gt; !oldMap.has(v))
-  const moved   = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) !== oldMap.get(v))
-  const same    = newList.filter(v =&gt; oldMap.has(v) &amp;&amp; newMap.get(v) === oldMap.get(v))
+  let oldStart = 0, oldEnd = old.length - 1
+  let newStart = 0, newEnd = newList.length - 1
 
-  return { removed, added, moved, same }
-}</div>
+  while (oldStart &lt;= oldEnd &amp;&amp; newStart &lt;= newEnd) {
+    const oS = old[oldStart], oE = old[oldEnd]
+    const nS = newList[newStart], nE = newList[newEnd]
+
+    if (oS === undefined) { oldStart++; continue }
+    if (oE === undefined) { oldEnd--;   continue }
+
+    if (oS === nS) {
+      ops.push(`复用 ${nS}（头头）`)
+      oldStart++; newStart++
+    } else if (oE === nE) {
+      ops.push(`复用 ${nE}（尾尾）`)
+      oldEnd--; newEnd--
+    } else if (oS === nE) {
+      ops.push(`移动 ${oS}（旧头→新尾）`)
+      oldStart++; newEnd--
+    } else if (oE === nS) {
+      ops.push(`移动 ${oE}（旧尾→新头）`)
+      oldEnd--; newStart++
+    } else {
+      const keyMap = new Map&lt;string, number&gt;(
+        old.map((k, i) =&gt; [k as string, i] as [string, number])
+           .filter(([k]) =&gt; k !== undefined)
+      )
+      const idxInOld = keyMap.get(nS)
+      if (idxInOld !== undefined) {
+        ops.push(`移动 ${nS}（key 映射）`)
+        old[idxInOld] = undefined
+      } else {
+        ops.push(`新增 ${nS}`)
+      }
+      newStart++
+    }
+  }
+
+  while (newStart &lt;= newEnd) { ops.push(`新增 ${newList[newStart++]}`) }
+  while (oldStart &lt;= oldEnd) {
+    if (old[oldStart] !== undefined) ops.push(`删除 ${old[oldStart]}`)
+    oldStart++
+  }
+
+  return { ops, result: newList }
+}
+
+// 测试 1：纯移动
+const r1 = vue2Diff(['A','B','C','D','E'], ['A','C','E','B','D'])
+console.log('=== 测试1：纯移动 ===')
+r1.ops.forEach(op =&gt; console.log(' ', op))
+
+// 测试 2：有新增和删除
+const r2 = vue2Diff(['A','B','C'], ['B','C','D','E'])
+console.log('\n=== 测试2：增删 ===')
+r2.ops.forEach(op =&gt; console.log(' ', op))</div>
 </div>
         <div class="demo-box">
           <div class="demo-label">diff 可视化演示</div>
@@ -982,7 +1069,8 @@ class MiniVue {
       Object.entries(vnode.props).forEach(([k, v]) => {
         if (k === 'class') el.className = v
         else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v)
-        else el.setAttribute(k, v)
+        else if (typeof v === 'function') el[k] = v  // 事件处理函数直接赋值（如 onclick）
+        else if (k !== 'key') el.setAttribute(k, v)  // key 仅用于 diff，不设置到 DOM
       })
       vnode.children.forEach(child => el.appendChild(createEl(child)))
       return el
@@ -990,13 +1078,12 @@ class MiniVue {
 
     function renderVnodeTree() {
       const vnode = h('div', { id: 'app', class: 'container' },
-        h('h1', { style: { color: '#6c63ff' } }, 'Hello Vue2'),
-        h('ul', { class: 'list' },
-          h('li', { key: 'a', class: 'item' }, 'Item A'),
-          h('li', { key: 'b', class: 'item' }, 'Item B'),
-          h('li', { key: 'c', class: 'item' }, 'Item C'),
-        ),
-        h('p', { class: 'desc' }, '虚拟 DOM 示例')
+        h('h1', null, 'Hello Vue'),
+        h('ul', null,
+          h('li', { key: 'a' }, 'Item A'),
+          h('li', { key: 'b' }, 'Item B'),
+          h('li', { key: 'c' }, 'Item C'),
+        )
       )
       const tree = document.getElementById('vnodeTree')
       tree.innerHTML = renderTreeHtml(vnode, 0)
@@ -1019,15 +1106,28 @@ class MiniVue {
     function mountVnode() {
       const out = document.getElementById('mountOutput')
       out.innerHTML = ''
-      const vnode = h('div', { style: 'border:1px solid #2e3350;border-radius:6px;padding:0.75rem;font-size:0.85rem' },
-        h('h3', { style: 'color:#6c63ff;margin-bottom:0.5rem' }, 'VNode → 真实 DOM'),
-        h('ul', { style: 'list-style:none;padding:0' },
-          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item A'),
-          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item B'),
-          h('li', { style: 'color:#00d4aa;padding:0.2rem 0' }, '✅ Item C'),
+      const tree = document.getElementById('vnodeTree')
+      const vnode = tree._vnode || h('div', { id: 'app', class: 'container' },
+        h('h1', null, 'Hello Vue'),
+        h('ul', null,
+          h('li', { key: 'a' }, 'Item A'),
+          h('li', { key: 'b' }, 'Item B'),
+          h('li', { key: 'c' }, 'Item C'),
         )
       )
-      out.appendChild(createEl(vnode))
+      const el = createEl(vnode)
+      // 隔离页面全局样式，避免 ul/li 继承页面样式
+      el.style.cssText = 'font-size:0.875rem;line-height:1.6'
+      el.querySelectorAll('ul').forEach(ul => {
+        ul.style.cssText = 'list-style:disc;padding-left:1.5rem;margin:0.25rem 0'
+      })
+      el.querySelectorAll('li').forEach(li => {
+        li.style.cssText = 'padding:0;margin:0.1rem 0;background:none;border:none'
+      })
+      el.querySelectorAll('h1,h2,h3').forEach(h => {
+        h.style.cssText = 'font-size:1rem;font-weight:700;margin:0 0 0.5rem;color:var(--color-primary)'
+      })
+      out.appendChild(el)
     }
 
     // ============================================================
@@ -1125,26 +1225,27 @@ class MiniVue {
         if (container) { container.innerHTML = ''; container.appendChild(createEl(this._vnode)) }
       }
       _patch(oldVnode, newVnode) {
-        if (!oldVnode._el) return
-        if (oldVnode.tag !== newVnode.tag) {
-          oldVnode._el.replaceWith(createEl(newVnode)); return
-        }
-        newVnode._el = oldVnode._el
-        // 更新文本子节点
-        if (newVnode.children.length === 1 && typeof newVnode.children[0] === 'string') {
-          oldVnode._el.textContent = newVnode.children[0]
+        // 完整替换：重新创建 DOM 并替换旧节点
+        // 这样可保证事件处理函数始终是最新的绑定
+        if (oldVnode._el && oldVnode._el.parentNode) {
+          const newEl = createEl(newVnode)
+          oldVnode._el.parentNode.replaceChild(newEl, oldVnode._el)
+        } else {
+          // 降级：重新挂载
+          this._mount()
         }
       }
     }
 
-    // 启动 Mini Vue2
+    // 启动 Mini Vue2（与第 5 节代码块数据一致：count, name, doubleCount, greeting）
     const app = new MiniVue2({
       el: '#miniVue2App',
       data() {
-        return { count: 0, message: 'Hello Mini Vue2!', items: ['苹果', '香蕉', '橙子'] }
+        return { count: 0, name: 'Alice' }
       },
       computed: {
-        doubleCount() { return this.count * 2 }
+        doubleCount() { return this.count * 2 },
+        greeting() { return `Hello, ${this.name}!` }
       },
       watch: {
         count(newVal, oldVal) {
@@ -1155,11 +1256,7 @@ class MiniVue {
       },
       methods: {
         increment() { this.count++ },
-        decrement() { this.count-- },
-        addItem() {
-          const fruits = ['葡萄','西瓜','草莓','芒果','菠萝']
-          this.items.push(fruits[Math.floor(Math.random() * fruits.length)])
-        }
+        setName(name) { this.name = name }
       },
       created() {
         const d = document.createElement('div'); d.className = 'info'
@@ -1168,28 +1265,21 @@ class MiniVue {
       },
       render(h) {
         return h('div', { style: 'font-size:0.875rem' },
-          h('div', { style: 'margin-bottom:0.75rem;color:#8892b0' }, this.message),
+          h('div', { style: 'margin-bottom:0.75rem;color:#8892b0' }, this.greeting),
           h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
             h('button', {
               onclick: this.increment.bind(this),
               style: 'background:#6c63ff;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem'
             }, '+1'),
             h('span', { style: 'color:#e2e8f0;font-weight:700;font-size:1.1rem;min-width:30px;text-align:center' }, String(this.count)),
-            h('button', {
-              onclick: this.decrement.bind(this),
-              style: 'background:#ff6584;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem'
-            }, '-1'),
             h('span', { style: 'color:#ffd166;font-size:0.8rem' }, `computed doubleCount = ${this.doubleCount}`),
           ),
-          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap' },
-            h('span', { style: 'color:#8892b0;font-size:0.8rem' }, '水果列表:'),
-            ...this.items.map(item => h('span', {
-              style: 'background:rgba(0,212,170,0.15);color:#00d4aa;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.75rem'
-            }, item)),
+          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;flex-wrap:wrap' },
+            h('span', { style: 'color:#8892b0;font-size:0.8rem' }, `name: ${this.name}`),
             h('button', {
-              onclick: this.addItem.bind(this),
+              onclick: () => this.setName(this.name === 'Alice' ? 'Bob' : 'Alice'),
               style: 'background:rgba(0,212,170,0.2);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.75rem'
-            }, '+ 添加')
+            }, '切换 name')
           )
         )
       }

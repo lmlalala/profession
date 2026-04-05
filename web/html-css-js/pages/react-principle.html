@@ -336,43 +336,150 @@ console.log('effectTag:', fiberNode.effectTag)</div>
           ③ key 相同则复用（key 的重要性！）
         </div>
         <!-- prettier-ignore -->
-        <div class="code-block" data-readonly><span class="cmt">// React 多节点 diff（React 18 核心逻辑）</span>
-<span class="kw">function</span> <span class="fn">reconcileChildrenArray</span>(returnFiber, currentFirstChild, newChildren) {
-  <span class="kw">let</span> resultFirstChild = <span class="kw">null</span>
-  <span class="kw">let</span> previousNewFiber = <span class="kw">null</span>
-  <span class="kw">let</span> oldFiber = currentFirstChild
-  <span class="kw">let</span> lastPlacedIndex = <span class="num">0</span>  <span class="cmt">// 最后一个可复用节点在旧列表中的位置</span>
-  <span class="kw">let</span> newIdx = <span class="num">0</span>
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * React 多节点 diff（lastPlacedIndex 算法，简化版）。
+ * 策略：两轮遍历
+ *  第一轮：顺序扫描，key 相同则复用，key 不同立即退出
+ *  第二轮：剩余旧节点建立 key→index 映射表，遍历剩余新节点
+ *          用 lastPlacedIndex 判断是否需要移动
+ *
+ * @param {string[]} oldList - 旧子节点 key 列表
+ * @param {string[]} newList - 新子节点 key 列表
+ * @returns {{ ops: string[], moves: number }} 操作日志与移动次数
+ */
+function reactDiff(oldList, newList) {
+  const ops = []
+  let lastPlacedIndex = 0  // 最后一个「不需要移动」的旧节点下标
+  let newIdx = 0
+  let oldIdx = 0
 
-  <span class="cmt">// 第一轮：顺序遍历，处理前缀相同的节点</span>
-  <span class="kw">for</span> (; oldFiber && newIdx &lt; newChildren.length; newIdx++) {
-    <span class="kw">const</span> newChild = newChildren[newIdx]
-    <span class="kw">if</span> (oldFiber.key !== newChild.key) <span class="kw">break</span>  <span class="cmt">// key 不同，退出第一轮</span>
-    <span class="kw">const</span> newFiber = <span class="fn">updateElement</span>(returnFiber, oldFiber, newChild)
-    oldFiber = oldFiber.sibling
+  // ── 第一轮：顺序遍历，处理前缀 key 相同的节点 ──
+  while (oldIdx &lt; oldList.length &amp;&amp; newIdx &lt; newList.length) {
+    if (oldList[oldIdx] !== newList[newIdx]) break  // key 不同，退出第一轮
+    ops.push(`复用 ${newList[newIdx]}（第一轮，index=${oldIdx}）`)
+    lastPlacedIndex = oldIdx
+    oldIdx++; newIdx++
   }
 
-  <span class="cmt">// 第二轮：剩余旧节点建立 key→fiber 映射表</span>
-  <span class="kw">const</span> existingChildren = <span class="kw">new</span> Map()
-  <span class="kw">while</span> (oldFiber) {
-    existingChildren.<span class="fn">set</span>(oldFiber.key ?? oldFiber.index, oldFiber)
-    oldFiber = oldFiber.sibling
+  // ── 第二轮：剩余旧节点建立 key→oldIndex 映射表 ──
+  const existingMap = new Map()
+  for (let i = oldIdx; i &lt; oldList.length; i++) {
+    existingMap.set(oldList[i], i)
   }
-  <span class="cmt">// 遍历剩余新节点，查找可复用的旧节点</span>
-  <span class="kw">for</span> (; newIdx &lt; newChildren.length; newIdx++) {
-    <span class="kw">const</span> newChild = newChildren[newIdx]
-    <span class="kw">const</span> matchedFiber = existingChildren.<span class="fn">get</span>(newChild.key ?? newIdx)
-    <span class="kw">if</span> (matchedFiber) {
-      existingChildren.<span class="fn">delete</span>(newChild.key ?? newIdx)
-      <span class="kw">if</span> (matchedFiber.index &lt; lastPlacedIndex) <span class="cmt">// 需要移动</span>
-        newFiber.effectTag = <span class="str">'PLACEMENT'</span>
-      <span class="kw">else</span>
-        lastPlacedIndex = matchedFiber.index  <span class="cmt">// 不需要移动</span>
+
+  let moves = 0
+  // 遍历剩余新节点
+  for (; newIdx &lt; newList.length; newIdx++) {
+    const key = newList[newIdx]
+    const oldIndex = existingMap.get(key)
+
+    if (oldIndex === undefined) {
+      // 旧列表中不存在：新增
+      ops.push(`新增 ${key}`)
+    } else {
+      existingMap.delete(key)
+      if (oldIndex &lt; lastPlacedIndex) {
+        // 旧位置在 lastPlacedIndex 之前：需要向后移动
+        ops.push(`移动 ${key}（oldIndex=${oldIndex} &lt; lastPlacedIndex=${lastPlacedIndex}）`)
+        moves++
+      } else {
+        // 旧位置在 lastPlacedIndex 之后或相等：不需要移动，原地复用
+        ops.push(`复用 ${key}（第二轮，oldIndex=${oldIndex}，无需移动）`)
+        lastPlacedIndex = oldIndex
+      }
     }
   }
-  <span class="cmt">// 剩余旧节点全部删除</span>
-  existingChildren.<span class="fn">forEach</span>(child => <span class="fn">deleteChild</span>(returnFiber, child))
-}</span></div>
+
+  // 剩余旧节点全部删除
+  existingMap.forEach((_, key) =&gt; ops.push(`删除 ${key}`))
+
+  return { ops, moves }
+}
+
+// 测试 1：React 经典场景（lastPlacedIndex 的体现）
+const r1 = reactDiff(['A','B','C','D'], ['D','A','B','C'])
+console.log('=== 测试1：D 移到最前 ===')
+console.log('旧: A B C D  →  新: D A B C')
+r1.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r1.moves}（React 会移动 A B C，而非只移动 D！）`)
+
+// 测试 2：有新增和删除
+const r2 = reactDiff(['A','B','C','D','E'], ['D','A','C','B','F'])
+console.log('\n=== 测试2：综合场景 ===')
+console.log('旧: A B C D E  →  新: D A C B F')
+r2.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r2.moves}`)
+
+// 对比：Vue2 双端 vs React lastPlacedIndex
+console.log('\n=== 关键区别 ===')
+console.log('React 不用双端指针，只从左到右扫描一遍')
+console.log('lastPlacedIndex 保证：旧位置在其右侧的节点不需要移动')
+console.log('缺点：[A,B,C,D]→[D,A,B,C] React 移动 A/B/C，Vue2 只移动 D')</div>
+<div data-tab="typescript">/** React diff 操作摘要 */
+interface ReactDiffResult {
+  /** 每一步操作的文字描述 */
+  ops: string[]
+  /** 实际发生移动的次数 */
+  moves: number
+}
+
+/**
+ * React 多节点 diff（lastPlacedIndex 算法，简化版）。
+ * @param oldList - 旧子节点 key 列表
+ * @param newList - 新子节点 key 列表
+ * @returns 操作日志与移动次数
+ */
+function reactDiff(oldList: string[], newList: string[]): ReactDiffResult {
+  const ops: string[] = []
+  let lastPlacedIndex = 0
+  let newIdx = 0, oldIdx = 0
+
+  // 第一轮：顺序遍历前缀
+  while (oldIdx &lt; oldList.length &amp;&amp; newIdx &lt; newList.length) {
+    if (oldList[oldIdx] !== newList[newIdx]) break
+    ops.push(`复用 ${newList[newIdx]}（第一轮）`)
+    lastPlacedIndex = oldIdx
+    oldIdx++; newIdx++
+  }
+
+  // 第二轮：剩余旧节点建立映射
+  const existingMap = new Map&lt;string, number&gt;()
+  for (let i = oldIdx; i &lt; oldList.length; i++) {
+    existingMap.set(oldList[i], i)
+  }
+
+  let moves = 0
+  for (; newIdx &lt; newList.length; newIdx++) {
+    const key = newList[newIdx]
+    const oldIndex = existingMap.get(key)
+    if (oldIndex === undefined) {
+      ops.push(`新增 ${key}`)
+    } else {
+      existingMap.delete(key)
+      if (oldIndex &lt; lastPlacedIndex) {
+        ops.push(`移动 ${key}（oldIndex=${oldIndex} &lt; lastPlacedIndex=${lastPlacedIndex}）`)
+        moves++
+      } else {
+        ops.push(`复用 ${key}（无需移动，oldIndex=${oldIndex}）`)
+        lastPlacedIndex = oldIndex
+      }
+    }
+  }
+  existingMap.forEach((_, key) =&gt; ops.push(`删除 ${key}`))
+  return { ops, moves }
+}
+
+const r1 = reactDiff(['A','B','C','D'], ['D','A','B','C'])
+console.log('=== 测试1：D 移到最前 ===')
+r1.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r1.moves}`)
+
+const r2 = reactDiff(['A','B','C','D','E'], ['D','A','C','B','F'])
+console.log('\n=== 测试2：综合场景 ===')
+r2.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r2.moves}`)</div>
+</div>
         <div class="demo-box">
           <div class="demo-label">diff 可视化演示</div>
           <div class="grid-2" style="margin-bottom:0.75rem">
@@ -694,28 +801,41 @@ console.log('总渲染次数:', fiber.renderCount)</div>
       const newList = document.getElementById('reactDiffNew').value.split(',').map(s => s.trim()).filter(Boolean)
       const out = document.getElementById('reactDiffOut')
 
-      // React diff 算法模拟（两轮遍历）
-      const ops = []
+      // React diff 算法（两轮遍历 + lastPlacedIndex，与代码块一致）
+      const nodeOps = []  // { key, op: 'same'|'move'|'insert', oldIdx? }
       let lastPlacedIndex = 0
+      let newIdx = 0, oldIdx = 0
 
-      // 建立旧节点 key→index 映射
-      const oldKeyMap = new Map(oldList.map((k, i) => [k, i]))
-      const newKeyMap = new Map(newList.map((k, i) => [k, i]))
+      // 第一轮：顺序遍历前缀 key 相同的节点
+      while (oldIdx < oldList.length && newIdx < newList.length) {
+        if (oldList[oldIdx] !== newList[newIdx]) break
+        nodeOps.push({ key: newList[newIdx], op: 'same', oldIdx, newIdx, round: 1 })
+        lastPlacedIndex = oldIdx
+        oldIdx++; newIdx++
+      }
 
-      // 分析每个新节点的操作
-      const nodeOps = newList.map((key, newIdx) => {
-        if (!oldKeyMap.has(key)) return { key, op: 'insert', newIdx }
-        const oldIdx = oldKeyMap.get(key)
-        if (oldIdx >= lastPlacedIndex) {
-          lastPlacedIndex = oldIdx
-          return { key, op: 'same', oldIdx, newIdx }
+      // 第二轮：剩余旧节点建立 key→index 映射
+      const existingMap = new Map()
+      for (let i = oldIdx; i < oldList.length; i++) existingMap.set(oldList[i], i)
+
+      for (; newIdx < newList.length; newIdx++) {
+        const key = newList[newIdx]
+        const oIdx = existingMap.get(key)
+        if (oIdx === undefined) {
+          nodeOps.push({ key, op: 'insert', newIdx })
         } else {
-          return { key, op: 'move', oldIdx, newIdx }
+          existingMap.delete(key)
+          if (oIdx < lastPlacedIndex) {
+            nodeOps.push({ key, op: 'move', oldIdx: oIdx, newIdx, round: 2 })
+          } else {
+            nodeOps.push({ key, op: 'same', oldIdx: oIdx, newIdx, round: 2 })
+            lastPlacedIndex = oIdx
+          }
         }
-      })
-      const deletedKeys = oldList.filter(k => !newKeyMap.has(k))
+      }
+      const deletedKeys = [...existingMap.keys()]
 
-      let html = '<div style="margin-bottom:0.5rem;color:var(--color-text-muted);font-size:0.75rem">React diff 分析（lastPlacedIndex 算法）：</div>'
+      let html = '<div style="margin-bottom:0.5rem;color:var(--color-text-muted);font-size:0.75rem">React diff 分析（两轮遍历 + lastPlacedIndex）：</div>'
       html += `<div style="margin-bottom:0.5rem">旧：${oldList.map(k => `<span class="diff-op same">${k}</span>`).join('')}</div>`
       html += `<div style="margin-bottom:0.75rem">新：${newList.map(k => {
         const op = nodeOps.find(o => o.key === k)
@@ -725,15 +845,16 @@ console.log('总渲染次数:', fiber.renderCount)</div>
       html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">'
       html += '<div style="font-size:0.75rem;color:var(--color-text-muted);margin-bottom:0.25rem">DOM 操作：</div>'
       deletedKeys.forEach(k => { html += `<div><span class="diff-op delete">DELETE</span> 删除节点 key="${k}"</div>` })
-      nodeOps.forEach(({ key, op, oldIdx, newIdx }) => {
-        if (op === 'insert') html += `<div><span class="diff-op insert">INSERT</span> 插入新节点 key="${key}" at index ${newIdx}</div>`
-        else if (op === 'move') html += `<div><span class="diff-op move">MOVE</span> 移动节点 key="${key}" from ${oldIdx} to ${newIdx}（oldIdx ${oldIdx} < lastPlacedIndex）</div>`
-        else html += `<div><span class="diff-op same">REUSE</span> 复用节点 key="${key}"（位置不变，lastPlacedIndex → ${oldIdx}）</div>`
+      nodeOps.forEach(({ key, op, oldIdx: oi, newIdx: ni, round }) => {
+        if (op === 'insert') html += `<div><span class="diff-op insert">INSERT</span> 插入新节点 key="${key}"</div>`
+        else if (op === 'move') html += `<div><span class="diff-op move">MOVE</span> 移动节点 key="${key}"（第${round}轮，oldIdx=${oi} &lt; lastPlacedIndex）</div>`
+        else html += `<div><span class="diff-op same">REUSE</span> 复用节点 key="${key}"（第${round}轮，oldIdx=${oi}，无需移动）</div>`
       })
 
-      const domOps = deletedKeys.length + nodeOps.filter(o => o.op !== 'same').length
+      const moves = nodeOps.filter(o => o.op === 'move').length
+      const inserts = nodeOps.filter(o => o.op === 'insert').length
       html += `<hr style="border-color:var(--color-border);margin:0.5rem 0">`
-      html += `<div style="color:var(--color-secondary);font-size:0.8rem">共 ${domOps} 次 DOM 操作（无 key 则需 ${newList.length} 次全量更新）</div>`
+      html += `<div style="color:var(--color-secondary);font-size:0.8rem">移动 ${moves} 次 · 新增 ${inserts} 次 · 删除 ${deletedKeys.length} 次</div>`
       out.innerHTML = html
     }
 
@@ -907,8 +1028,7 @@ console.log('总渲染次数:', fiber.renderCount)</div>
       // 组件
       function Counter() {
         const [count, setCount] = useState2(0)
-        const [items, setItems] = useState2(['苹果', '香蕉'])
-        const fruits = ['葡萄','西瓜','草莓','芒果']
+        const [name, setName] = useState2('Alice')
         return createElement('div', { style: 'font-size:0.875rem' },
           createElement('div', { style: 'color:#8892b0;margin-bottom:0.75rem' }, 'Mini React（含 Fiber + Hooks）'),
           createElement('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
@@ -924,14 +1044,14 @@ console.log('总渲染次数:', fiber.renderCount)</div>
             createElement('span', { style: 'color:#ffd166;font-size:0.8rem' }, `count × 2 = ${count * 2}`)
           ),
           createElement('div', { style: 'display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap' },
-            createElement('span', { style: 'color:#8892b0;font-size:0.8rem' }, '水果:'),
-            ...items.map(item => createElement('span', {
+            createElement('span', { style: 'color:#8892b0;font-size:0.8rem' }, 'name:'),
+            createElement('span', {
               style: 'background:rgba(0,212,170,0.15);color:#00d4aa;padding:0.2rem 0.5rem;border-radius:4px;font-size:0.75rem'
-            }, item)),
+            }, name),
             createElement('button', {
-              onClick: () => setItems(prev => [...prev, fruits[Math.floor(Math.random() * fruits.length)]]),
+              onClick: () => setName(n => (n === 'Alice' ? 'Bob' : 'Alice')),
               style: 'background:rgba(0,212,170,0.2);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.75rem'
-            }, '+ 添加')
+            }, '切换名字')
           )
         )
       }

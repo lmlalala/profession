@@ -8,6 +8,7 @@ const NAV_LINKS = [
   { href: 'css-layout.html', label: 'CSS 布局' },
   { href: 'css-animation.html', label: 'CSS 动画' },
   { href: 'css-interview.html', label: 'CSS 面试' },
+  { href: 'js-dom.html', label: 'JS DOM' },
   { href: 'js-basic.html', label: 'JS 基础' },
   { href: 'js-es6.html', label: 'JS ES6+' },
   { href: 'js-async.html', label: 'JS 异步' },

@@ -1,29 +1,33 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>TypeScript 核心知识点</title>
-  <link rel="stylesheet" href="../css/common.css">
-  <script type="module" src="../js/nav.js"></script>
-  <script type="module" src="../js/code-editor.js"></script>
-</head>
-<body>
-  <nav class="nav"></nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TypeScript 核心知识点</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <script type="module" src="../js/nav.js"></script>
+    <script type="module" src="../js/code-editor.js"></script>
+  </head>
+  <body>
+    <nav class="nav"></nav>
 
-  <div class="page-wrapper">
-    <h1 class="page-title">TypeScript 核心知识点</h1>
-    <p class="page-subtitle">类型系统 · 泛型 · 类型体操 · 工具类型 · 类型守卫 · 声明文件</p>
+    <div class="page-wrapper">
+      <h1 class="page-title">TypeScript 核心知识点</h1>
+      <p class="page-subtitle">类型系统 · 泛型 · 类型体操 · 工具类型 · 类型守卫 · 声明文件</p>
 
-    <!-- 1. 基础类型 -->
-    <section class="section">
-      <h2 class="section-title">1. 基础类型与类型注解 <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>TypeScript = JavaScript + 静态类型系统</strong>，编译时检查类型错误，运行时类型信息会被擦除。
-        </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// 基础类型注解
+      <!-- 1. 基础类型 -->
+      <section class="section">
+        <h2 class="section-title">
+          1. 基础类型与类型注解
+          <span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>TypeScript = JavaScript + 静态类型系统</strong>
+            ，编译时检查类型错误，运行时类型信息会被擦除。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// 基础类型注解
 const name: string = 'Alice'
 const age: number = 25
 const isDev: boolean = true
@@ -49,15 +53,18 @@ let u: undefined = undefined
 // 类型断言
 const el = document.getElementById('app') as HTMLDivElement
 const el2 = &lt;HTMLDivElement&gt;document.getElementById('app')  // JSX 中不可用</div>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- 2. interface vs type -->
-    <section class="section">
-      <h2 class="section-title">2. interface 与 type <span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// ── interface：描述对象形状，可声明合并 ──
+      <!-- 2. interface vs type -->
+      <section class="section">
+        <h2 class="section-title">
+          2. interface 与 type
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// ── interface：描述对象形状，可声明合并 ──
 interface User {
   readonly id: number       // 只读
   name: string
@@ -90,25 +97,32 @@ type AsyncFn&lt;T&gt; = () =&gt; Promise&lt;T&gt;
 // interface: 可声明合并、extends 继承、描述对象/类
 // type: 支持联合/交叉/元组/映射/条件类型，不可声明合并
 // 推荐：对象用 interface，其他用 type</div>
-        <div class="callout warn">
-          <strong>面试高频问题：interface 和 type 的区别？</strong><br>
-          ① interface 可声明合并，type 不行<br>
-          ② type 支持联合类型、交叉类型、条件类型等高级特性<br>
-          ③ interface 可被 class implements<br>
-          ④ 性能上 interface 略优（编译器内部优化）
+          <div class="callout warn">
+            <strong>面试高频问题：interface 和 type 的区别？</strong>
+            1. interface 可声明合并，type 不行
+            <br />
+            2. type 支持联合类型、交叉类型、条件类型等高级特性
+            <br />
+            3. interface 可被 class implements
+            <br />
+            4. 性能上 interface 略优（编译器内部优化）
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 3. 泛型 -->
-    <section class="section">
-      <h2 class="section-title">3. 泛型（Generics）<span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>泛型 = 类型的参数化</strong>，让函数/类/接口在定义时不指定具体类型，使用时再确定。
-        </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// 泛型函数
+      <!-- 3. 泛型 -->
+      <section class="section">
+        <h2 class="section-title">
+          3. 泛型（Generics）
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>泛型 = 类型的参数化</strong>
+            ，让函数/类/接口在定义时不指定具体类型，使用时再确定。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// 泛型函数
 function identity&lt;T&gt;(value: T): T { return value }
 identity&lt;string&gt;('hello')  // 显式指定
 identity(42)               // 自动推断为 number
@@ -150,15 +164,18 @@ class Container&lt;T&gt; {
 
 // 泛型默认值
 type Pagination&lt;T = any&gt; = { list: T[]; total: number; page: number }</div>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- 4. 工具类型 -->
-    <section class="section">
-      <h2 class="section-title">4. 内置工具类型 <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>interface User {
+      <!-- 4. 工具类型 -->
+      <section class="section">
+        <h2 class="section-title">
+          4. 内置工具类型
+          <span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>interface User {
   id: number
   name: string
   email: string
@@ -204,29 +221,66 @@ type FetchResult = ReturnType&lt;typeof fetchUser&gt;
 
 // Parameters&lt;T&gt; — 获取函数参数类型（元组）
 type FetchParams = Parameters&lt;typeof fetchUser&gt;  // []</div>
-        <div class="table-wrap">
-          <table>
-            <thead><tr><th>工具类型</th><th>作用</th><th>常见场景</th></tr></thead>
-            <tbody>
-              <tr><td><code>Partial&lt;T&gt;</code></td><td>全部可选</td><td>更新接口、表单初始值</td></tr>
-              <tr><td><code>Required&lt;T&gt;</code></td><td>全部必选</td><td>严格校验</td></tr>
-              <tr><td><code>Readonly&lt;T&gt;</code></td><td>全部只读</td><td>不可变数据</td></tr>
-              <tr><td><code>Pick&lt;T, K&gt;</code></td><td>选取属性</td><td>API 响应裁剪</td></tr>
-              <tr><td><code>Omit&lt;T, K&gt;</code></td><td>排除属性</td><td>隐藏敏感字段</td></tr>
-              <tr><td><code>Record&lt;K, V&gt;</code></td><td>键值映射</td><td>字典、配置表</td></tr>
-              <tr><td><code>ReturnType&lt;T&gt;</code></td><td>函数返回类型</td><td>推断第三方库返回</td></tr>
-            </tbody>
-          </table>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>工具类型</th>
+                  <th>作用</th>
+                  <th>常见场景</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td><code>Partial&lt;T&gt;</code></td>
+                  <td>全部可选</td>
+                  <td>更新接口、表单初始值</td>
+                </tr>
+                <tr>
+                  <td><code>Required&lt;T&gt;</code></td>
+                  <td>全部必选</td>
+                  <td>严格校验</td>
+                </tr>
+                <tr>
+                  <td><code>Readonly&lt;T&gt;</code></td>
+                  <td>全部只读</td>
+                  <td>不可变数据</td>
+                </tr>
+                <tr>
+                  <td><code>Pick&lt;T, K&gt;</code></td>
+                  <td>选取属性</td>
+                  <td>API 响应裁剪</td>
+                </tr>
+                <tr>
+                  <td><code>Omit&lt;T, K&gt;</code></td>
+                  <td>排除属性</td>
+                  <td>隐藏敏感字段</td>
+                </tr>
+                <tr>
+                  <td><code>Record&lt;K, V&gt;</code></td>
+                  <td>键值映射</td>
+                  <td>字典、配置表</td>
+                </tr>
+                <tr>
+                  <td><code>ReturnType&lt;T&gt;</code></td>
+                  <td>函数返回类型</td>
+                  <td>推断第三方库返回</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 5. 类型守卫 -->
-    <section class="section">
-      <h2 class="section-title">5. 类型守卫与类型收窄 <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// typeof 守卫
+      <!-- 5. 类型守卫 -->
+      <section class="section">
+        <h2 class="section-title">
+          5. 类型守卫与类型收窄
+          <span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// typeof 守卫
 function padLeft(value: string, padding: string | number): string {
   if (typeof padding === 'number') {
     return ' '.repeat(padding) + value   // 这里 padding 被收窄为 number
@@ -289,15 +343,18 @@ function areaStrict(shape: Shape): number {
     default:       return assertNever(shape)  // 如果漏了 case，编译报错
   }
 }</div>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- 6. 高级类型 -->
-    <section class="section">
-      <h2 class="section-title">6. 高级类型与类型体操 <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// ── 条件类型（Conditional Types）──
+      <!-- 6. 高级类型 -->
+      <section class="section">
+        <h2 class="section-title">
+          6. 高级类型与类型体操
+          <span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// ── 条件类型（Conditional Types）──
 type IsString&lt;T&gt; = T extends string ? 'yes' : 'no'
 type A = IsString&lt;string&gt;   // 'yes'
 type B = IsString&lt;number&gt;   // 'no'
@@ -339,18 +396,27 @@ type DeepReadonly&lt;T&gt; = {
 // Flatten：将嵌套数组类型拍平
 type Flatten&lt;T&gt; = T extends (infer U)[] ? Flatten&lt;U&gt; : T
 type F1 = Flatten&lt;number[][][]&gt;  // number</div>
-        <div class="callout tip">
-          <strong>类型体操核心三件套</strong>：<code>extends</code>（条件判断）+ <code>infer</code>（类型推断）+ <code>keyof</code>/<code>in</code>（映射遍历）。掌握这三个就能应对绝大多数类型编程场景。
+          <div class="callout tip">
+            <strong>类型体操核心三件套</strong>
+            ：
+            <code>extends</code>
+            （条件判断）+
+            <code>infer</code>
+            （类型推断）+
+            <code>keyof</code>
+            /
+            <code>in</code>
+            （映射遍历）。掌握这三个就能应对绝大多数类型编程场景。
+          </div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 7. 声明文件与模块 -->
-    <section class="section">
-      <h2 class="section-title">7. 声明文件与模块系统</h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// ── 声明文件 .d.ts ──
+      <!-- 7. 声明文件与模块 -->
+      <section class="section">
+        <h2 class="section-title">7. 声明文件与模块系统</h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// ── 声明文件 .d.ts ──
 // 为没有类型定义的 JS 库提供类型信息
 
 // global.d.ts — 全局声明
@@ -391,15 +457,18 @@ Utils.formatDate(new Date())
 // moduleResolution: 'bundler' — 模块解析策略
 // paths: { '@/*': ['./src/*'] } — 路径别名
 // skipLibCheck: true    — 跳过 .d.ts 检查（加速编译）</div>
-      </div>
-    </section>
+        </div>
+      </section>
 
-    <!-- 8. TS 与框架 -->
-    <section class="section">
-      <h2 class="section-title">8. TypeScript 与框架实战 <span class="tag-badge interview">面试高频</span></h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-lang="typescript" data-readonly>// ── Vue 3 + TypeScript ──
+      <!-- 8. TS 与框架 -->
+      <section class="section">
+        <h2 class="section-title">
+          8. TypeScript 与框架实战
+          <span class="tag-badge interview">面试高频</span>
+        </h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-lang="typescript" data-readonly>// ── Vue 3 + TypeScript ──
 // defineProps 类型声明
 const props = defineProps&lt;{
   title: string
@@ -452,8 +521,8 @@ async function request&lt;T&gt;(url: string): Promise&lt;ApiResponse&lt;T&gt;&gt
 
 // 使用时自动推断 data 类型
 const { data } = await request&lt;User[]&gt;('/api/users')</div>
-      </div>
-    </section>
-  </div>
-</body>
+        </div>
+      </section>
+    </div>
+  </body>
 </html>

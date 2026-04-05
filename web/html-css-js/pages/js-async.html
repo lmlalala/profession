@@ -106,9 +106,9 @@ console.log('② 同步：5')
  * @returns {Promise&lt;void&gt;}
  */
 async function async1() {
-  console.log('② async1 start');
+  console.log('② async1 start')
   await async2()
-  console.log('⑥ async1 end')
+  console.log('⑥ async1 end（微任务 - await 恢复）')
 }
 /**
  * 被 async1 await 的异步函数（内部无 await，同步执行完毕）。
@@ -119,12 +119,12 @@ async function async2() {
   console.log('③ async2')
 }
 console.log('① script start')
-setTimeout(() => console.log('⑦ setTimeout（宏任务）'), 0)
+setTimeout(() =&gt; console.log('⑧ setTimeout（宏任务）'), 0)
 async1()
-new Promise(resolve => {
+new Promise(resolve =&gt; {
   console.log('④ promise executor（同步）')
   resolve()
-}).then(() => console.log('⑤ promise.then（微任务）'))
+}).then(() =&gt; console.log('⑦ promise.then（微任务）'))
 console.log('⑤ script end')</div>
           <div class="demo-box">
             <div class="console-output" id="out1b"><span class="info">点击运行或按 Ctrl+Enter</span></div>

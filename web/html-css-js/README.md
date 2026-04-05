@@ -12,19 +12,20 @@
 
 ## 页面目录
 
-| 页面                   | 内容                                                   | 交互方式                   |
-| ---------------------- | ------------------------------------------------------ | -------------------------- |
-| `html5.html`           | HTML5 语义化、Canvas、Web Storage、拖拽 API、data 属性 | DOM + Canvas + Console     |
-| `css-layout.html`      | 选择器优先级、盒模型、Flexbox、Grid、定位              | 多 Tab（HTML+CSS）实时预览 |
-| `css-animation.html`   | transition、transform、animation、filter、渐变         | 多 Tab（HTML+CSS）实时预览 |
-| `css-interview.html`   | BFC、层叠上下文、居中方案、响应式、伪元素、性能优化    | 多 Tab（HTML+CSS）实时预览 |
-| `js-basic.html`        | 数据类型、类型转换、作用域、闭包、原型链、this         | Console 模式               |
-| `js-es6.html`          | 解构、模板字符串、Symbol、迭代器、Proxy、ES2020+       | Console 模式               |
-| `js-async.html`        | 事件循环、Promise、async/await、并发控制               | Console 模式               |
-| `js-advanced.html`     | 手写 call/bind/new、深拷贝、防抖节流、设计模式         | Console 模式 + 交互演示    |
-| `vue2-principle.html`  | 响应式原理、Dep/Watcher、虚拟 DOM、diff 算法           | Console + 交互演示         |
-| `vue3-principle.html`  | Proxy 响应式、effect/track/trigger、Composition API    | Console + Mini Vue3        |
-| `react-principle.html` | JSX 编译、Fiber 架构、diff 算法、Hooks 原理            | Console + Mini React       |
+| 页面                   | 内容                                                       | 交互方式                   |
+| ---------------------- | ---------------------------------------------------------- | -------------------------- |
+| `html5.html`           | HTML5 语义化、Canvas、Web Storage、拖拽 API、data 属性     | DOM + Canvas + Console     |
+| `css-layout.html`      | 选择器优先级、盒模型、Flexbox、Grid、定位                  | 多 Tab（HTML+CSS）实时预览 |
+| `css-animation.html`   | transition、transform、animation、filter、渐变             | 多 Tab（HTML+CSS）实时预览 |
+| `css-interview.html`   | BFC、层叠上下文、居中方案、响应式、伪元素、性能优化        | 多 Tab（HTML+CSS）实时预览 |
+| `js-dom.html`          | DOM 查询、元素操作、属性样式、事件系统、事件委托、表单     | DOM 多 Tab + Console       |
+| `js-basic.html`        | 数据类型、作用域、闭包、this、原型链、数组/对象/字符串方法 | Console 模式               |
+| `js-es6.html`          | 解构、模板字符串、Symbol、迭代器、Proxy、ES2020+           | Console 模式               |
+| `js-async.html`        | 事件循环、Promise、async/await、并发控制                   | Console 模式               |
+| `js-advanced.html`     | 手写 call/bind/new、深拷贝、防抖节流、设计模式             | Console 模式 + 交互演示    |
+| `vue2-principle.html`  | 响应式原理、Dep/Watcher、虚拟 DOM、diff 算法               | Console + 交互演示         |
+| `vue3-principle.html`  | Proxy 响应式、effect/track/trigger、Composition API        | Console + Mini Vue3        |
+| `react-principle.html` | JSX 编译、Fiber 架构、diff 算法、Hooks 原理                | Console + Mini React       |
 
 ## 开发
 
@@ -43,6 +44,7 @@ html-css-js/
 │   ├── css-layout.html
 │   ├── css-animation.html
 │   ├── css-interview.html
+│   ├── js-dom.html
 │   ├── js-basic.html
 │   ├── js-es6.html
 │   ├── js-async.html

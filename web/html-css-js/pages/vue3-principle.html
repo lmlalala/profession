@@ -777,9 +777,249 @@ function watch&lt;T&gt;(source: WatchSource&lt;T&gt;, cb: (newVal: T, oldVal: T)
       </div>
     </section>
 
-    <!-- 5. 编译优化 -->
+    <!-- 5. diff 算法（LIS） -->
     <section class="section">
-      <h2 class="section-title">5. Vue3 编译优化 <span class="tag-badge interview">面试高频</span></h2>
+      <h2 class="section-title">5. Vue3 diff 算法（最长递增子序列）<span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>Vue3 vs Vue2 diff 核心区别</strong>：Vue2 用双端指针；Vue3 在处理乱序节点时，先找出<strong>最长递增子序列（LIS）</strong>，LIS 内的节点无需移动，只移动 LIS 外的节点，将移动次数降到最低。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+<div data-tab="javascript">/**
+ * 求最长递增子序列的下标数组（贪心 + 二分，O(n log n)）。
+ * 返回的是 LIS 中各元素在原数组中的下标。
+ *
+ * @param {number[]} arr - 输入数组
+ * @returns {number[]} LIS 元素的下标列表
+ */
+function getLIS(arr) {
+  const n = arr.length
+  const tails = []   // tails[i] = 长度为 i+1 的递增子序列的最小末尾值
+  const indices = [] // 记录每个位置对应的原数组下标
+  const parent = new Array(n).fill(-1) // 用于回溯完整 LIS
+
+  for (let i = 0; i &lt; n; i++) {
+    const val = arr[i]
+    // 二分查找 tails 中第一个 &gt;= val 的位置
+    let lo = 0, hi = tails.length
+    while (lo &lt; hi) {
+      const mid = (lo + hi) &gt;&gt; 1
+      if (tails[mid] &lt; val) lo = mid + 1
+      else hi = mid
+    }
+    tails[lo] = val
+    indices[lo] = i
+    if (lo &gt; 0) parent[i] = indices[lo - 1]
+  }
+
+  // 回溯得到完整 LIS 的下标序列
+  const result = []
+  let cur = indices[tails.length - 1]
+  while (cur !== -1) { result.unshift(cur); cur = parent[cur] }
+  return result
+}
+
+/**
+ * Vue3 乱序 diff：用 LIS 最小化 DOM 移动次数。
+ * 返回每个新节点的操作类型（复用/移动/新增）及删除列表。
+ *
+ * @param {string[]} oldList - 旧子节点 key 列表
+ * @param {string[]} newList - 新子节点 key 列表
+ * @returns {{ ops: string[], moves: number, total: number }} 操作摘要
+ */
+function vue3Diff(oldList, newList) {
+  const ops = []
+
+  // ① 前缀相同：头部快速跳过
+  let i = 0
+  while (i &lt; oldList.length &amp;&amp; i &lt; newList.length &amp;&amp; oldList[i] === newList[i]) {
+    ops.push(`复用 ${newList[i]}（前缀）`)
+    i++
+  }
+
+  // ② 后缀相同：尾部快速跳过
+  let oldEnd = oldList.length - 1, newEnd = newList.length - 1
+  while (oldEnd &gt;= i &amp;&amp; newEnd &gt;= i &amp;&amp; oldList[oldEnd] === newList[newEnd]) {
+    ops.push(`复用 ${newList[newEnd]}（后缀）`)
+    oldEnd--; newEnd--
+  }
+
+  // ③ 乱序区间：[i, oldEnd] vs [i, newEnd]
+  const oldKeyMap = new Map(oldList.slice(i, oldEnd + 1).map((k, idx) =&gt; [k, i + idx]))
+
+  // 建立新节点在旧列表中的位置映射（-1 表示新增）
+  const newIndexToOldIndex = []
+  for (let j = i; j &lt;= newEnd; j++) {
+    const oldIdx = oldKeyMap.get(newList[j])
+    newIndexToOldIndex.push(oldIdx !== undefined ? oldIdx : -1)
+  }
+
+  // 找出 LIS（不需要移动的节点集合）
+  const lisIndices = new Set(getLIS(newIndexToOldIndex.filter(v =&gt; v !== -1)
+    .map((v, _, a) =&gt; v)) )
+  // 重新映射到 newIndexToOldIndex 的下标
+  const lisSet = new Set()
+  const sortedOldInNew = [...newIndexToOldIndex].filter(v =&gt; v !== -1).sort((a, b) =&gt; a - b)
+  const lis = getLIS(newIndexToOldIndex.map(v =&gt; v === -1 ? -Infinity : v).filter(v =&gt; v !== -Infinity))
+  lis.forEach(idx =&gt; {
+    // idx 是在过滤后数组中的下标，需要映射回 newIndexToOldIndex
+    let cnt = -1
+    for (let k = 0; k &lt; newIndexToOldIndex.length; k++) {
+      if (newIndexToOldIndex[k] !== -1) cnt++
+      if (cnt === idx) { lisSet.add(k); break }
+    }
+  })
+
+  let moves = 0
+  for (let j = 0; j &lt; newIndexToOldIndex.length; j++) {
+    const key = newList[i + j]
+    if (newIndexToOldIndex[j] === -1) {
+      ops.push(`新增 ${key}`)
+    } else if (lisSet.has(j)) {
+      ops.push(`复用 ${key}（LIS，无需移动）`)
+    } else {
+      ops.push(`移动 ${key}（LIS 外）`)
+      moves++
+    }
+  }
+
+  // ④ 删除旧列表中多余节点
+  for (let j = i; j &lt;= oldEnd; j++) {
+    if (!newList.includes(oldList[j])) ops.push(`删除 ${oldList[j]}`)
+  }
+
+  return { ops, moves, total: newList.length }
+}
+
+// 测试 1：Vue3 经典场景
+const r1 = vue3Diff(['A','B','C','D','E','F'], ['A','C','E','D','B','F'])
+console.log('=== 测试1：乱序（Vue3 LIS diff） ===')
+console.log('旧: A B C D E F  →  新: A C E D B F')
+r1.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r1.moves}（LIS 优化，最小化移动）`)
+
+// 测试 2：有新增和删除
+const r2 = vue3Diff(['A','B','C','D'], ['B','D','E','F'])
+console.log('\n=== 测试2：增删 ===')
+console.log('旧: A B C D  →  新: B D E F')
+r2.ops.forEach(op =&gt; console.log(' ', op))
+
+// 对比 Vue2 双端 vs Vue3 LIS 移动次数
+console.log('\n=== LIS 核心价值 ===')
+console.log('旧: 1 2 3 4 5  →  新: 1 3 5 2 4')
+const r3 = vue3Diff(['1','2','3','4','5'], ['1','3','5','2','4'])
+console.log('Vue3 LIS 移动次数:', r3.moves, '（只移动不在 LIS 中的节点）')</div>
+<div data-tab="typescript">/** Vue3 diff 操作摘要 */
+interface Vue3DiffResult {
+  /** 每一步操作的文字描述 */
+  ops: string[]
+  /** 实际发生移动的次数 */
+  moves: number
+  /** 新列表总节点数 */
+  total: number
+}
+
+/**
+ * 求最长递增子序列的下标数组（贪心 + 二分，O(n log n)）。
+ * @param arr - 输入数组
+ * @returns LIS 元素在原数组中的下标列表
+ */
+function getLIS(arr: number[]): number[] {
+  const n = arr.length
+  const tails: number[] = []
+  const indices: number[] = []
+  const parent: number[] = new Array(n).fill(-1)
+
+  for (let i = 0; i &lt; n; i++) {
+    const val = arr[i]
+    let lo = 0, hi = tails.length
+    while (lo &lt; hi) {
+      const mid = (lo + hi) &gt;&gt; 1
+      if (tails[mid] &lt; val) lo = mid + 1
+      else hi = mid
+    }
+    tails[lo] = val
+    indices[lo] = i
+    if (lo &gt; 0) parent[i] = indices[lo - 1]
+  }
+
+  const result: number[] = []
+  let cur = indices[tails.length - 1]
+  while (cur !== -1) { result.unshift(cur); cur = parent[cur] }
+  return result
+}
+
+/**
+ * Vue3 乱序 diff：用 LIS 最小化 DOM 移动次数。
+ * @param oldList - 旧子节点 key 列表
+ * @param newList - 新子节点 key 列表
+ * @returns 操作摘要
+ */
+function vue3Diff(oldList: string[], newList: string[]): Vue3DiffResult {
+  const ops: string[] = []
+  let i = 0
+  while (i &lt; oldList.length &amp;&amp; i &lt; newList.length &amp;&amp; oldList[i] === newList[i]) {
+    ops.push(`复用 ${newList[i]}（前缀）`); i++
+  }
+  let oldEnd = oldList.length - 1, newEnd = newList.length - 1
+  while (oldEnd &gt;= i &amp;&amp; newEnd &gt;= i &amp;&amp; oldList[oldEnd] === newList[newEnd]) {
+    ops.push(`复用 ${newList[newEnd]}（后缀）`); oldEnd--; newEnd--
+  }
+
+  const oldKeyMap = new Map&lt;string, number&gt;(
+    oldList.slice(i, oldEnd + 1).map((k, idx): [string, number] =&gt; [k, i + idx])
+  )
+  const newIndexToOldIndex: number[] = []
+  for (let j = i; j &lt;= newEnd; j++) {
+    const oldIdx = oldKeyMap.get(newList[j])
+    newIndexToOldIndex.push(oldIdx !== undefined ? oldIdx : -1)
+  }
+
+  const validOld = newIndexToOldIndex.filter(v =&gt; v !== -1)
+  const lis = getLIS(validOld)
+  const lisSet = new Set&lt;number&gt;()
+  let cnt = -1
+  for (let k = 0; k &lt; newIndexToOldIndex.length; k++) {
+    if (newIndexToOldIndex[k] !== -1) cnt++
+    if (lis.includes(cnt)) lisSet.add(k)
+  }
+
+  let moves = 0
+  for (let j = 0; j &lt; newIndexToOldIndex.length; j++) {
+    const key = newList[i + j]
+    if (newIndexToOldIndex[j] === -1) {
+      ops.push(`新增 ${key}`)
+    } else if (lisSet.has(j)) {
+      ops.push(`复用 ${key}（LIS，无需移动）`)
+    } else {
+      ops.push(`移动 ${key}（LIS 外）`); moves++
+    }
+  }
+  for (let j = i; j &lt;= oldEnd; j++) {
+    if (!newList.includes(oldList[j])) ops.push(`删除 ${oldList[j]}`)
+  }
+  return { ops, moves, total: newList.length }
+}
+
+const r1 = vue3Diff(['A','B','C','D','E','F'], ['A','C','E','D','B','F'])
+console.log('=== 测试1：乱序 ===')
+r1.ops.forEach(op =&gt; console.log(' ', op))
+console.log(`移动次数: ${r1.moves}`)
+
+const r2 = vue3Diff(['A','B','C','D'], ['B','D','E','F'])
+console.log('\n=== 测试2：增删 ===')
+r2.ops.forEach(op =&gt; console.log(' ', op))</div>
+</div>
+        <div class="demo-box">
+          <div class="console-output" id="outVue3Diff"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 编译优化 -->
+    <section class="section">
+      <h2 class="section-title">6. Vue3 编译优化 <span class="tag-badge interview">面试高频</span></h2>
       <div class="card">
         <!-- prettier-ignore -->
         <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
@@ -1117,38 +1357,41 @@ function trackDynamic(vnode: VNode): VNode {
     createApp({
       setup() {
         const count = ref(0)
-        const name = ref('Vue3')
-        const doubled = computed(() => count.value * 2)
-        const history = reactive([])
+        const name = ref('Alice')
+        const doubleCount = computed(() => count.value * 2)
+        const greeting = computed(() => `Hello, ${name.value}!`)
+        const watchLogs = reactive([])
 
         watch(count, (newVal, oldVal) => {
-          history.push(`${oldVal}→${newVal}`)
+          watchLogs.push(`${oldVal}→${newVal}`)
           v3Log(`[watch] count: ${oldVal} → ${newVal}`, 'result')
         })
 
         const increment = () => { count.value++ }
         const decrement = () => { count.value-- }
-        const reset = () => { count.value = 0; history.length = 0 }
+        const reset = () => { count.value = 0; watchLogs.length = 0 }
 
         v3Log('[setup] Composition API 初始化完成', 'info')
-        return { count, name, doubled, history, increment, decrement, reset }
+        return { count, name, doubleCount, greeting, watchLogs, increment, decrement, reset }
       },
-      render({ count, name, doubled, history, increment, decrement, reset }, h) {
+      render({ count, name, doubleCount, greeting, watchLogs, increment, decrement, reset }, h) {
         return h('div', { style: 'font-size:0.875rem' },
-          h('div', { style: 'color:#8892b0;margin-bottom:0.75rem' }, `Mini Vue3 - ${name.value}`),
+          h('div', { style: 'color:#8892b0;margin-bottom:0.5rem' }, 'Mini Vue3（与上文 ref / computed / watch 示例字段对齐）'),
+          h('div', { style: 'color:#e2e8f0;margin-bottom:0.35rem;font-size:0.8rem' }, `name (ref): ${name.value}`),
+          h('div', { style: 'color:#e2e8f0;margin-bottom:0.35rem;font-size:0.8rem' }, `greeting (computed): ${greeting.value}`),
+          h('div', { style: 'color:#ffd166;margin-bottom:0.75rem;font-size:0.8rem' }, `doubleCount (computed): ${doubleCount.value}`),
           h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
             h('button', { onclick: decrement, style: 'background:#ff6584;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem' }, '-1'),
-            h('span', { style: 'color:#e2e8f0;font-weight:700;font-size:1.2rem;min-width:40px;text-align:center' }, String(count.value)),
+            h('span', { style: 'color:#e2e8f0;font-weight:700;font-size:1.2rem;min-width:40px;text-align:center' }, `count (ref): ${count.value}`),
             h('button', { onclick: increment, style: 'background:#6c63ff;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem' }, '+1'),
             h('button', { onclick: reset, style: 'background:rgba(255,255,255,0.08);color:#8892b0;border:1px solid #2e3350;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem' }, '重置'),
-            h('span', { style: 'color:#ffd166;font-size:0.8rem' }, `computed doubled = ${doubled.value}`),
           ),
-          history.length > 0
+          watchLogs.length > 0
             ? h('div', { style: 'font-size:0.75rem;color:#8892b0' },
-                '变化历史: ',
-                ...history.slice(-5).map(s => h('span', { style: 'background:rgba(108,99,255,0.15);color:#8b85ff;padding:0.1rem 0.4rem;border-radius:3px;margin-right:0.25rem' }, s))
+                'watch 变化记录 (count): ',
+                ...watchLogs.slice(-5).map(s => h('span', { style: 'background:rgba(108,99,255,0.15);color:#8b85ff;padding:0.1rem 0.4rem;border-radius:3px;margin-right:0.25rem' }, s))
               )
-            : h('div', { style: 'font-size:0.75rem;color:#5c6370' }, '点击按钮查看变化历史')
+            : h('div', { style: 'font-size:0.75rem;color:#5c6370' }, '点击 ±1 查看 count 的 watch 记录（格式与上文 watchLogs 一致）')
         )
       }
     }).mount('#miniVue3App')

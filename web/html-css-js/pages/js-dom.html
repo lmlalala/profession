@@ -1,0 +1,842 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>JS DOM 操作与交互</title>
+  <link rel="stylesheet" href="../css/common.css">
+  <script type="module" src="../js/nav.js"></script>
+  <script type="module" src="../js/code-editor.js"></script>
+</head>
+<body>
+  <nav class="nav"></nav>
+
+  <div class="page-wrapper">
+    <h1 class="page-title">JS DOM 操作与交互</h1>
+    <p class="page-subtitle">DOM 查询 · 元素操作 · 样式与类 · 事件系统 · 事件委托 · 表单处理 · 动态渲染</p>
+
+    <!-- 1. DOM 查询方法 -->
+    <section class="section">
+      <h2 class="section-title">1. DOM 查询方法 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>核心查询 API</strong>
+          <code>querySelector</code> / <code>querySelectorAll</code> 是现代首选，支持任意 CSS 选择器。<br>
+          <code>getElementById</code> 速度最快但只能按 ID 查询。<code>closest</code> 向上查找最近祖先元素。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;div id="app" class="container" data-role="main"&gt;
+  &lt;h3 class="title"&gt;DOM 查询演示&lt;/h3&gt;
+  &lt;ul class="list"&gt;
+    &lt;li class="item active" data-id="1"&gt;苹果&lt;/li&gt;
+    &lt;li class="item" data-id="2"&gt;香蕉&lt;/li&gt;
+    &lt;li class="item" data-id="3"&gt;橙子&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;p class="info"&gt;查询结果将显示在下方&lt;/p&gt;
+  &lt;div id="result" style="margin-top:8px;padding:8px;background:rgba(108,99,255,0.1);border-radius:4px;font-size:13px;line-height:1.8"&gt;&lt;/div&gt;
+&lt;/div&gt;</div>
+<div data-tab="css">.container { max-width: 500px; }
+.title { color: #6c63ff; margin-bottom: 8px; font-size: 15px; }
+.list { list-style: none; padding: 0; display: flex; gap: 8px; margin-bottom: 8px; }
+.item {
+  padding: 6px 14px;
+  background: rgba(108,99,255,0.12);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: default;
+}
+.item.active { background: rgba(0,212,170,0.2); color: #00d4aa; font-weight: 600; }
+.info { color: #8892b0; font-size: 13px; }</div>
+<div data-tab="js">const r = []
+const app = document.getElementById('app')
+r.push('getElementById: ' + app.tagName + '#' + app.id)
+
+const title = document.querySelector('.title')
+r.push('querySelector(".title"): ' + title.textContent)
+
+const items = document.querySelectorAll('.item')
+r.push('querySelectorAll(".item"): ' + items.length + ' 个元素')
+
+const byClass = document.getElementsByClassName('item')
+r.push('getElementsByClassName: ' + byClass.length + ' 个（HTMLCollection，实时更新）')
+
+const byTag = document.getElementsByTagName('li')
+r.push('getElementsByTagName("li"): ' + byTag.length + ' 个')
+
+const activeItem = document.querySelector('.item.active')
+const closestUl = activeItem.closest('.list')
+r.push('closest(".list"): ' + closestUl.tagName + '.' + closestUl.className)
+
+r.push('matches(".active"): ' + activeItem.matches('.active'))
+r.push('contains(activeItem): ' + app.contains(activeItem))
+
+const dataId = document.querySelector('[data-id="2"]')
+r.push('属性选择器[data-id="2"]: ' + dataId.textContent)
+
+document.getElementById('result').innerHTML = r.map(s =&gt; '✅ ' + s).join('&lt;br&gt;')</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 2. 元素创建与操作 -->
+    <section class="section">
+      <h2 class="section-title">2. 元素创建与操作</h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>现代 API 推荐</strong>
+          <code>append/prepend/before/after/remove/replaceWith</code> 是现代标准，比传统的 <code>appendChild/removeChild</code> 更简洁，支持直接传入字符串。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;div class="todo-app"&gt;
+  &lt;h3 class="todo-title"&gt;📝 待办列表&lt;/h3&gt;
+  &lt;div class="todo-input-row"&gt;
+    &lt;input type="text" id="todoInput" placeholder="输入待办事项..." /&gt;
+    &lt;button id="addBtn"&gt;添加&lt;/button&gt;
+    &lt;button id="batchBtn"&gt;批量添加 3 项&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;ul id="todoList"&gt;&lt;/ul&gt;
+  &lt;p id="todoInfo" style="color:#8892b0;font-size:12px;margin-top:8px"&gt;&lt;/p&gt;
+&lt;/div&gt;</div>
+<div data-tab="css">.todo-app { max-width: 420px; }
+.todo-title { font-size: 15px; margin-bottom: 10px; }
+.todo-input-row { display: flex; gap: 6px; margin-bottom: 10px; }
+.todo-input-row input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 13px;
+}
+.todo-input-row input:focus { outline: none; border-color: #6c63ff; }
+.todo-input-row button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+.todo-input-row button:hover { background: #8b85ff; }
+#todoList { list-style: none; padding: 0; }
+#todoList li {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background: rgba(108,99,255,0.08);
+  border-radius: 6px;
+  font-size: 13px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+#todoList li .del-btn {
+  background: none;
+  border: none;
+  color: #ff6584;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+#todoList li .del-btn:hover { background: rgba(255,101,132,0.15); }</div>
+<div data-tab="js">const list = document.getElementById('todoList')
+const input = document.getElementById('todoInput')
+const info = document.getElementById('todoInfo')
+let count = 0
+
+function createItem(text) {
+  const li = document.createElement('li')
+  const span = document.createElement('span')
+  span.textContent = text
+  const btn = document.createElement('button')
+  btn.className = 'del-btn'
+  btn.textContent = '✕ 删除'
+  btn.onclick = () =&gt; { li.remove(); updateInfo() }
+  li.append(span, btn)
+  return li
+}
+
+function updateInfo() {
+  const total = list.children.length
+  info.textContent = total ? '共 ' + total + ' 项待办' : '暂无待办'
+}
+
+document.getElementById('addBtn').onclick = () =&gt; {
+  const text = input.value.trim()
+  if (!text) return
+  list.appendChild(createItem(text))
+  input.value = ''
+  updateInfo()
+}
+
+document.getElementById('batchBtn').onclick = () =&gt; {
+  const fragment = document.createDocumentFragment()
+  const items = ['学习 DOM API', '练习事件委托', '复习 CSS 布局']
+  items.forEach(t =&gt; fragment.appendChild(createItem(t)))
+  list.appendChild(fragment)
+  updateInfo()
+}
+
+input.addEventListener('keydown', e =&gt; {
+  if (e.key === 'Enter') document.getElementById('addBtn').click()
+})
+
+const defaultItems = ['阅读 MDN 文档', '完成练习题']
+defaultItems.forEach(t =&gt; list.appendChild(createItem(t)))
+updateInfo()</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 3. 属性与样式操作 -->
+    <section class="section">
+      <h2 class="section-title">3. 属性与样式操作</h2>
+      <div class="card">
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;div class="attr-demo"&gt;
+  &lt;div id="box" class="demo-box-item primary" data-status="active" data-count="0" title="示例盒子"&gt;
+    点击我切换样式
+  &lt;/div&gt;
+  &lt;div class="btn-row"&gt;
+    &lt;button id="toggleBtn"&gt;toggle class&lt;/button&gt;
+    &lt;button id="styleBtn"&gt;直接设置 style&lt;/button&gt;
+    &lt;button id="resetBtn"&gt;重置&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div id="attrResult" style="margin-top:10px;font-size:12px;line-height:1.8;color:#8892b0"&gt;&lt;/div&gt;
+&lt;/div&gt;</div>
+<div data-tab="css">.attr-demo { max-width: 500px; }
+.demo-box-item {
+  padding: 16px 20px;
+  border-radius: 8px;
+  text-align: center;
+  font-size: 14px;
+  cursor: pointer;
+  transition: all 0.3s;
+  margin-bottom: 10px;
+  user-select: none;
+}
+.demo-box-item.primary {
+  background: rgba(108,99,255,0.15);
+  border: 1px solid rgba(108,99,255,0.4);
+  color: #8b85ff;
+}
+.demo-box-item.danger {
+  background: rgba(255,101,132,0.15);
+  border: 1px solid rgba(255,101,132,0.4);
+  color: #ff6584;
+}
+.demo-box-item.rounded { border-radius: 24px; }
+.demo-box-item.shadow { box-shadow: 0 4px 16px rgba(108,99,255,0.3); }
+.btn-row { display: flex; gap: 6px; flex-wrap: wrap; }
+.btn-row button {
+  padding: 5px 12px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.btn-row button:hover { border-color: #6c63ff; }</div>
+<div data-tab="js">const box = document.getElementById('box')
+const result = document.getElementById('attrResult')
+
+function showInfo() {
+  const r = []
+  r.push('getAttribute("title"): ' + box.getAttribute('title'))
+  r.push('hasAttribute("data-status"): ' + box.hasAttribute('data-status'))
+  r.push('dataset.status: ' + box.dataset.status)
+  r.push('dataset.count: ' + box.dataset.count)
+  r.push('classList: [' + [...box.classList].join(', ') + ']')
+
+  const computed = getComputedStyle(box)
+  r.push('getComputedStyle background: ' + computed.background.slice(0, 40) + '...')
+  r.push('offsetWidth: ' + box.offsetWidth + ', offsetHeight: ' + box.offsetHeight)
+  r.push('clientWidth: ' + box.clientWidth + ', clientHeight: ' + box.clientHeight)
+
+  const rect = box.getBoundingClientRect()
+  r.push('getBoundingClientRect: {top:' + Math.round(rect.top) + ', left:' + Math.round(rect.left) + ', width:' + Math.round(rect.width) + ', height:' + Math.round(rect.height) + '}')
+
+  result.innerHTML = r.map(s =&gt; '📌 ' + s).join('&lt;br&gt;')
+}
+
+document.getElementById('toggleBtn').onclick = () =&gt; {
+  box.classList.toggle('rounded')
+  box.classList.toggle('shadow')
+  box.dataset.count = parseInt(box.dataset.count) + 1
+  showInfo()
+}
+
+document.getElementById('styleBtn').onclick = () =&gt; {
+  box.classList.replace('primary', 'danger')
+  box.style.fontSize = '16px'
+  box.style.letterSpacing = '2px'
+  box.setAttribute('title', '已修改样式')
+  box.dataset.status = 'modified'
+  showInfo()
+}
+
+document.getElementById('resetBtn').onclick = () =&gt; {
+  box.className = 'demo-box-item primary'
+  box.style.cssText = ''
+  box.setAttribute('title', '示例盒子')
+  box.dataset.status = 'active'
+  box.dataset.count = '0'
+  showInfo()
+}
+
+box.onclick = () =&gt; {
+  box.classList.toggle('shadow')
+  showInfo()
+}
+
+showInfo()</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 4. 事件系统 -->
+    <section class="section">
+      <h2 class="section-title">4. 事件系统 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>事件传播三阶段</strong>：捕获（从 window → target）→ 目标 → 冒泡（从 target → window）。<br>
+          <code>e.target</code> 是实际触发元素，<code>e.currentTarget</code> 是绑定监听器的元素。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;div class="event-demo"&gt;
+  &lt;div id="outer" class="event-outer"&gt;
+    &lt;span class="layer-label"&gt;outer (捕获+冒泡)&lt;/span&gt;
+    &lt;div id="inner" class="event-inner"&gt;
+      &lt;span class="layer-label"&gt;inner (捕获+冒泡)&lt;/span&gt;
+      &lt;button id="eventBtn" class="event-btn"&gt;点击我&lt;/button&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+  &lt;div class="event-options"&gt;
+    &lt;label&gt;&lt;input type="checkbox" id="stopProp"&gt; stopPropagation&lt;/label&gt;
+    &lt;label&gt;&lt;input type="checkbox" id="preventDefault"&gt; preventDefault&lt;/label&gt;
+    &lt;button id="clearLog" style="margin-left:auto"&gt;清空日志&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;div class="event-types"&gt;
+    &lt;input id="eventInput" type="text" placeholder="输入触发 input/change/keydown/focus/blur" /&gt;
+  &lt;/div&gt;
+  &lt;div id="eventLog" style="margin-top:8px;font-size:12px;line-height:1.6;max-height:200px;overflow-y:auto;padding:8px;background:rgba(0,0,0,0.2);border-radius:6px"&gt;&lt;/div&gt;
+&lt;/div&gt;</div>
+<div data-tab="css">.event-demo { max-width: 500px; }
+.event-outer {
+  padding: 16px;
+  border: 2px solid rgba(108,99,255,0.4);
+  border-radius: 10px;
+  background: rgba(108,99,255,0.06);
+  position: relative;
+}
+.event-inner {
+  padding: 16px;
+  border: 2px solid rgba(0,212,170,0.4);
+  border-radius: 8px;
+  background: rgba(0,212,170,0.06);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  position: relative;
+}
+.layer-label {
+  font-size: 11px;
+  color: #8892b0;
+  position: absolute;
+  top: 4px;
+  left: 8px;
+}
+.event-btn {
+  padding: 8px 20px;
+  border: none;
+  border-radius: 6px;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+  margin: 12px auto 0;
+  display: block;
+}
+.event-btn:hover { background: #8b85ff; }
+.event-options {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+  font-size: 12px;
+}
+.event-options label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
+.event-options button {
+  padding: 3px 10px;
+  border: 1px solid #2e3350;
+  border-radius: 4px;
+  background: transparent;
+  color: inherit;
+  font-size: 12px;
+  cursor: pointer;
+}
+.event-types { margin-top: 8px; }
+.event-types input {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 13px;
+}
+.event-types input:focus { outline: none; border-color: #6c63ff; }</div>
+<div data-tab="js">const log = document.getElementById('eventLog')
+const outer = document.getElementById('outer')
+const inner = document.getElementById('inner')
+const btn = document.getElementById('eventBtn')
+const stopProp = document.getElementById('stopProp')
+const prevDef = document.getElementById('preventDefault')
+const eventInput = document.getElementById('eventInput')
+
+let logCount = 0
+function addLog(msg, color) {
+  logCount++
+  const line = document.createElement('div')
+  line.innerHTML = '&lt;span style="color:#8892b0"&gt;' + logCount + '.&lt;/span&gt; &lt;span style="color:' + color + '"&gt;' + msg + '&lt;/span&gt;'
+  log.appendChild(line)
+  log.scrollTop = log.scrollHeight
+}
+
+outer.addEventListener('click', e =&gt; {
+  addLog('[捕获] outer click — target: ' + e.target.tagName, '#6c63ff')
+}, true)
+
+outer.addEventListener('click', e =&gt; {
+  addLog('[冒泡] outer click — currentTarget: ' + e.currentTarget.id, '#8b85ff')
+})
+
+inner.addEventListener('click', e =&gt; {
+  addLog('[捕获] inner click', '#00d4aa')
+}, true)
+
+inner.addEventListener('click', e =&gt; {
+  addLog('[冒泡] inner click', '#00d4aa')
+})
+
+btn.addEventListener('click', e =&gt; {
+  addLog('[目标] button click — type: ' + e.type, '#ffd166')
+  if (stopProp.checked) {
+    e.stopPropagation()
+    addLog('⛔ stopPropagation() 已调用', '#ff6584')
+  }
+  if (prevDef.checked) {
+    e.preventDefault()
+    addLog('⛔ preventDefault() 已调用', '#ff6584')
+  }
+})
+
+const onceBtn = btn.cloneNode(true)
+onceBtn.textContent = 'once:true（只触发一次）'
+onceBtn.style.background = '#00d4aa'
+onceBtn.style.marginTop = '8px'
+btn.parentElement.appendChild(onceBtn)
+onceBtn.addEventListener('click', () =&gt; {
+  addLog('🎯 once:true 触发！之后不再触发', '#00d4aa')
+}, { once: true })
+
+;['input', 'change', 'keydown', 'focus', 'blur'].forEach(type =&gt; {
+  eventInput.addEventListener(type, e =&gt; {
+    const val = type === 'keydown' ? ' key=' + e.key : (e.target.value ? ' val="' + e.target.value + '"' : '')
+    addLog('📥 ' + type + val, '#ffd166')
+  })
+})
+
+document.getElementById('clearLog').onclick = () =&gt; {
+  log.innerHTML = ''
+  logCount = 0
+}
+
+addLog('👆 点击按钮观察事件传播', '#8892b0')</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 5. 事件委托 -->
+    <section class="section">
+      <h2 class="section-title">5. 事件委托 <span class="tag-badge interview">面试必考</span></h2>
+      <div class="card">
+        <div class="callout info">
+          <strong>事件委托</strong>：利用事件冒泡，将子元素的事件监听器统一绑定到父元素上。<br>
+          优势：① 减少内存开销 ② 动态新增元素自动具备事件处理 ③ 代码更简洁。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;div class="delegate-demo"&gt;
+  &lt;div class="delegate-header"&gt;
+    &lt;input type="text" id="newItem" placeholder="输入新项目名称..." /&gt;
+    &lt;button id="addItem"&gt;+ 添加&lt;/button&gt;
+  &lt;/div&gt;
+  &lt;ul id="delegateList"&gt;
+    &lt;li&gt;&lt;span class="item-text"&gt;学习事件委托&lt;/span&gt;&lt;button class="edit-btn"&gt;✏️&lt;/button&gt;&lt;button class="del-btn"&gt;✕&lt;/button&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span class="item-text"&gt;理解事件冒泡&lt;/span&gt;&lt;button class="edit-btn"&gt;✏️&lt;/button&gt;&lt;button class="del-btn"&gt;✕&lt;/button&gt;&lt;/li&gt;
+    &lt;li&gt;&lt;span class="item-text"&gt;对比直接绑定&lt;/span&gt;&lt;button class="edit-btn"&gt;✏️&lt;/button&gt;&lt;button class="del-btn"&gt;✕&lt;/button&gt;&lt;/li&gt;
+  &lt;/ul&gt;
+  &lt;div id="delegateLog" style="margin-top:10px;font-size:12px;color:#8892b0;line-height:1.6"&gt;&lt;/div&gt;
+&lt;/div&gt;</div>
+<div data-tab="css">.delegate-demo { max-width: 420px; }
+.delegate-header { display: flex; gap: 6px; margin-bottom: 10px; }
+.delegate-header input {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 13px;
+}
+.delegate-header input:focus { outline: none; border-color: #6c63ff; }
+.delegate-header button {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  background: #6c63ff;
+  color: #fff;
+  font-size: 13px;
+  cursor: pointer;
+}
+#delegateList { list-style: none; padding: 0; }
+#delegateList li {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  margin-bottom: 4px;
+  background: rgba(108,99,255,0.08);
+  border-radius: 6px;
+  font-size: 13px;
+  animation: fadeIn 0.2s ease;
+}
+@keyframes fadeIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+#delegateList .item-text { flex: 1; }
+#delegateList .edit-btn, #delegateList .del-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  font-size: 13px;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+#delegateList .del-btn { color: #ff6584; }
+#delegateList .del-btn:hover { background: rgba(255,101,132,0.15); }
+#delegateList .edit-btn { color: #ffd166; }
+#delegateList .edit-btn:hover { background: rgba(255,209,102,0.12); }</div>
+<div data-tab="js">const list = document.getElementById('delegateList')
+const logEl = document.getElementById('delegateLog')
+const logs = []
+
+function addLog(msg) {
+  logs.push(msg)
+  if (logs.length &gt; 6) logs.shift()
+  logEl.innerHTML = logs.map(s =&gt; '📋 ' + s).join('&lt;br&gt;')
+}
+
+list.addEventListener('click', e =&gt; {
+  const li = e.target.closest('li')
+  if (!li || !list.contains(li)) return
+
+  if (e.target.classList.contains('del-btn')) {
+    addLog('删除: ' + li.querySelector('.item-text').textContent)
+    li.remove()
+    return
+  }
+
+  if (e.target.classList.contains('edit-btn')) {
+    const span = li.querySelector('.item-text')
+    const newText = prompt('编辑项目名称:', span.textContent)
+    if (newText !== null &amp;&amp; newText.trim()) {
+      addLog('编辑: "' + span.textContent + '" → "' + newText.trim() + '"')
+      span.textContent = newText.trim()
+    }
+    return
+  }
+
+  addLog('点击: ' + li.querySelector('.item-text').textContent)
+})
+
+document.getElementById('addItem').onclick = () =&gt; {
+  const input = document.getElementById('newItem')
+  const text = input.value.trim()
+  if (!text) return
+  const li = document.createElement('li')
+  li.innerHTML = '&lt;span class="item-text"&gt;' + text + '&lt;/span&gt;&lt;button class="edit-btn"&gt;✏️&lt;/button&gt;&lt;button class="del-btn"&gt;✕&lt;/button&gt;'
+  list.appendChild(li)
+  input.value = ''
+  addLog('新增: ' + text + '（自动拥有事件处理！）')
+}
+
+document.getElementById('newItem').addEventListener('keydown', e =&gt; {
+  if (e.key === 'Enter') document.getElementById('addItem').click()
+})
+
+addLog('所有事件只绑定在 ul 上，通过冒泡处理 li 点击')</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 表单与输入处理 -->
+    <section class="section">
+      <h2 class="section-title">6. 表单与输入处理</h2>
+      <div class="card">
+        <!-- prettier-ignore -->
+        <div class="code-block" data-tabs="html,css,js" data-mode="dom">
+<div data-tab="html">&lt;form id="demoForm" novalidate&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;姓名 &lt;span class="required"&gt;*&lt;/span&gt;&lt;/label&gt;
+    &lt;input type="text" name="username" required minlength="2" placeholder="至少 2 个字符" /&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;年龄&lt;/label&gt;
+    &lt;input type="number" name="age" min="1" max="150" placeholder="1-150" /&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;邮箱 &lt;span class="required"&gt;*&lt;/span&gt;&lt;/label&gt;
+    &lt;input type="email" name="email" required placeholder="example@mail.com" /&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;性别&lt;/label&gt;
+    &lt;label class="radio-label"&gt;&lt;input type="radio" name="gender" value="male"&gt; 男&lt;/label&gt;
+    &lt;label class="radio-label"&gt;&lt;input type="radio" name="gender" value="female"&gt; 女&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;技能&lt;/label&gt;
+    &lt;label class="radio-label"&gt;&lt;input type="checkbox" name="skills" value="html"&gt; HTML&lt;/label&gt;
+    &lt;label class="radio-label"&gt;&lt;input type="checkbox" name="skills" value="css"&gt; CSS&lt;/label&gt;
+    &lt;label class="radio-label"&gt;&lt;input type="checkbox" name="skills" value="js"&gt; JS&lt;/label&gt;
+  &lt;/div&gt;
+  &lt;div class="form-group"&gt;
+    &lt;label&gt;城市&lt;/label&gt;
+    &lt;select name="city"&gt;
+      &lt;option value=""&gt;请选择&lt;/option&gt;
+      &lt;option value="beijing"&gt;北京&lt;/option&gt;
+      &lt;option value="shanghai"&gt;上海&lt;/option&gt;
+      &lt;option value="shenzhen"&gt;深圳&lt;/option&gt;
+    &lt;/select&gt;
+  &lt;/div&gt;
+  &lt;div class="form-actions"&gt;
+    &lt;button type="submit"&gt;提交&lt;/button&gt;
+    &lt;button type="reset"&gt;重置&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/form&gt;
+&lt;div id="formResult" style="margin-top:10px;font-size:12px;line-height:1.8;color:#8892b0"&gt;&lt;/div&gt;</div>
+<div data-tab="css">form { max-width: 400px; }
+.form-group { margin-bottom: 10px; }
+.form-group label { display: block; font-size: 13px; margin-bottom: 4px; color: #e2e8f0; }
+.form-group input[type="text"],
+.form-group input[type="number"],
+.form-group input[type="email"],
+.form-group select {
+  width: 100%;
+  padding: 6px 10px;
+  border: 1px solid #2e3350;
+  border-radius: 6px;
+  background: rgba(255,255,255,0.05);
+  color: inherit;
+  font-size: 13px;
+}
+.form-group input:focus, .form-group select:focus { outline: none; border-color: #6c63ff; }
+.form-group input:invalid:not(:placeholder-shown) { border-color: #ff6584; }
+.form-group input:valid:not(:placeholder-shown) { border-color: #00d4aa; }
+.required { color: #ff6584; }
+.radio-label { display: inline-flex; align-items: center; gap: 4px; margin-right: 12px; font-size: 13px; cursor: pointer; }
+.form-group select { cursor: pointer; }
+.form-actions { display: flex; gap: 8px; margin-top: 12px; }
+.form-actions button {
+  padding: 6px 16px;
+  border: none;
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.form-actions button[type="submit"] { background: #6c63ff; color: #fff; }
+.form-actions button[type="submit"]:hover { background: #8b85ff; }
+.form-actions button[type="reset"] { background: rgba(255,255,255,0.08); color: inherit; border: 1px solid #2e3350; }</div>
+<div data-tab="js">const form = document.getElementById('demoForm')
+const result = document.getElementById('formResult')
+
+form.addEventListener('submit', e =&gt; {
+  e.preventDefault()
+
+  if (!form.checkValidity()) {
+    form.reportValidity()
+    result.innerHTML = '&lt;span style="color:#ff6584"&gt;❌ 表单验证未通过&lt;/span&gt;'
+    return
+  }
+
+  const fd = new FormData(form)
+  const data = {}
+  for (const [key, val] of fd.entries()) {
+    if (data[key]) {
+      data[key] = Array.isArray(data[key]) ? [...data[key], val] : [data[key], val]
+    } else {
+      data[key] = val
+    }
+  }
+
+  const lines = Object.entries(data).map(([k, v]) =&gt;
+    '✅ ' + k + ': ' + (Array.isArray(v) ? v.join(', ') : v)
+  )
+  result.innerHTML = '&lt;strong style="color:#00d4aa"&gt;提交数据：&lt;/strong&gt;&lt;br&gt;' + lines.join('&lt;br&gt;')
+})
+
+form.addEventListener('reset', () =&gt; {
+  result.innerHTML = '🔄 表单已重置'
+})
+
+const emailInput = form.querySelector('[name="email"]')
+emailInput.addEventListener('input', e =&gt; {
+  if (e.target.value &amp;&amp; !e.target.value.includes('@')) {
+    e.target.setCustomValidity('请输入有效的邮箱地址')
+  } else {
+    e.target.setCustomValidity('')
+  }
+})
+
+const selectEl = form.querySelector('[name="city"]')
+selectEl.addEventListener('change', e =&gt; {
+  const idx = e.target.selectedIndex
+  const opt = e.target.options[idx]
+  if (opt.value) {
+    result.innerHTML = '🏙️ 选择了: ' + opt.textContent + ' (value: ' + opt.value + ', selectedIndex: ' + idx + ')'
+  }
+})</div>
+</div>
+        <div class="demo-box">
+          <div class="demo-label">预览效果</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. DOM 性能优化 -->
+    <section class="section">
+      <h2 class="section-title">7. DOM 性能优化 <span class="tag-badge interview">面试高频</span></h2>
+      <div class="card">
+        <div class="callout warn">
+          <strong>性能关键原则</strong>
+          减少 DOM 操作次数 → 使用 DocumentFragment 批量插入；减少回流重绘 → 使用 transform 代替 top/left；
+          善用 <code>requestAnimationFrame</code>、<code>IntersectionObserver</code>、<code>MutationObserver</code> 等现代 API。
+        </div>
+        <!-- prettier-ignore -->
+        <div class="code-block" data-mode="console">// ① DocumentFragment 批量插入 vs 逐个 appendChild
+function benchAppend(count) {
+  const container = document.createElement('div')
+
+  const t1 = performance.now()
+  for (let i = 0; i &lt; count; i++) {
+    const el = document.createElement('span')
+    el.textContent = i
+    container.appendChild(el)
+  }
+  const time1 = (performance.now() - t1).toFixed(2)
+
+  container.innerHTML = ''
+  const t2 = performance.now()
+  const frag = document.createDocumentFragment()
+  for (let i = 0; i &lt; count; i++) {
+    const el = document.createElement('span')
+    el.textContent = i
+    frag.appendChild(el)
+  }
+  container.appendChild(frag)
+  const time2 = (performance.now() - t2).toFixed(2)
+
+  return { direct: time1 + 'ms', fragment: time2 + 'ms' }
+}
+const bench = benchAppend(5000)
+console.log('逐个 appendChild (5000个):', bench.direct)
+console.log('DocumentFragment (5000个):', bench.fragment)
+
+// ② requestAnimationFrame vs setTimeout
+console.log('\n--- requestAnimationFrame ---')
+console.log('rAF 特点: 与屏幕刷新率同步(通常60fps)，页面不可见时自动暂停')
+console.log('setTimeout(fn, 16) 不精确，可能导致丢帧或过度绘制')
+console.log('动画示例: element.style.transform = `translateX(${x}px)`')
+console.log('用法: const id = requestAnimationFrame(callback); cancelAnimationFrame(id)')
+
+// ③ IntersectionObserver 懒加载
+console.log('\n--- IntersectionObserver 懒加载 ---')
+console.log('用法:')
+console.log('  const observer = new IntersectionObserver((entries) => {')
+console.log('    entries.forEach(entry => {')
+console.log('      if (entry.isIntersecting) {')
+console.log('        entry.target.src = entry.target.dataset.src  // 懒加载图片')
+console.log('        observer.unobserve(entry.target)')
+console.log('      }')
+console.log('    })')
+console.log('  }, { threshold: 0.1 })')
+console.log('优势: 异步、高性能，替代 scroll 事件 + getBoundingClientRect()')
+
+// ④ MutationObserver 监听 DOM 变化
+console.log('\n--- MutationObserver ---')
+console.log('用法:')
+console.log('  const observer = new MutationObserver((mutations) => {')
+console.log('    mutations.forEach(m => console.log(m.type, m.target))')
+console.log('  })')
+console.log('  observer.observe(element, {')
+console.log('    childList: true,    // 子节点增删')
+console.log('    attributes: true,   // 属性变化')
+console.log('    subtree: true,      // 后代节点')
+console.log('    characterData: true // 文本内容变化')
+console.log('  })')
+
+// ⑤ ResizeObserver 监听尺寸变化
+console.log('\n--- ResizeObserver ---')
+console.log('用法:')
+console.log('  const ro = new ResizeObserver((entries) => {')
+console.log('    entries.forEach(entry => {')
+console.log('      const { width, height } = entry.contentRect')
+console.log('      console.log(`尺寸: ${width}x${height}`)')
+console.log('    })')
+console.log('  })')
+console.log('  ro.observe(element)')
+console.log('优势: 替代 window.resize，可监听任意元素尺寸变化')
+
+// ⑥ 减少回流重绘的最佳实践
+console.log('\n--- 减少回流(Reflow)重绘(Repaint)的最佳实践 ---')
+console.log('触发回流的操作: 修改 width/height/margin/padding/top/left 等几何属性')
+console.log('触发回流的读取: offsetTop/scrollTop/clientWidth/getBoundingClientRect()')
+console.log('')
+console.log('优化策略:')
+console.log('  1. 批量修改: 用 cssText 或 class 一次性修改多个样式')
+console.log('  2. 离线操作: display:none → 修改 → display:block')
+console.log('  3. 缓存布局值: 先读取 offsetTop 存变量，避免反复触发回流')
+console.log('  4. transform 替代: translate 代替 top/left，scale 代替 width/height')
+console.log('  5. will-change: 提前告知浏览器哪些属性会变化，触发 GPU 加速')
+console.log('  6. 虚拟列表: 大量数据只渲染可视区域的 DOM 节点')</div>
+        <div class="demo-box">
+          <div class="console-output" id="out7"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+    </section>
+  </div>
+</body>
+</html>

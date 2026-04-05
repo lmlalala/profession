@@ -13,7 +13,7 @@
 
   <div class="page-wrapper">
     <h1 class="page-title">JavaScript 核心基础</h1>
-    <p class="page-subtitle">数据类型 · 变量提升 · 作用域链 · 闭包 · this 绑定 · 原型链 · 继承</p>
+    <p class="page-subtitle">数据类型 · 变量提升 · 作用域链 · 闭包 · this 绑定 · 原型链 · 继承 · 数组方法 · 对象方法 · 字符串与数字</p>
 
     <!-- 1. 数据类型 -->
     <section class="section">
@@ -433,6 +433,186 @@ console.log('原型链:', Object.getPrototypeOf(dog) === Dog.prototype)</div>
 </div>
         <div class="demo-box">
           <div class="console-output" id="out5"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 6. 数组常用方法 -->
+    <section class="section">
+      <h2 class="section-title">6. 数组常用方法</h2>
+      <div class="card">
+        <!-- prettier-ignore -->
+        <div class="code-block" data-mode="console">// ── 遍历方法 ──
+const nums = [1, 2, 3, 4, 5]
+nums.forEach((n, i) =&gt; { if (i === 0) console.log('forEach 第一个元素:', n) })
+console.log('map ×2:', JSON.stringify(nums.map(n =&gt; n * 2)))
+console.log('filter 偶数:', JSON.stringify(nums.filter(n =&gt; n % 2 === 0)))
+console.log('find &gt;3:', nums.find(n =&gt; n &gt; 3))
+console.log('findIndex &gt;3:', nums.findIndex(n =&gt; n &gt; 3))
+console.log('some &gt;4:', nums.some(n =&gt; n &gt; 4))
+console.log('every &gt;0:', nums.every(n =&gt; n &gt; 0))
+console.log('reduce 求和:', nums.reduce((acc, n) =&gt; acc + n, 0))
+
+// ── 变换方法 ──
+console.log('flat:', JSON.stringify([1, [2, [3]]].flat(Infinity)))
+console.log('flatMap:', JSON.stringify([1, 2, 3].flatMap(n =&gt; [n, n * 10])))
+console.log('Array.from:', JSON.stringify(Array.from({ length: 3 }, (_, i) =&gt; i + 1)))
+console.log('fill:', JSON.stringify(new Array(4).fill(0)))
+console.log('at(-1):', [10, 20, 30].at(-1))
+
+// ── 排序搜索 ──
+console.log('sort 升序:', JSON.stringify([3, 1, 4, 1, 5].sort((a, b) =&gt; a - b)))
+console.log('includes 3:', nums.includes(3))
+console.log('indexOf 4:', nums.indexOf(4))
+
+// ── 增删方法 ──
+const arr = [1, 2, 3]
+arr.push(4);         console.log('push(4):', JSON.stringify(arr))
+arr.pop();           console.log('pop():', JSON.stringify(arr))
+arr.unshift(0);      console.log('unshift(0):', JSON.stringify(arr))
+arr.shift();         console.log('shift():', JSON.stringify(arr))
+arr.splice(1, 1, 8, 9); console.log('splice(1,1,8,9):', JSON.stringify(arr))
+console.log('slice(0,2):', JSON.stringify(arr.slice(0, 2)))
+
+// ── 组合方法 ──
+console.log('concat:', JSON.stringify([1, 2].concat([3, 4])))
+console.log('join:', ['a', 'b', 'c'].join('-'))
+console.log('Array.isArray([]):', Array.isArray([]))
+console.log('Array.isArray({}):', Array.isArray({}))</div>
+        <div class="demo-box">
+          <div class="console-output" id="out6"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 7. 对象常用方法 -->
+    <section class="section">
+      <h2 class="section-title">7. 对象常用方法</h2>
+      <div class="card">
+        <!-- prettier-ignore -->
+        <div class="code-block" data-mode="console">// ── 遍历与提取 ──
+const user = { name: 'Alice', age: 25, role: 'admin' }
+console.log('keys:', JSON.stringify(Object.keys(user)))
+console.log('values:', JSON.stringify(Object.values(user)))
+console.log('entries:', JSON.stringify(Object.entries(user)))
+
+// ── 合并与冻结 ──
+const merged = Object.assign({}, user, { age: 30, vip: true })
+console.log('assign:', JSON.stringify(merged))
+const frozen = Object.freeze({ x: 1 })
+frozen.x = 2
+console.log('freeze 后修改无效:', frozen.x)
+console.log('isFrozen:', Object.isFrozen(frozen))
+
+// ── fromEntries ──
+const map = new Map([['a', 1], ['b', 2]])
+console.log('fromEntries:', JSON.stringify(Object.fromEntries(map)))
+
+// ── hasOwn (ES2022) ──
+console.log('hasOwn name:', Object.hasOwn(user, 'name'))
+console.log('hasOwn toString:', Object.hasOwn(user, 'toString'))
+
+// ── create &amp; getPrototypeOf ──
+const proto = { greet() { return 'hello' } }
+const child = Object.create(proto)
+console.log('create + 原型方法:', child.greet())
+console.log('getPrototypeOf:', Object.getPrototypeOf(child) === proto)
+
+// ── defineProperty ──
+const obj = {}
+Object.defineProperty(obj, 'id', { value: 42, writable: false, enumerable: true })
+console.log('defineProperty id:', obj.id)
+obj.id = 99
+console.log('writable:false 修改无效:', obj.id)
+
+// ── JSON 序列化 ──
+const data = { name: 'Bob', age: 20, password: '123' }
+const json = JSON.stringify(data, (k, v) =&gt; k === 'password' ? undefined : v, 2)
+console.log('stringify replacer:\n' + json)
+const parsed = JSON.parse('{"date":"2024-01-01"}', (k, v) =&gt;
+  k === 'date' ? new Date(v) : v
+)
+console.log('parse reviver:', parsed.date instanceof Date, parsed.date.toISOString())
+
+// ── structuredClone 深拷贝 ──
+const original = { a: 1, nested: { b: 2 } }
+const cloned = structuredClone(original)
+cloned.nested.b = 999
+console.log('原对象未受影响:', original.nested.b)
+console.log('克隆对象已修改:', cloned.nested.b)</div>
+        <div class="demo-box">
+          <div class="console-output" id="out7"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 8. 字符串与数字常用方法 -->
+    <section class="section">
+      <h2 class="section-title">8. 字符串与数字常用方法</h2>
+      <div class="card">
+        <!-- prettier-ignore -->
+        <div class="code-block" data-mode="console">// ── 字符串：查找与截取 ──
+const str = 'Hello, JavaScript!'
+console.log('includes:', str.includes('Java'))
+console.log('startsWith:', str.startsWith('Hello'))
+console.log('endsWith:', str.endsWith('!'))
+console.log('indexOf:', str.indexOf('Script'))
+console.log('slice(7,17):', str.slice(7, 17))
+console.log('substring(7,17):', str.substring(7, 17))
+
+// ── 去空白与填充 ──
+const padded = '  hello  '
+console.log('trim:', `"${padded.trim()}"`)
+console.log('trimStart:', `"${padded.trimStart()}"`)
+console.log('trimEnd:', `"${padded.trimEnd()}"`)
+console.log('padStart:', '42'.padStart(6, '0'))
+console.log('padEnd:', 'hi'.padEnd(6, '.'))
+
+// ── 重复、替换与分割 ──
+console.log('repeat:', 'ab'.repeat(3))
+console.log('replace:', 'aabbcc'.replace('bb', 'XX'))
+console.log('replaceAll:', 'a-b-c-d'.replaceAll('-', '/'))
+console.log('split:', JSON.stringify('a,b,c'.split(',')))
+console.log('match:', 'test123'.match(/\d+/)?.[0])
+console.log('matchAll:', JSON.stringify([...'a1b2c3'.matchAll(/[a-z](\d)/g)].map(m =&gt; m[0])))
+
+// ── 大小写与字符 ──
+console.log('toUpperCase:', 'hello'.toUpperCase())
+console.log('toLowerCase:', 'WORLD'.toLowerCase())
+console.log('charAt(0):', 'abc'.charAt(0))
+console.log('charCodeAt(0):', 'A'.charCodeAt(0))
+console.log('at(-1):', 'hello'.at(-1))
+
+// ── String.raw ──
+console.log('String.raw:', String.raw`换行符 \n 不会被转义`)
+
+// ── 数字：类型判断 ──
+console.log('isInteger(3):', Number.isInteger(3))
+console.log('isInteger(3.5):', Number.isInteger(3.5))
+console.log('isFinite(Infinity):', Number.isFinite(Infinity))
+console.log('isNaN(NaN):', Number.isNaN(NaN))
+console.log('isNaN("NaN"):', Number.isNaN('NaN'))
+console.log('parseInt:', Number.parseInt('0xFF', 16))
+console.log('parseFloat:', Number.parseFloat('3.14abc'))
+
+// ── 数字格式化 ──
+console.log('toFixed:', (3.14159).toFixed(2))
+console.log('toPrecision:', (123.456).toPrecision(5))
+console.log('toString(16):', (255).toString(16))
+console.log('toString(2):', (10).toString(2))
+console.log('toString(8):', (8).toString(8))
+
+// ── Math 常用方法 ──
+console.log('round:', Math.round(4.5), Math.round(4.4))
+console.log('ceil:', Math.ceil(4.1))
+console.log('floor:', Math.floor(4.9))
+console.log('trunc:', Math.trunc(-4.9))
+console.log('random [0,1):', Math.random().toFixed(4))
+console.log('max:', Math.max(1, 5, 3))
+console.log('min:', Math.min(1, 5, 3))
+console.log('abs:', Math.abs(-7))</div>
+        <div class="demo-box">
+          <div class="console-output" id="out8"><span class="info">点击运行或按 Ctrl+Enter</span></div>
         </div>
       </div>
     </section>
