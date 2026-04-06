@@ -17,6 +17,7 @@ const NAV_LINKS = [
   { href: 'vue2-principle.html', label: 'Vue2 原理' },
   { href: 'vue3-principle.html', label: 'Vue3 原理' },
   { href: 'react-principle.html', label: 'React 原理' },
+  { href: 'js-algorithms.html', label: '前端算法' },
   { href: 'exam-index.html', label: '面试题库' },
 ];
 

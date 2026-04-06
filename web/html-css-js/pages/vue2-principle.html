@@ -1,79 +1,113 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Vue2 原理实现</title>
-  <link rel="stylesheet" href="../css/common.css">
-  <script type="module" src="../js/nav.js"></script>
-  <script type="module" src="../js/code-editor.js"></script>
-  <style>
-    .demo-app {
-      background: var(--color-surface-2);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      padding: 1.25rem;
-      margin-top: 0.75rem;
-    }
-    .demo-app h3 { font-size: 0.9rem; color: var(--color-secondary); margin-bottom: 0.75rem; }
-    .demo-app input {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
-      color: var(--color-text);
-      padding: 0.4rem 0.75rem;
-      font-size: 0.875rem;
-      width: 200px;
-      margin-right: 0.5rem;
-    }
-    .demo-app input:focus { outline: none; border-color: var(--color-primary); }
-    .demo-output {
-      margin-top: 0.75rem;
-      padding: 0.75rem;
-      background: var(--color-surface);
-      border-radius: 4px;
-      font-size: 0.875rem;
-      min-height: 40px;
-    }
-    .reactive-badge {
-      display: inline-block;
-      padding: 0.15rem 0.5rem;
-      background: rgba(108,99,255,0.2);
-      color: var(--color-primary-light);
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-family: var(--font-mono);
-    }
-    .vdom-tree {
-      font-family: var(--font-mono);
-      font-size: 0.8rem;
-      line-height: 1.8;
-    }
-    .vdom-node { color: var(--color-secondary); }
-    .vdom-prop { color: var(--color-warning); }
-    .vdom-text { color: var(--color-text-muted); }
-    .diff-old { background: rgba(255,101,132,0.15); border-left: 3px solid var(--color-accent); padding: 0.2rem 0.5rem; margin: 0.15rem 0; }
-    .diff-new { background: rgba(0,212,170,0.12); border-left: 3px solid var(--color-secondary); padding: 0.2rem 0.5rem; margin: 0.15rem 0; }
-    .diff-same { padding: 0.2rem 0.5rem; margin: 0.15rem 0; color: var(--color-text-muted); }
-  </style>
-</head>
-<body>
-  <nav class="nav"></nav>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Vue2 原理实现</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <script type="module" src="../js/nav.js"></script>
+    <script type="module" src="../js/code-editor.js"></script>
+    <style>
+      .demo-app {
+        background: var(--color-surface-2);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        padding: 1.25rem;
+        margin-top: 0.75rem;
+      }
+      .demo-app h3 {
+        font-size: 0.9rem;
+        color: var(--color-secondary);
+        margin-bottom: 0.75rem;
+      }
+      .demo-app input {
+        background: var(--color-surface);
+        border: 1px solid var(--color-border);
+        border-radius: var(--radius-sm);
+        color: var(--color-text);
+        padding: 0.4rem 0.75rem;
+        font-size: 0.875rem;
+        width: 200px;
+        margin-right: 0.5rem;
+      }
+      .demo-app input:focus {
+        outline: none;
+        border-color: var(--color-primary);
+      }
+      .demo-output {
+        margin-top: 0.75rem;
+        padding: 0.75rem;
+        background: var(--color-surface);
+        border-radius: 4px;
+        font-size: 0.875rem;
+        min-height: 40px;
+      }
+      .reactive-badge {
+        display: inline-block;
+        padding: 0.15rem 0.5rem;
+        background: rgba(108, 99, 255, 0.2);
+        color: var(--color-primary-light);
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-family: var(--font-mono);
+      }
+      .vdom-tree {
+        font-family: var(--font-mono);
+        font-size: 0.8rem;
+        line-height: 1.8;
+      }
+      .vdom-node {
+        color: var(--color-secondary);
+      }
+      .vdom-prop {
+        color: var(--color-warning);
+      }
+      .vdom-text {
+        color: var(--color-text-muted);
+      }
+      .diff-old {
+        background: rgba(255, 101, 132, 0.15);
+        border-left: 3px solid var(--color-accent);
+        padding: 0.2rem 0.5rem;
+        margin: 0.15rem 0;
+      }
+      .diff-new {
+        background: rgba(0, 212, 170, 0.12);
+        border-left: 3px solid var(--color-secondary);
+        padding: 0.2rem 0.5rem;
+        margin: 0.15rem 0;
+      }
+      .diff-same {
+        padding: 0.2rem 0.5rem;
+        margin: 0.15rem 0;
+        color: var(--color-text-muted);
+      }
+    </style>
+  </head>
+  <body>
+    <nav class="nav"></nav>
 
-  <div class="page-wrapper">
-    <h1 class="page-title">Vue2 原理实现</h1>
-    <p class="page-subtitle">响应式系统（Object.defineProperty）· 依赖收集 · 虚拟 DOM · diff 算法 · 指令 · 组件系统</p>
+    <div class="page-wrapper">
+      <h1 class="page-title">Vue2 原理实现</h1>
+      <p class="page-subtitle">
+        响应式系统（Object.defineProperty）· 依赖收集 · 虚拟 DOM · diff 算法 · 指令 · 组件系统
+      </p>
 
-    <!-- 1. 响应式原理 -->
-    <section class="section">
-      <h2 class="section-title">1. 响应式原理：Object.defineProperty <span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>核心思路</strong>：遍历 data 的每个属性，用 <code>Object.defineProperty</code> 将其转为 getter/setter。
-          getter 中收集依赖（Dep.depend），setter 中通知更新（Dep.notify）。
-        </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+      <!-- 1. 响应式原理 -->
+      <section class="section">
+        <h2 class="section-title">
+          1. 响应式原理：Object.defineProperty
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>核心思路</strong>
+            ：遍历 data 的每个属性，用
+            <code>Object.defineProperty</code>
+            将其转为 getter/setter。 getter 中收集依赖（Dep.depend），setter 中通知更新（Dep.notify）。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" id="block-vue2-core" data-tabs="javascript,typescript" data-mode="console">
 <div data-tab="javascript">/**
  * 依赖收集器，每个响应式属性对应一个 Dep 实例。
  * 通过 depend 收集当前 Watcher，通过 notify 触发所有 Watcher 更新。
@@ -251,170 +285,125 @@ function observe(obj: Record&lt;string, any&gt;): void {
   Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
 }</div>
 </div>
-        <div class="demo-box">
-          <div class="demo-label">响应式演示：修改数据自动触发回调</div>
-          <div style="display:flex;gap:0.5rem;flex-wrap:wrap;align-items:center;margin-bottom:0.75rem">
-            <input type="text" id="reactiveInput" placeholder="输入姓名" value="Alice">
-            <button class="btn btn-primary btn-sm" onclick="setReactiveData()">设置数据</button>
-            <button class="btn btn-outline btn-sm" onclick="triggerNested()">修改嵌套属性</button>
+          <div class="demo-box">
+            <div class="demo-label">响应式演示：修改数据自动触发回调</div>
+            <div style="display: flex; gap: 0.5rem; flex-wrap: wrap; align-items: center; margin-bottom: 0.75rem">
+              <input type="text" id="reactiveInput" placeholder="输入姓名" value="Alice" />
+              <button class="btn btn-primary btn-sm" onclick="setReactiveData()">设置数据</button>
+              <button class="btn btn-outline btn-sm" onclick="triggerNested()">修改嵌套属性</button>
+            </div>
+            <div class="demo-output" id="reactiveOutput">等待数据变化...</div>
+            <div class="console-output" id="reactiveLog" style="margin-top: 0.5rem">
+              <span class="info">响应式日志</span>
+            </div>
           </div>
-          <div class="demo-output" id="reactiveOutput">等待数据变化...</div>
-          <div class="console-output" id="reactiveLog" style="margin-top:0.5rem"><span class="info">响应式日志</span></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 2. Vue2 局限性 -->
-    <section class="section">
-      <h2 class="section-title">2. Vue2 响应式局限性 <span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <div class="callout warn">
-          <strong>Object.defineProperty 的缺陷</strong>：只能劫持已存在的属性，无法检测属性的新增和删除，也无法检测数组下标直接赋值。
-        </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
-<div data-tab="javascript">/** 依赖收集器（简化版） */
-class Dep {
-  constructor() { this.subs = new Set() }
-  /** 收集当前 Watcher */
-  depend()  { if (Dep.target) this.subs.add(Dep.target) }
-  /** 通知所有 Watcher 更新 */
-  notify()  { this.subs.forEach(w =&gt; w.update()) }
-}
-Dep.target = null
+      <!-- 2. Vue2 局限性 -->
+      <section class="section">
+        <h2 class="section-title">
+          2. Vue2 响应式局限性
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <div class="callout warn">
+            <strong>Object.defineProperty 的缺陷</strong>
+            ：只能劫持已存在的属性，无法检测属性的新增和删除，也无法检测数组下标直接赋值。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-tabs="javascript,typescript" data-filename="limitations.js" data-mode="console" data-import="block-vue2-core">
+<div data-tab="javascript">// 依赖 Section 1 的 Dep / Watcher / defineReactive / observe（已通过 import 引入）
 
-/** 观察者（简化版） */
-class Watcher {
-  /**
-   * @param {Object} vm - 视图模型
-   * @param {Function} getter - 取值函数
-   * @param {Function} cb - 变化回调
-   */
-  constructor(vm, getter, cb) {
-    this.vm = vm; this.cb = cb; this.getter = getter
-    this.value = this.get()
-  }
-  /** @returns {*} getter 返回值 */
-  get() { Dep.target = this; const v = this.getter(); Dep.target = null; return v }
-  /** 重新求值并触发回调 */
-  update() { const n = this.get(); this.cb(n, this.value); this.value = n }
-}
-
-/**
- * 将对象单个属性转为响应式。
- * @param {Object} obj - 目标对象
- * @param {string} key - 属性名
- * @param {*} val - 初始值
- */
-function defineReactive(obj, key, val) {
-  const dep = new Dep()
-  Object.defineProperty(obj, key, {
-    get() { dep.depend(); return val },
-    set(newVal) { if (newVal !== val) { val = newVal; dep.notify() } }
-  })
-}
-
-/**
- * 递归将对象所有属性转为响应式。
- * @param {Object} obj - 目标对象
- */
-function observe(obj) {
-  if (!obj || typeof obj !== 'object') return
-  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
-}
-
-const data = { name: 'Alice', list: [1, 2, 3] }
-observe(data)
-const changes = []
-new Watcher(data, () =&gt; data.name, (n, o) =&gt; changes.push(`name: ${o}→${n}`))
+const limData = { name: 'Alice', list: [1, 2, 3] }
+observe(limData)
+const limChanges = []
+new Watcher(limData, () =&gt; limData.name, (n, o) =&gt; limChanges.push(`name: ${o}→${n}`))
 
 // ✅ 正常响应：修改已有属性
-data.name = 'Bob'
-console.log('✅ 修改已有属性 name=Bob → 响应:', changes)
+limData.name = 'Bob'
+console.log('✅ 修改已有属性 name=Bob → 响应:', limChanges)
 
 // ❌ 无法检测：新增属性
-const before = changes.length
-data.newProp = 'new'
-console.log('❌ 新增属性 newProp → 无响应（changes 未增加）:', changes.length === before)
+const before = limChanges.length
+limData.newProp = 'new'
+console.log('❌ 新增属性 newProp → 无响应（changes 未增加）:', limChanges.length === before)
 
 // ❌ 无法检测：删除属性
-const before2 = changes.length
-delete data.name
-console.log('❌ 删除属性 name → 无响应:', changes.length === before2)
+const before2 = limChanges.length
+delete limData.name
+console.log('❌ 删除属性 name → 无响应:', limChanges.length === before2)
 
 // ❌ 数组下标赋值无法检测
-console.log('❌ data.list[0] = 99 → 无响应（Vue2 缺陷）')
-data.list[0] = 99
-console.log('list:', JSON.stringify(data.list))
+limData.list[0] = 99
+console.log('❌ limData.list[0] = 99 → 无响应（Vue2 缺陷）list:', JSON.stringify(limData.list))
 
 console.log('\n💡 Vue2 解决方案：Vue.set(obj, key, val) / vm.$set')
-console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')</div>
-<div data-tab="typescript">/** Watcher 回调类型 */
-type WatcherCallback&lt;T&gt; = (newVal: T, oldVal: T) =&gt; void
-
-/** 依赖收集器（简化版） */
-class Dep {
-  static target: Watcher&lt;any&gt; | null = null
-  private subs: Set&lt;Watcher&lt;any&gt;&gt; = new Set()
-
-  depend(): void { if (Dep.target) this.subs.add(Dep.target) }
-  notify(): void { this.subs.forEach(w =&gt; w.update()) }
-}
-
-/** 观察者（简化版） */
-class Watcher&lt;T&gt; {
-  private vm: Record&lt;string, any&gt;
-  private cb: WatcherCallback&lt;T&gt;
-  private getter: () =&gt; T
-  public value: T
-
-  constructor(vm: Record&lt;string, any&gt;, getter: () =&gt; T, cb: WatcherCallback&lt;T&gt;) {
-    this.vm = vm; this.cb = cb; this.getter = getter
-    this.value = this.get()
-  }
-
-  get(): T { Dep.target = this; const v = this.getter(); Dep.target = null; return v }
-  update(): void { const n = this.get(); this.cb(n, this.value); this.value = n }
-}
-
-/**
- * 将对象单个属性转为响应式。
- * @param obj - 目标对象
- * @param key - 属性名
- * @param val - 初始值
- */
-function defineReactive(obj: Record&lt;string, any&gt;, key: string, val: any): void {
-  const dep = new Dep()
-  Object.defineProperty(obj, key, {
-    get(): any { dep.depend(); return val },
-    set(newVal: any) { if (newVal !== val) { val = newVal; dep.notify() } }
-  })
-}
-
-/**
- * 递归将对象所有属性转为响应式。
- * @param obj - 目标对象
- */
-function observe(obj: Record&lt;string, any&gt;): void {
-  if (!obj || typeof obj !== 'object') return
-  Object.keys(obj).forEach(key =&gt; defineReactive(obj, key, obj[key]))
-}</div>
+console.log('💡 Vue3 用 Proxy 彻底解决了这些问题')
 </div>
-        <div class="demo-box">
-          <div class="console-output" id="limOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
-        </div>
-      </div>
-    </section>
+<div data-tab="typescript">// TypeScript 类型标注版（只读对照）
 
-    <!-- 3. 虚拟 DOM -->
-    <section class="section">
-      <h2 class="section-title">3. 虚拟 DOM（Virtual DOM）<span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>核心思想</strong>：用 JS 对象描述 DOM 结构（VNode），数据变化时先对比新旧 VNode（diff），再将最小差异更新到真实 DOM。
+// 引入的核心类型（来自 Section 1）
+declare class Dep {
+  subs: Set&lt;Watcher&gt;
+  depend(): void
+  notify(): void
+  static target: Watcher | null
+}
+declare class Watcher {
+  constructor(vm: object, expOrFn: (() =&gt; any) | string, cb: (n: any, o: any) =&gt; void): void
+  get(): any
+  update(): void
+}
+declare function observe(obj: object): void
+
+// 局限性演示
+interface LimData {
+  name: string
+  list: number[]
+  [key: string]: any  // 允许动态属性（但 Vue2 无法响应）
+}
+
+const limData: LimData = { name: 'Alice', list: [1, 2, 3] }
+observe(limData)
+
+const limChanges: string[] = []
+new Watcher(limData, () =&gt; limData.name, (n: string, o: string) =&gt;
+  limChanges.push(`name: ${o}→${n}`)
+)
+
+// ✅ 正常响应
+limData.name = 'Bob'
+
+// ❌ 以下操作 Vue2 无法检测（TypeScript 类型上合法，但响应式失效）
+limData.newProp = 'new'   // 新增属性
+delete limData.name        // 删除属性
+limData.list[0] = 99       // 数组下标赋值
+
+// Vue2 正确做法：
+// Vue.set(limData, 'newProp', 'new')
+// Vue.set(limData.list, 0, 99)
+</div>
         </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+          <div class="demo-box">
+            <div class="console-output" id="limOut"><span class="info">点击运行或按 Ctrl+Enter</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 虚拟 DOM -->
+      <section class="section">
+        <h2 class="section-title">
+          3. 虚拟 DOM（Virtual DOM）
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>核心思想</strong>
+            ：用 JS 对象描述 DOM 结构（VNode），数据变化时先对比新旧 VNode（diff），再将最小差异更新到真实 DOM。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="dom">
 <div data-tab="javascript">/**
  * 创建虚拟 DOM 节点（VNode）。
  * @param {string} tag - 标签名
@@ -426,7 +415,27 @@ function h(tag, props, ...children) {
   return { tag, props: props || {}, children: children.flat().filter(c =&gt; c != null) }
 }
 
-const vnode = h('div', { id: 'app', class: 'container' },
+/**
+ * 将 VNode 递归转为真实 DOM 节点。
+ * @param {Object|string} vnode - VNode 或文本节点
+ * @returns {Node} 真实 DOM 节点
+ */
+function createEl(vnode) {
+  if (typeof vnode === 'string' || typeof vnode === 'number')
+    return document.createTextNode(String(vnode))
+  const el = document.createElement(vnode.tag)
+  Object.entries(vnode.props).forEach(([k, v]) =&gt; {
+    if (k === 'class') el.className = v
+    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v)
+    else if (typeof v === 'function') el.addEventListener(k.replace(/^on/, '').toLowerCase(), v)
+    else if (k !== 'key') el.setAttribute(k, v)
+  })
+  vnode.children.forEach(child =&gt; el.appendChild(createEl(child)))
+  return el
+}
+
+// ── 构建 VNode 树 ─────────────────────────────────────────────
+const vnode = h('div', { id: 'app' },
   h('h1', null, 'Hello Vue'),
   h('ul', null,
     h('li', { key: 'a' }, 'Item A'),
@@ -435,36 +444,34 @@ const vnode = h('div', { id: 'app', class: 'container' },
   )
 )
 
-/**
- * 递归打印 VNode 树结构到控制台。
- * @param {Object|string} node - VNode 节点或文本
- * @param {number} [depth=0] - 当前缩进深度
- */
-function printVNode(node, depth = 0) {
-  const indent = '  '.repeat(depth)
-  if (typeof node === 'string') { console.log(`${indent}"${node}"`); return }
-  const props = Object.entries(node.props).map(([k,v]) =&gt; `${k}="${v}"`).join(' ')
-  console.log(`${indent}&lt;${node.tag}${props ? ' ' + props : ''}&gt;`)
-  node.children.forEach(c =&gt; printVNode(c, depth + 1))
-  console.log(`${indent}&lt;/${node.tag}&gt;`)
-}
-console.log('VNode 树结构：')
-printVNode(vnode)
+// ── ① 打印 VNode 对象结构（JS 对象，非真实 DOM）────────────────
+const pre = document.createElement('pre')
+pre.style.cssText = 'background:#161b2e;color:#8b85ff;padding:0.75rem;border-radius:4px;font-size:0.8rem;margin-bottom:1rem;overflow:auto'
 
-/**
- * 将 VNode 转为简化的纯数据对象（用于 JSON 序列化）。
- * @param {Object|string} node - VNode 节点或文本
- * @returns {Object|string} 简化后的对象
- */
-function vnodeToSimple(node) {
-  if (typeof node === 'string') return node
-  return { tag: node.tag, props: node.props, children: node.children.map(vnodeToSimple) }
+function vnodeToText(node, depth = 0) {
+  const indent = '  '.repeat(depth)
+  if (typeof node === 'string') return `${indent}"${node}"\n`
+  const propsStr = Object.keys(node.props).length ? ' props=' + JSON.stringify(node.props) : ''
+  let s = `${indent}{ tag: "${node.tag}"${propsStr} }\n`
+  node.children.forEach(c =&gt; { s += vnodeToText(c, depth + 1) })
+  return s
 }
-console.log('\nVNode JSON（简化）:')
-console.log(JSON.stringify(vnodeToSimple(vnode), null, 2))</div>
+
+pre.textContent = '── VNode 对象结构（h 函数返回值）──\n\n' + vnodeToText(vnode)
+document.body.appendChild(pre)
+
+// ── ② 将 VNode 挂载为真实 DOM ────────────────────────────────
+const label = document.createElement('div')
+label.style.cssText = 'font-size:0.75rem;color:#8892b0;margin-bottom:0.5rem'
+label.textContent = '── 挂载为真实 DOM（createEl 输出）──'
+document.body.appendChild(label)
+
+const domEl = createEl(vnode)
+document.body.appendChild(domEl)
+</div>
 <div data-tab="typescript">/** VNode 属性类型 */
 interface VNodeProps {
-  [key: string]: string | number | boolean | Record&lt;string, string&gt;
+  [key: string]: string | number | boolean | Record&lt;string, string&gt; | ((...a: any[]) =&gt; void)
 }
 
 /** 虚拟 DOM 节点 */
@@ -474,70 +481,62 @@ interface VNode {
   children: Array&lt;VNode | string&gt;
 }
 
-/** 简化后的 VNode（用于序列化） */
-type SimpleVNode = string | {
-  tag: string
-  props: VNodeProps
-  children: SimpleVNode[]
-}
-
 /**
  * 创建虚拟 DOM 节点（VNode）。
- * @param tag - 标签名
- * @param props - 属性对象
- * @param children - 子节点列表
- * @returns VNode 对象
  */
 function h(tag: string, props: VNodeProps | null, ...children: Array&lt;VNode | string | null&gt;): VNode {
   return { tag, props: props || {}, children: children.flat().filter((c): c is VNode | string =&gt; c != null) }
 }
 
 /**
- * 递归打印 VNode 树结构到控制台。
- * @param node - VNode 节点或文本
- * @param depth - 当前缩进深度
+ * 将 VNode 递归转为真实 DOM 节点。
  */
-function printVNode(node: VNode | string, depth: number = 0): void {
-  const indent = '  '.repeat(depth)
-  if (typeof node === 'string') { console.log(`${indent}"${node}"`); return }
-  const props = Object.entries(node.props).map(([k, v]) =&gt; `${k}="${v}"`).join(' ')
-  console.log(`${indent}&lt;${node.tag}${props ? ' ' + props : ''}&gt;`)
-  node.children.forEach(c =&gt; printVNode(c, depth + 1))
-  console.log(`${indent}&lt;/${node.tag}&gt;`)
+function createEl(vnode: VNode | string): Node {
+  if (typeof vnode === 'string') return document.createTextNode(vnode)
+  const el = document.createElement(vnode.tag)
+  Object.entries(vnode.props).forEach(([k, v]) =&gt; {
+    if (k === 'class') el.className = v as string
+    else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v)
+    else if (typeof v === 'function') el.addEventListener(k.replace(/^on/, '').toLowerCase(), v as EventListener)
+    else if (k !== 'key') el.setAttribute(k, String(v))
+  })
+  vnode.children.forEach(child =&gt; el.appendChild(createEl(child)))
+  return el
 }
 
-/**
- * 将 VNode 转为简化的纯数据对象。
- * @param node - VNode 节点或文本
- * @returns 简化后的对象
- */
-function vnodeToSimple(node: VNode | string): SimpleVNode {
-  if (typeof node === 'string') return node
-  return { tag: node.tag, props: node.props, children: node.children.map(vnodeToSimple) }
-}</div>
-</div>
-        <div class="demo-box">
-          <div class="demo-label">VNode 树可视化</div>
-          <div id="vnodeTree" class="vdom-tree" style="padding:0.75rem;background:var(--color-code-bg);border-radius:4px"></div>
-          <div style="margin-top:0.75rem;display:flex;gap:0.5rem">
-            <button class="btn btn-primary btn-sm" onclick="renderVnodeTree()">生成 VNode 树</button>
-            <button class="btn btn-outline btn-sm" onclick="mountVnode()">挂载到 DOM</button>
-          </div>
-          <div id="mountOutput" style="margin-top:0.75rem;padding:0.75rem;background:var(--color-surface);border-radius:4px;font-size:0.85rem;min-height:40px"></div>
-        </div>
-      </div>
-    </section>
+// 使用示例（类型推断）
+const vnode: VNode = h('div', { id: 'app' },
+  h('h1', null, 'Hello Vue'),
+  h('ul', null,
+    h('li', { key: 'a' }, 'Item A'),
+    h('li', { key: 'b' }, 'Item B'),
+    h('li', { key: 'c' }, 'Item C'),
+  )
+)
 
-    <!-- 4. diff 算法 -->
-    <section class="section">
-      <h2 class="section-title">4. diff 算法（同层对比）<span class="tag-badge interview">面试必考</span></h2>
-      <div class="card">
-        <div class="callout info">
-          <strong>Vue2 diff 策略</strong>：同层比较，不跨层。使用双端指针（头头/尾尾/头尾/尾头）对比，再用 key 建立映射表。
-          时间复杂度 O(n)。
+// createEl 返回 Node，可直接 appendChild
+const el: Node = createEl(vnode)
+</div>
+</div>
+          <div class="demo-box">
+            <div class="demo-label">预览效果</div>
+          </div>
         </div>
-        <!-- prettier-ignore -->
-        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+      </section>
+
+      <!-- 4. diff 算法 -->
+      <section class="section">
+        <h2 class="section-title">
+          4. diff 算法（同层对比）
+          <span class="tag-badge interview">面试必考</span>
+        </h2>
+        <div class="card">
+          <div class="callout info">
+            <strong>Vue2 diff 策略</strong>
+            ：同层比较，不跨层。使用双端指针（头头/尾尾/头尾/尾头）对比，再用 key 建立映射表。 时间复杂度 O(n)。
+          </div>
+          <!-- prettier-ignore -->
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
 <div data-tab="javascript">/**
  * Vue2 双端指针 diff 算法（简化版，操作 key 字符串列表）。
  * 策略：头头/尾尾/头尾/尾头 四种对比，命中则复用并移动指针；
@@ -697,30 +696,60 @@ const r2 = vue2Diff(['A','B','C'], ['B','C','D','E'])
 console.log('\n=== 测试2：增删 ===')
 r2.ops.forEach(op =&gt; console.log(' ', op))</div>
 </div>
-        <div class="demo-box">
-          <div class="demo-label">diff 可视化演示</div>
-          <div class="grid-2" style="margin-bottom:0.75rem">
-            <div>
-              <div style="font-size:0.75rem;color:var(--color-text-muted);margin-bottom:0.25rem">旧列表（逗号分隔）</div>
-              <input type="text" id="diffOld" value="A,B,C,D,E" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:4px;color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:100%">
+          <div class="demo-box">
+            <div class="demo-label">diff 可视化演示</div>
+            <div class="grid-2" style="margin-bottom: 0.75rem">
+              <div>
+                <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.25rem">
+                  旧列表（逗号分隔）
+                </div>
+                <input
+                  type="text"
+                  id="diffOld"
+                  value="A,B,C,D,E"
+                  style="
+                    background: var(--color-surface-2);
+                    border: 1px solid var(--color-border);
+                    border-radius: 4px;
+                    color: var(--color-text);
+                    padding: 0.4rem 0.75rem;
+                    font-size: 0.875rem;
+                    width: 100%;
+                  "
+                />
+              </div>
+              <div>
+                <div style="font-size: 0.75rem; color: var(--color-text-muted); margin-bottom: 0.25rem">
+                  新列表（逗号分隔）
+                </div>
+                <input
+                  type="text"
+                  id="diffNew"
+                  value="A,C,E,B,D"
+                  style="
+                    background: var(--color-surface-2);
+                    border: 1px solid var(--color-border);
+                    border-radius: 4px;
+                    color: var(--color-text);
+                    padding: 0.4rem 0.75rem;
+                    font-size: 0.875rem;
+                    width: 100%;
+                  "
+                />
+              </div>
             </div>
-            <div>
-              <div style="font-size:0.75rem;color:var(--color-text-muted);margin-bottom:0.25rem">新列表（逗号分隔）</div>
-              <input type="text" id="diffNew" value="A,C,E,B,D" style="background:var(--color-surface-2);border:1px solid var(--color-border);border-radius:4px;color:var(--color-text);padding:0.4rem 0.75rem;font-size:0.875rem;width:100%">
-            </div>
+            <button class="btn btn-primary btn-sm" onclick="runDiff()">▶ 运行 diff</button>
+            <div id="diffOutput" style="margin-top: 0.75rem; font-size: 0.82rem; font-family: var(--font-mono)"></div>
           </div>
-          <button class="btn btn-primary btn-sm" onclick="runDiff()">▶ 运行 diff</button>
-          <div id="diffOutput" style="margin-top:0.75rem;font-size:0.82rem;font-family:var(--font-mono)"></div>
         </div>
-      </div>
-    </section>
+      </section>
 
-    <!-- 5. 完整 Mini Vue2 -->
-    <section class="section">
-      <h2 class="section-title">5. Mini Vue2 完整实现</h2>
-      <div class="card">
-        <!-- prettier-ignore -->
-        <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
+      <!-- 5. 完整 Mini Vue2 -->
+      <section class="section">
+        <h2 class="section-title">5. Mini Vue2 完整实现</h2>
+        <div class="card">
+          <!-- prettier-ignore -->
+          <div class="code-block" data-tabs="javascript,typescript" data-mode="console">
 <div data-tab="javascript">/** 依赖收集器 */
 class Dep {
   constructor() { this.subs = new Set() }
@@ -938,355 +967,466 @@ class MiniVue {
   }
 }</div>
 </div>
-        <div class="demo-box">
-          <div class="demo-label">Mini Vue2 运行效果</div>
-          <div id="miniVue2App"></div>
-          <div class="console-output" id="miniVue2Log" style="margin-top:0.75rem"><span class="info">Mini Vue2 运行日志</span></div>
+          <div class="demo-box">
+            <div class="demo-label">Mini Vue2 运行效果</div>
+            <div id="miniVue2App"></div>
+            <div class="console-output" id="miniVue2Log" style="margin-top: 0.75rem">
+              <span class="info">Mini Vue2 运行日志</span>
+            </div>
+          </div>
         </div>
-      </div>
-    </section>
-  </div>
+      </section>
+    </div>
 
-  <script>
-    // ============================================================
-    // 核心：Dep / Watcher / observe
-    // ============================================================
-    class Dep {
-      constructor() { this.subs = new Set() }
-      depend()  { if (Dep.target) this.subs.add(Dep.target) }
-      notify()  { this.subs.forEach(w => w.update()) }
-    }
-    Dep.target = null
-    const targetStack = []
-
-    class Watcher {
-      constructor(vm, expOrFn, cb, options = {}) {
-        this.vm = vm; this.cb = cb; this.deps = new Set(); this.lazy = options.lazy || false
-        this.dirty = this.lazy
-        this.getter = typeof expOrFn === 'function' ? expOrFn : () => {
-          return expOrFn.split('.').reduce((obj, k) => obj?.[k], vm)
+    <script>
+      // ============================================================
+      // 核心：Dep / Watcher / observe
+      // ============================================================
+      class Dep {
+        constructor() {
+          this.subs = new Set();
         }
-        this.value = this.lazy ? undefined : this.get()
-      }
-      get() {
-        targetStack.push(this); Dep.target = this
-        const value = this.getter.call(this.vm)
-        targetStack.pop(); Dep.target = targetStack[targetStack.length - 1] ?? null
-        return value
-      }
-      addDep(dep) { this.deps.add(dep); dep.subs.add(this) }
-      update() {
-        if (this.lazy) { this.dirty = true; return }
-        const newVal = this.get()
-        if (newVal !== this.value) { this.cb.call(this.vm, newVal, this.value); this.value = newVal }
-      }
-      evaluate() { this.value = this.get(); this.dirty = false }
-    }
-
-    function defineReactive(obj, key, val) {
-      const dep = new Dep()
-      if (val && typeof val === 'object') observe(val)
-      Object.defineProperty(obj, key, {
-        enumerable: true, configurable: true,
-        get() { dep.depend(); return val },
-        set(newVal) {
-          if (newVal === val) return
-          val = newVal
-          if (typeof newVal === 'object' && newVal !== null) observe(newVal)
-          dep.notify()
+        depend() {
+          if (Dep.target) this.subs.add(Dep.target);
         }
-      })
-    }
-
-    function observe(obj) {
-      if (!obj || typeof obj !== 'object') return
-      if (obj.__ob__) return
-      Object.defineProperty(obj, '__ob__', { value: true, enumerable: false })
-      if (Array.isArray(obj)) {
-        patchArrayMethods(obj)
-        obj.forEach(item => observe(item))
-      } else {
-        Object.keys(obj).forEach(key => defineReactive(obj, key, obj[key]))
-      }
-    }
-
-    // 数组方法重写
-    const arrayProto = Array.prototype
-    const arrayMethods = Object.create(arrayProto)
-    ;['push','pop','shift','unshift','splice','sort','reverse'].forEach(method => {
-      Object.defineProperty(arrayMethods, method, {
-        value: function(...args) {
-          const result = arrayProto[method].apply(this, args)
-          this.__dep__?.notify()
-          return result
+        notify() {
+          this.subs.forEach((w) => w.update());
         }
-      })
-    })
-    function patchArrayMethods(arr) { Object.setPrototypeOf(arr, arrayMethods) }
-
-    // ============================================================
-    // 演示 1：响应式
-    // ============================================================
-    const reactiveData = { name: 'Alice', age: 25, address: { city: 'Beijing' } }
-    observe(reactiveData)
-    const logEl = document.getElementById('reactiveLog')
-    const outEl = document.getElementById('reactiveOutput')
-    function reactLog(msg, type='log') {
-      const d = document.createElement('div'); d.className = type
-      d.textContent = msg; logEl.appendChild(d); logEl.scrollTop = logEl.scrollHeight
-    }
-    new Watcher({ ...reactiveData }, () => reactiveData.name, (newVal, oldVal) => {
-      outEl.innerHTML = `<span style="color:var(--color-secondary)">name 变化：</span> ${oldVal} → <strong style="color:var(--color-primary-light)">${newVal}</strong>`
-      reactLog(`[Watcher] name: "${oldVal}" → "${newVal}"`, 'result')
-    })
-    new Watcher({ ...reactiveData }, () => reactiveData.age, (newVal, oldVal) => {
-      reactLog(`[Watcher] age: ${oldVal} → ${newVal}`, 'result')
-    })
-    new Watcher({ ...reactiveData }, () => reactiveData.address.city, (newVal, oldVal) => {
-      reactLog(`[Watcher] address.city: "${oldVal}" → "${newVal}"`, 'result')
-    })
-    function setReactiveData() {
-      const val = document.getElementById('reactiveInput').value
-      reactLog(`[SET] name = "${val}"`)
-      reactiveData.name = val
-    }
-    function triggerNested() {
-      const cities = ['Shanghai', 'Guangzhou', 'Shenzhen', 'Hangzhou', 'Chengdu']
-      const city = cities[Math.floor(Math.random() * cities.length)]
-      reactLog(`[SET] address.city = "${city}"`)
-      reactiveData.address.city = city
-    }
-
-    // ============================================================
-    // 虚拟 DOM
-    // ============================================================
-    function h(tag, props, ...children) {
-      return { tag, props: props || {}, children: children.flat().filter(c => c != null) }
-    }
-    function createEl(vnode) {
-      if (typeof vnode === 'string' || typeof vnode === 'number') return document.createTextNode(vnode)
-      const el = vnode._el = document.createElement(vnode.tag)
-      Object.entries(vnode.props).forEach(([k, v]) => {
-        if (k === 'class') el.className = v
-        else if (k === 'style' && typeof v === 'object') Object.assign(el.style, v)
-        else if (typeof v === 'function') el[k] = v  // 事件处理函数直接赋值（如 onclick）
-        else if (k !== 'key') el.setAttribute(k, v)  // key 仅用于 diff，不设置到 DOM
-      })
-      vnode.children.forEach(child => el.appendChild(createEl(child)))
-      return el
-    }
-
-    function renderVnodeTree() {
-      const vnode = h('div', { id: 'app', class: 'container' },
-        h('h1', null, 'Hello Vue'),
-        h('ul', null,
-          h('li', { key: 'a' }, 'Item A'),
-          h('li', { key: 'b' }, 'Item B'),
-          h('li', { key: 'c' }, 'Item C'),
-        )
-      )
-      const tree = document.getElementById('vnodeTree')
-      tree.innerHTML = renderTreeHtml(vnode, 0)
-      tree._vnode = vnode
-    }
-
-    function renderTreeHtml(node, depth) {
-      const indent = '  '.repeat(depth)
-      if (typeof node === 'string' || typeof node === 'number') {
-        return `<span class="vdom-text">${indent}"${node}"</span>\n`
       }
-      const propsStr = Object.entries(node.props).map(([k,v]) =>
-        ` <span class="vdom-prop">${k}</span>="<span class="vdom-text">${typeof v === 'object' ? JSON.stringify(v) : v}</span>"`).join('')
-      let html = `${indent}<span class="vdom-node">&lt;${node.tag}${propsStr}&gt;</span>\n`
-      node.children.forEach(c => { html += renderTreeHtml(c, depth + 1) })
-      html += `${indent}<span class="vdom-node">&lt;/${node.tag}&gt;</span>\n`
-      return html
-    }
+      Dep.target = null;
+      const targetStack = [];
 
-    function mountVnode() {
-      const out = document.getElementById('mountOutput')
-      out.innerHTML = ''
-      const tree = document.getElementById('vnodeTree')
-      const vnode = tree._vnode || h('div', { id: 'app', class: 'container' },
-        h('h1', null, 'Hello Vue'),
-        h('ul', null,
-          h('li', { key: 'a' }, 'Item A'),
-          h('li', { key: 'b' }, 'Item B'),
-          h('li', { key: 'c' }, 'Item C'),
-        )
-      )
-      const el = createEl(vnode)
-      // 隔离页面全局样式，避免 ul/li 继承页面样式
-      el.style.cssText = 'font-size:0.875rem;line-height:1.6'
-      el.querySelectorAll('ul').forEach(ul => {
-        ul.style.cssText = 'list-style:disc;padding-left:1.5rem;margin:0.25rem 0'
-      })
-      el.querySelectorAll('li').forEach(li => {
-        li.style.cssText = 'padding:0;margin:0.1rem 0;background:none;border:none'
-      })
-      el.querySelectorAll('h1,h2,h3').forEach(h => {
-        h.style.cssText = 'font-size:1rem;font-weight:700;margin:0 0 0.5rem;color:var(--color-primary)'
-      })
-      out.appendChild(el)
-    }
-
-    // ============================================================
-    // diff 演示
-    // ============================================================
-    function runDiff() {
-      const oldList = document.getElementById('diffOld').value.split(',').map(s => s.trim()).filter(Boolean)
-      const newList = document.getElementById('diffNew').value.split(',').map(s => s.trim()).filter(Boolean)
-      const out = document.getElementById('diffOutput')
-
-      // 简单 LCS diff（用于可视化）
-      const ops = []
-      const oldMap = new Map(oldList.map((v, i) => [v, i]))
-      const newMap = new Map(newList.map((v, i) => [v, i]))
-
-      // 分析操作
-      const removed = oldList.filter(v => !newMap.has(v))
-      const added   = newList.filter(v => !oldMap.has(v))
-      const moved   = newList.filter(v => oldMap.has(v) && newMap.get(v) !== oldMap.get(v))
-      const same    = newList.filter(v => oldMap.has(v) && newMap.get(v) === oldMap.get(v))
-
-      let html = '<div style="margin-bottom:0.5rem;color:var(--color-text-muted);font-size:0.75rem">diff 分析结果：</div>'
-      html += `<div class="diff-same">旧列表：[${oldList.join(', ')}]</div>`
-      html += `<div class="diff-same">新列表：[${newList.join(', ')}]</div>`
-      html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">'
-      if (same.length)    html += `<div class="diff-same">♻️ 复用（位置不变）：${same.join(', ')}</div>`
-      if (moved.length)   html += `<div class="diff-same" style="color:var(--color-warning)">↕️ 移动（key 相同位置变）：${moved.join(', ')}</div>`
-      if (removed.length) html += `<div class="diff-old">➖ 删除（旧有新无）：${removed.join(', ')}</div>`
-      if (added.length)   html += `<div class="diff-new">➕ 新增（旧无新有）：${added.join(', ')}</div>`
-
-      // 操作步骤
-      html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">'
-      html += '<div style="color:var(--color-text-muted);font-size:0.75rem;margin-bottom:0.25rem">DOM 操作步骤（有 key 优化）：</div>'
-      removed.forEach(v => { html += `<div class="diff-old">removeChild(${v})</div>` })
-      added.forEach(v   => { html += `<div class="diff-new">appendChild(${v})</div>` })
-      moved.forEach(v   => { html += `<div class="diff-same" style="color:var(--color-warning)">insertBefore(${v}, ...)</div>` })
-      if (!removed.length && !added.length && !moved.length) {
-        html += '<div class="diff-same" style="color:var(--color-secondary)">✅ 无需 DOM 操作，完全复用</div>'
-      }
-      out.innerHTML = html
-    }
-
-    // ============================================================
-    // Mini Vue2 完整实现
-    // ============================================================
-    function proxy(vm, data) {
-      Object.keys(data).forEach(key => {
-        Object.defineProperty(vm, key, {
-          get() { return data[key] },
-          set(v) { data[key] = v }
-        })
-      })
-    }
-
-    class MiniVue2 {
-      constructor(options) {
-        this.$options = options
-        this.$data = typeof options.data === 'function' ? options.data() : options.data
-        observe(this.$data)
-        proxy(this, this.$data)
-
-        // methods
-        if (options.methods) {
-          Object.keys(options.methods).forEach(k => { this[k] = options.methods[k].bind(this) })
+      class Watcher {
+        constructor(vm, expOrFn, cb, options = {}) {
+          this.vm = vm;
+          this.cb = cb;
+          this.deps = new Set();
+          this.lazy = options.lazy || false;
+          this.dirty = this.lazy;
+          this.getter =
+            typeof expOrFn === 'function'
+              ? expOrFn
+              : () => {
+                  return expOrFn.split('.').reduce((obj, k) => obj?.[k], vm);
+                };
+          this.value = this.lazy ? undefined : this.get();
         }
-        // computed
-        if (options.computed) {
-          Object.keys(options.computed).forEach(key => {
-            const watcher = new Watcher(this, options.computed[key].bind(this), () => {}, { lazy: true })
-            Object.defineProperty(this, key, {
-              get() { if (watcher.dirty) watcher.evaluate(); return watcher.value }
-            })
-          })
+        get() {
+          targetStack.push(this);
+          Dep.target = this;
+          const value = this.getter.call(this.vm);
+          targetStack.pop();
+          Dep.target = targetStack[targetStack.length - 1] ?? null;
+          return value;
         }
-        // watch
-        if (options.watch) {
-          Object.keys(options.watch).forEach(key => {
-            new Watcher(this, key, options.watch[key].bind(this))
-          })
+        addDep(dep) {
+          this.deps.add(dep);
+          dep.subs.add(this);
         }
+        update() {
+          if (this.lazy) {
+            this.dirty = true;
+            return;
+          }
+          const newVal = this.get();
+          if (newVal !== this.value) {
+            this.cb.call(this.vm, newVal, this.value);
+            this.value = newVal;
+          }
+        }
+        evaluate() {
+          this.value = this.get();
+          this.dirty = false;
+        }
+      }
 
-        options.created?.call(this)
-        this._renderWatcher = new Watcher(this, () => {
-          const vnode = options.render.call(this, h)
-          return vnode
-        }, (newVnode, oldVnode) => {
-          this._patch(oldVnode, newVnode)
-          this._vnode = newVnode
-        })
-        this._vnode = this._renderWatcher.value
-        this._mount()
+      function defineReactive(obj, key, val) {
+        const dep = new Dep();
+        if (val && typeof val === 'object') observe(val);
+        Object.defineProperty(obj, key, {
+          enumerable: true,
+          configurable: true,
+          get() {
+            dep.depend();
+            return val;
+          },
+          set(newVal) {
+            if (newVal === val) return;
+            val = newVal;
+            if (typeof newVal === 'object' && newVal !== null) observe(newVal);
+            dep.notify();
+          },
+        });
       }
-      _mount() {
-        const container = document.getElementById(this.$options.el.replace('#',''))
-        if (container) { container.innerHTML = ''; container.appendChild(createEl(this._vnode)) }
-      }
-      _patch(oldVnode, newVnode) {
-        // 完整替换：重新创建 DOM 并替换旧节点
-        // 这样可保证事件处理函数始终是最新的绑定
-        if (oldVnode._el && oldVnode._el.parentNode) {
-          const newEl = createEl(newVnode)
-          oldVnode._el.parentNode.replaceChild(newEl, oldVnode._el)
+
+      function observe(obj) {
+        if (!obj || typeof obj !== 'object') return;
+        if (obj.__ob__) return;
+        Object.defineProperty(obj, '__ob__', { value: true, enumerable: false });
+        if (Array.isArray(obj)) {
+          patchArrayMethods(obj);
+          obj.forEach((item) => observe(item));
         } else {
-          // 降级：重新挂载
-          this._mount()
+          Object.keys(obj).forEach((key) => defineReactive(obj, key, obj[key]));
         }
       }
-    }
 
-    // 启动 Mini Vue2（与第 5 节代码块数据一致：count, name, doubleCount, greeting）
-    const app = new MiniVue2({
-      el: '#miniVue2App',
-      data() {
-        return { count: 0, name: 'Alice' }
-      },
-      computed: {
-        doubleCount() { return this.count * 2 },
-        greeting() { return `Hello, ${this.name}!` }
-      },
-      watch: {
-        count(newVal, oldVal) {
-          const d = document.createElement('div'); d.className = 'result'
-          d.textContent = `[Watch] count: ${oldVal} → ${newVal}`
-          document.getElementById('miniVue2Log').appendChild(d)
-        }
-      },
-      methods: {
-        increment() { this.count++ },
-        setName(name) { this.name = name }
-      },
-      created() {
-        const d = document.createElement('div'); d.className = 'info'
-        d.textContent = '[created] Mini Vue2 实例已创建'
-        document.getElementById('miniVue2Log').appendChild(d)
-      },
-      render(h) {
-        return h('div', { style: 'font-size:0.875rem' },
-          h('div', { style: 'margin-bottom:0.75rem;color:#8892b0' }, this.greeting),
-          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
-            h('button', {
-              onclick: this.increment.bind(this),
-              style: 'background:#6c63ff;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem'
-            }, '+1'),
-            h('span', { style: 'color:#e2e8f0;font-weight:700;font-size:1.1rem;min-width:30px;text-align:center' }, String(this.count)),
-            h('span', { style: 'color:#ffd166;font-size:0.8rem' }, `computed doubleCount = ${this.doubleCount}`),
-          ),
-          h('div', { style: 'display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;flex-wrap:wrap' },
-            h('span', { style: 'color:#8892b0;font-size:0.8rem' }, `name: ${this.name}`),
-            h('button', {
-              onclick: () => this.setName(this.name === 'Alice' ? 'Bob' : 'Alice'),
-              style: 'background:rgba(0,212,170,0.2);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.75rem'
-            }, '切换 name')
-          )
-        )
+      // 数组方法重写
+      const arrayProto = Array.prototype;
+      const arrayMethods = Object.create(arrayProto);
+      ['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'].forEach((method) => {
+        Object.defineProperty(arrayMethods, method, {
+          value: function (...args) {
+            const result = arrayProto[method].apply(this, args);
+            this.__dep__?.notify();
+            return result;
+          },
+        });
+      });
+      function patchArrayMethods(arr) {
+        Object.setPrototypeOf(arr, arrayMethods);
       }
-    })
 
-    // 初始化演示
-    renderVnodeTree()
+      // ============================================================
+      // 演示 1：响应式
+      // ============================================================
+      const reactiveData = { name: 'Alice', age: 25, address: { city: 'Beijing' } };
+      observe(reactiveData);
+      const logEl = document.getElementById('reactiveLog');
+      const outEl = document.getElementById('reactiveOutput');
+      function reactLog(msg, type = 'log') {
+        const d = document.createElement('div');
+        d.className = type;
+        d.textContent = msg;
+        logEl.appendChild(d);
+        logEl.scrollTop = logEl.scrollHeight;
+      }
+      new Watcher(
+        { ...reactiveData },
+        () => reactiveData.name,
+        (newVal, oldVal) => {
+          outEl.innerHTML = `<span style="color:var(--color-secondary)">name 变化：</span> ${oldVal} → <strong style="color:var(--color-primary-light)">${newVal}</strong>`;
+          reactLog(`[Watcher] name: "${oldVal}" → "${newVal}"`, 'result');
+        }
+      );
+      new Watcher(
+        { ...reactiveData },
+        () => reactiveData.age,
+        (newVal, oldVal) => {
+          reactLog(`[Watcher] age: ${oldVal} → ${newVal}`, 'result');
+        }
+      );
+      new Watcher(
+        { ...reactiveData },
+        () => reactiveData.address.city,
+        (newVal, oldVal) => {
+          reactLog(`[Watcher] address.city: "${oldVal}" → "${newVal}"`, 'result');
+        }
+      );
+      function setReactiveData() {
+        const val = document.getElementById('reactiveInput').value;
+        reactLog(`[SET] name = "${val}"`);
+        reactiveData.name = val;
+      }
+      function triggerNested() {
+        const cities = ['Shanghai', 'Guangzhou', 'Shenzhen', 'Hangzhou', 'Chengdu'];
+        const city = cities[Math.floor(Math.random() * cities.length)];
+        reactLog(`[SET] address.city = "${city}"`);
+        reactiveData.address.city = city;
+      }
+
+      // ============================================================
+      // diff 演示
+      // ============================================================
+      function runDiff() {
+        const oldList = document
+          .getElementById('diffOld')
+          .value.split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const newList = document
+          .getElementById('diffNew')
+          .value.split(',')
+          .map((s) => s.trim())
+          .filter(Boolean);
+        const out = document.getElementById('diffOutput');
+
+        // 简单 LCS diff（用于可视化）
+        const ops = [];
+        const oldMap = new Map(oldList.map((v, i) => [v, i]));
+        const newMap = new Map(newList.map((v, i) => [v, i]));
+
+        // 分析操作
+        const removed = oldList.filter((v) => !newMap.has(v));
+        const added = newList.filter((v) => !oldMap.has(v));
+        const moved = newList.filter((v) => oldMap.has(v) && newMap.get(v) !== oldMap.get(v));
+        const same = newList.filter((v) => oldMap.has(v) && newMap.get(v) === oldMap.get(v));
+
+        let html =
+          '<div style="margin-bottom:0.5rem;color:var(--color-text-muted);font-size:0.75rem">diff 分析结果：</div>';
+        html += `<div class="diff-same">旧列表：[${oldList.join(', ')}]</div>`;
+        html += `<div class="diff-same">新列表：[${newList.join(', ')}]</div>`;
+        html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">';
+        if (same.length) html += `<div class="diff-same">♻️ 复用（位置不变）：${same.join(', ')}</div>`;
+        if (moved.length)
+          html += `<div class="diff-same" style="color:var(--color-warning)">↕️ 移动（key 相同位置变）：${moved.join(', ')}</div>`;
+        if (removed.length) html += `<div class="diff-old">➖ 删除（旧有新无）：${removed.join(', ')}</div>`;
+        if (added.length) html += `<div class="diff-new">➕ 新增（旧无新有）：${added.join(', ')}</div>`;
+
+        // 操作步骤
+        html += '<hr style="border-color:var(--color-border);margin:0.5rem 0">';
+        html +=
+          '<div style="color:var(--color-text-muted);font-size:0.75rem;margin-bottom:0.25rem">DOM 操作步骤（有 key 优化）：</div>';
+        removed.forEach((v) => {
+          html += `<div class="diff-old">removeChild(${v})</div>`;
+        });
+        added.forEach((v) => {
+          html += `<div class="diff-new">appendChild(${v})</div>`;
+        });
+        moved.forEach((v) => {
+          html += `<div class="diff-same" style="color:var(--color-warning)">insertBefore(${v}, ...)</div>`;
+        });
+        if (!removed.length && !added.length && !moved.length) {
+          html += '<div class="diff-same" style="color:var(--color-secondary)">✅ 无需 DOM 操作，完全复用</div>';
+        }
+        out.innerHTML = html;
+      }
+
+      // ============================================================
+      // Mini Vue2 完整实现
+      // ============================================================
+      function proxy(vm, data) {
+        Object.keys(data).forEach((key) => {
+          Object.defineProperty(vm, key, {
+            get() {
+              return data[key];
+            },
+            set(v) {
+              data[key] = v;
+            },
+          });
+        });
+      }
+
+      class MiniVue2 {
+        constructor(options) {
+          this.$options = options;
+          this.$data = typeof options.data === 'function' ? options.data() : options.data;
+          observe(this.$data);
+          proxy(this, this.$data);
+
+          // methods
+          if (options.methods) {
+            Object.keys(options.methods).forEach((k) => {
+              this[k] = options.methods[k].bind(this);
+            });
+          }
+          // computed
+          if (options.computed) {
+            Object.keys(options.computed).forEach((key) => {
+              const watcher = new Watcher(this, options.computed[key].bind(this), () => {}, { lazy: true });
+              Object.defineProperty(this, key, {
+                get() {
+                  if (watcher.dirty) watcher.evaluate();
+                  return watcher.value;
+                },
+              });
+            });
+          }
+          // watch
+          if (options.watch) {
+            Object.keys(options.watch).forEach((key) => {
+              new Watcher(this, key, options.watch[key].bind(this));
+            });
+          }
+
+          options.created?.call(this);
+          this._renderWatcher = new Watcher(
+            this,
+            () => {
+              const vnode = options.render.call(this, h);
+              return vnode;
+            },
+            (newVnode, oldVnode) => {
+              this._patch(oldVnode, newVnode);
+              this._vnode = newVnode;
+            }
+          );
+          this._vnode = this._renderWatcher.value;
+          this._mount();
+        }
+        _mount() {
+          const container = document.getElementById(this.$options.el.replace('#', ''));
+          if (container) {
+            container.innerHTML = '';
+            container.appendChild(createEl(this._vnode));
+          }
+        }
+        _patch(oldVnode, newVnode) {
+          // 完整替换：重新创建 DOM 并替换旧节点
+          // 这样可保证事件处理函数始终是最新的绑定
+          if (oldVnode._el && oldVnode._el.parentNode) {
+            const newEl = createEl(newVnode);
+            oldVnode._el.parentNode.replaceChild(newEl, oldVnode._el);
+          } else {
+            // 降级：重新挂载
+            this._mount();
+          }
+        }
+      }
+
+      // 启动 Mini Vue2（与第 5 节代码块数据一致：count, name, doubleCount, greeting）
+      const app = new MiniVue2({
+        el: '#miniVue2App',
+        data() {
+          return { count: 0, name: 'Alice' };
+        },
+        computed: {
+          doubleCount() {
+            return this.count * 2;
+          },
+          greeting() {
+            return `Hello, ${this.name}!`;
+          },
+        },
+        watch: {
+          count(newVal, oldVal) {
+            const d = document.createElement('div');
+            d.className = 'result';
+            d.textContent = `[Watch] count: ${oldVal} → ${newVal}`;
+            document.getElementById('miniVue2Log').appendChild(d);
+          },
+        },
+        methods: {
+          increment() {
+            this.count++;
+          },
+          setName(name) {
+            this.name = name;
+          },
+        },
+        created() {
+          const d = document.createElement('div');
+          d.className = 'info';
+          d.textContent = '[created] Mini Vue2 实例已创建';
+          document.getElementById('miniVue2Log').appendChild(d);
+        },
+        render(h) {
+          return h(
+            'div',
+            { style: 'font-size:0.875rem' },
+            h('div', { style: 'margin-bottom:0.75rem;color:#8892b0' }, this.greeting),
+            h(
+              'div',
+              { style: 'display:flex;gap:0.5rem;align-items:center;margin-bottom:0.75rem;flex-wrap:wrap' },
+              h(
+                'button',
+                {
+                  onclick: this.increment.bind(this),
+                  style:
+                    'background:#6c63ff;color:#fff;border:none;padding:0.35rem 0.75rem;border-radius:4px;cursor:pointer;font-size:0.8rem',
+                },
+                '+1'
+              ),
+              h(
+                'span',
+                { style: 'color:#e2e8f0;font-weight:700;font-size:1.1rem;min-width:30px;text-align:center' },
+                String(this.count)
+              ),
+              h('span', { style: 'color:#ffd166;font-size:0.8rem' }, `computed doubleCount = ${this.doubleCount}`)
+            ),
+            h(
+              'div',
+              { style: 'display:flex;gap:0.5rem;align-items:center;margin-top:0.5rem;flex-wrap:wrap' },
+              h('span', { style: 'color:#8892b0;font-size:0.8rem' }, `name: ${this.name}`),
+              h(
+                'button',
+                {
+                  onclick: () => this.setName(this.name === 'Alice' ? 'Bob' : 'Alice'),
+                  style:
+                    'background:rgba(0,212,170,0.2);color:#00d4aa;border:1px solid rgba(0,212,170,0.3);padding:0.2rem 0.5rem;border-radius:4px;cursor:pointer;font-size:0.75rem',
+                },
+                '切换 name'
+              )
+            )
+          );
+        },
+      });
+
   </script>
-</body>
+
+    <div class="page-wrapper" style="padding-top: 0">
+      <!-- 官方文档参考 -->
+      <section class="section">
+        <h2 class="section-title">官方文档 &amp; 延伸阅读</h2>
+        <div class="card">
+          <div class="callout info">Vue2 已进入维护模式，建议结合 Vue3 对比学习，理解响应式演进。</div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>主题</th>
+                  <th>链接</th>
+                  <th>说明</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr>
+                  <td>Vue2 响应式原理</td>
+                  <td>
+                    <a href="https://v2.cn.vuejs.org/v2/guide/reactivity.html" target="_blank">
+                      v2.cn.vuejs.org — 深入响应式原理
+                    </a>
+                  </td>
+                  <td>官方对 defineProperty 响应式的详细说明</td>
+                </tr>
+                <tr>
+                  <td>Vue.set / $set</td>
+                  <td>
+                    <a href="https://v2.cn.vuejs.org/v2/api/#Vue-set" target="_blank">v2.cn.vuejs.org — Vue.set API</a>
+                  </td>
+                  <td>解决新增属性不响应的官方方案</td>
+                </tr>
+                <tr>
+                  <td>数组变更方法</td>
+                  <td>
+                    <a
+                      href="https://v2.cn.vuejs.org/v2/guide/list.html#%E5%8F%98%E5%BC%82%E6%96%B9%E6%B3%95"
+                      target="_blank"
+                    >
+                      v2.cn.vuejs.org — 数组变更方法
+                    </a>
+                  </td>
+                  <td>Vue2 为什么要重写数组方法</td>
+                </tr>
+                <tr>
+                  <td>Vue2 源码</td>
+                  <td>
+                    <a href="https://github.com/vuejs/vue/tree/dev/src/core/observer" target="_blank">
+                      github.com/vuejs/vue — core/observer
+                    </a>
+                  </td>
+                  <td>Dep / Watcher / Observer 原始实现</td>
+                </tr>
+                <tr>
+                  <td>Vue2 vs Vue3 迁移</td>
+                  <td><a href="https://v3-migration.vuejs.org/zh/" target="_blank">v3-migration.vuejs.org</a></td>
+                  <td>官方迁移指南，含响应式变化说明</td>
+                </tr>
+                <tr>
+                  <td>虚拟 DOM 与 diff</td>
+                  <td>
+                    <a href="https://v2.cn.vuejs.org/v2/guide/render-function.html" target="_blank">
+                      v2.cn.vuejs.org — 渲染函数
+                    </a>
+                  </td>
+                  <td>VNode 结构与 h 函数说明</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
 </html>

@@ -132,6 +132,19 @@
         background: rgba(66, 184, 131, 0.25);
       }
 
+      .mm-algo .mm-root {
+        background: linear-gradient(135deg, rgba(255, 165, 0, 0.15), rgba(255, 100, 0, 0.08));
+        border: 1px solid rgba(255, 165, 0, 0.3);
+        color: #f5a623;
+      }
+      .mm-algo .mm-root-count {
+        background: rgba(255, 165, 0, 0.2);
+        color: #f5a623;
+      }
+      .mm-algo .mm-branch::before {
+        background: rgba(255, 165, 0, 0.25);
+      }
+
       .mm-exam .mm-root {
         background: linear-gradient(135deg, rgba(255, 101, 132, 0.15), rgba(255, 209, 102, 0.08));
         border: 1px solid rgba(255, 101, 132, 0.3);
@@ -205,6 +218,9 @@
       }
       .mm-fw .mm-chapter::before {
         background: rgba(66, 184, 131, 0.25);
+      }
+      .mm-algo .mm-chapter::before {
+        background: rgba(255, 165, 0, 0.25);
       }
       .mm-exam .mm-chapter::before {
         background: rgba(255, 101, 132, 0.25);
@@ -287,6 +303,9 @@
       }
       .mm-fw .mm-leaf-dot {
         background: rgba(66, 184, 131, 0.6);
+      }
+      .mm-algo .mm-leaf-dot {
+        background: rgba(255, 165, 0, 0.6);
       }
       .mm-exam .mm-leaf-dot {
         background: rgba(255, 101, 132, 0.6);
@@ -969,6 +988,82 @@
           </div>
         </div>
       </div>
+      <!-- ═══════════ 前端算法 ═══════════ -->
+      <div class="mm-category mm-algo">
+        <div class="mm-root">
+          <span class="mm-root-icon">⚡</span>
+          <span class="mm-root-label">前端算法</span>
+          <span class="mm-root-count">1 章 · 10 节</span>
+        </div>
+        <div class="mm-branches">
+          <div class="mm-branch">
+            <a href="pages/js-algorithms.html" class="mm-chapter">
+              <span class="mm-chapter-icon">🧮</span>
+              <span class="mm-chapter-name">前端常用算法</span>
+              <span class="mm-chapter-arrow">→</span>
+            </a>
+            <div class="mm-leaves">
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">查找算法</span>
+                <span class="mm-leaf-desc">— 线性 O(n)、二分 O(log n)、哈希 O(1)、两数之和</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">排序算法</span>
+                <span class="mm-leaf-desc">— 快排/归并 O(n log n)、多字段稳定排序</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">树与图遍历</span>
+                <span class="mm-leaf-desc">— DFS/BFS、路径查找、扁平↔树互转 O(n)</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">懒加载与虚拟列表</span>
+                <span class="mm-leaf-desc">— IntersectionObserver、固定行高虚拟列表、分批渲染 rAF</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">动态规划</span>
+                <span class="mm-leaf-desc">— LIS O(n log n)、编辑距离、最大子数组、背包问题</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">字符串处理</span>
+                <span class="mm-leaf-desc">— 滑动窗口、模板引擎、URL 解析、高亮关键词、金额格式化</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">LRU 缓存</span>
+                <span class="mm-leaf-desc">— Map 实现 O(1) get/set、Memoize 记忆化、TTL 过期缓存</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">并发控制与调度</span>
+                <span class="mm-leaf-desc">— p-limit 并发限制、串行队列、最小堆优先级调度</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">递归与分治</span>
+                <span class="mm-leaf-desc">— 深拷贝（循环引用）、树形过滤、全排列回溯</span>
+                <span class="mm-leaf-badge badge-interview">面试</span>
+              </div>
+              <div class="mm-leaf">
+                <span class="mm-leaf-dot"></span>
+                <span class="mm-leaf-name">复杂度速查表</span>
+                <span class="mm-leaf-desc">— 15 种算法时间/空间复杂度及前端应用场景对照</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
       <!-- ═══════════ 面试题库 ═══════════ -->
       <div class="mm-category mm-exam">
         <div class="mm-root">

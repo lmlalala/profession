@@ -1,0 +1,1072 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>前端常用算法</title>
+    <link rel="stylesheet" href="../css/common.css" />
+    <script type="module" src="../js/nav.js"></script>
+    <script type="module" src="../js/code-editor.js"></script>
+  </head>
+  <body>
+    <nav class="nav"></nav>
+
+    <div class="page-wrapper">
+      <h1 class="page-title">前端常用算法</h1>
+      <p class="page-subtitle">查找 · 排序 · 树与图遍历 · 懒加载 · 动态规划 · 字符串处理 · 实战场景</p>
+
+      <!-- 1. 查找算法 -->
+      <section class="section">
+        <h2 class="section-title">1. 查找算法 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <p class="card-desc">前端最常用的查找场景：线性查找（列表过滤）、二分查找（有序数据快速定位）、哈希查找（O(1) 键值映射）。</p>
+          <div class="callout tip">
+            <strong>核心口诀</strong>：无序用线性 O(n)，有序用二分 O(log n)，键值对用哈希 O(1)。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 线性查找 ───────────────────────────────────────────────
+/**
+ * 在数组中查找满足条件的第一个元素（等价于 Array.prototype.find）
+ * @param {any[]} arr - 目标数组
+ * @param {Function} predicate - 判断函数
+ * @returns {any|undefined}
+ */
+function linearSearch(arr, predicate) {
+  for (let i = 0; i &lt; arr.length; i++) {
+    if (predicate(arr[i])) return arr[i];
+  }
+  return undefined;
+}
+
+const users = [
+  { id: 1, name: 'Alice', role: 'admin' },
+  { id: 2, name: 'Bob',   role: 'user'  },
+  { id: 3, name: 'Carol', role: 'user'  },
+];
+console.log('线性查找 id=2:', linearSearch(users, u => u.id === 2));
+
+// ─── 2. 二分查找 ───────────────────────────────────────────────
+/**
+ * 在升序数组中查找目标值的索引，找不到返回 -1
+ * 时间复杂度 O(log n)，前端常用于有序 ID 列表、分页数据快速定位
+ * @param {number[]} arr - 升序数组
+ * @param {number} target - 目标值
+ * @returns {number} 索引或 -1
+ */
+function binarySearch(arr, target) {
+  let lo = 0, hi = arr.length - 1;
+  while (lo &lt;= hi) {
+    const mid = (lo + hi) >> 1;
+    if (arr[mid] === target) return mid;
+    if (arr[mid] &lt; target) lo = mid + 1;
+    else hi = mid - 1;
+  }
+  return -1;
+}
+
+const ids = [1, 3, 5, 7, 9, 11, 13, 15];
+console.log('二分查找 7 的索引:', binarySearch(ids, 7));   // 3
+console.log('二分查找 6 的索引:', binarySearch(ids, 6));   // -1
+
+// ─── 3. 哈希查找（Map 实现 O(1) 查询）─────────────────────────
+/**
+ * 构建 id→对象 的哈希映射，O(1) 查找
+ * 实际场景：大列表渲染后，用 Map 缓存避免每次 find 遍历
+ */
+const userMap = new Map(users.map(u => [u.id, u]));
+console.log('哈希查找 id=3:', userMap.get(3));
+
+// ─── 4. 实战：两数之和（哈希表）──────────────────────────────
+/**
+ * 给定整数数组 nums 和目标值 target，返回两个下标使其和等于 target
+ * @param {number[]} nums
+ * @param {number} target
+ * @returns {number[]}
+ */
+function twoSum(nums, target) {
+  const seen = new Map(); // value → index
+  for (let i = 0; i &lt; nums.length; i++) {
+    const complement = target - nums[i];
+    if (seen.has(complement)) return [seen.get(complement), i];
+    seen.set(nums[i], i);
+  }
+  return [];
+}
+console.log('两数之和 [2,7,11,15] target=9:', twoSum([2, 7, 11, 15], 9)); // [0,1]
+          </div>
+        </div>
+      </section>
+
+      <!-- 2. 排序算法 -->
+      <section class="section">
+        <h2 class="section-title">2. 排序算法 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <p class="card-desc">前端实际项目中排序场景：表格列排序、商品价格/评分排序、树节点排序。掌握快排和归并排序即可覆盖 90% 场景。</p>
+          <div class="callout tip">
+            <strong>选择建议</strong>：① 小数据量（&lt;1000）→ 直接用 <code>Array.sort</code>；② 需要稳定排序 → 归并排序；③ 平均性能最优 → 快速排序。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 快速排序 ───────────────────────────────────────────────
+/**
+ * 快速排序：选基准值，分区递归，平均 O(n log n)
+ * 前端场景：大量数据排序、手写面试题
+ * @param {number[]} arr
+ * @returns {number[]}
+ */
+function quickSort(arr) {
+  if (arr.length &lt;= 1) return arr;
+  const pivot = arr[Math.floor(arr.length / 2)];
+  const left  = arr.filter(x => x &lt; pivot);
+  const mid   = arr.filter(x => x === pivot);
+  const right = arr.filter(x => x > pivot);
+  return [...quickSort(left), ...mid, ...quickSort(right)];
+}
+console.log('快速排序:', quickSort([3, 6, 8, 10, 1, 2, 1]));
+
+// ─── 2. 归并排序（稳定）────────────────────────────────────────
+/**
+ * 归并排序：分治合并，稳定，O(n log n)
+ * 前端场景：需要稳定排序时（如多字段排序保持原有顺序）
+ * @param {any[]} arr
+ * @param {Function} compareFn - 比较函数，默认升序
+ * @returns {any[]}
+ */
+function mergeSort(arr, compareFn = (a, b) => a - b) {
+  if (arr.length &lt;= 1) return arr;
+  const mid = arr.length >> 1;
+  const left  = mergeSort(arr.slice(0, mid), compareFn);
+  const right = mergeSort(arr.slice(mid), compareFn);
+  return merge(left, right, compareFn);
+}
+function merge(left, right, compareFn) {
+  const result = [];
+  let i = 0, j = 0;
+  while (i &lt; left.length &amp;&amp; j &lt; right.length) {
+    result.push(compareFn(left[i], right[j]) &lt;= 0 ? left[i++] : right[j++]);
+  }
+  return [...result, ...left.slice(i), ...right.slice(j)];
+}
+const products = [
+  { name: 'A', price: 50 },
+  { name: 'B', price: 20 },
+  { name: 'C', price: 80 },
+  { name: 'D', price: 20 }, // 与 B 同价，稳定排序保持 B 在 D 前
+];
+const sorted = mergeSort(products, (a, b) => a.price - b.price);
+console.log('归并排序（按价格）:', sorted.map(p => `${p.name}:${p.price}`));
+
+// ─── 3. 实战：多字段排序 ───────────────────────────────────────
+/**
+ * 多字段排序：先按 score 降序，相同时按 name 升序
+ * 实际场景：排行榜、表格多列排序
+ */
+const players = [
+  { name: 'Alice', score: 90 },
+  { name: 'Bob',   score: 85 },
+  { name: 'Carol', score: 90 },
+  { name: 'Dave',  score: 85 },
+];
+players.sort((a, b) => b.score - a.score || a.name.localeCompare(b.name));
+console.log('多字段排序:', players.map(p => `${p.name}(${p.score})`));
+          </div>
+        </div>
+      </section>
+
+      <!-- 3. 树与图遍历 -->
+      <section class="section">
+        <h2 class="section-title">3. 树与图遍历 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <p class="card-desc">前端最常见的树结构：DOM 树、菜单树、组织架构树、路由树。掌握 DFS（深度优先）和 BFS（广度优先）即可处理所有树形数据。</p>
+          <div class="callout tip">
+            <strong>选择建议</strong>：① 查找某节点 / 路径 → DFS；② 按层处理（如虚拟列表分层渲染）→ BFS；③ 扁平↔树互转 → 哈希表 O(n)。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// 模拟菜单树数据
+const menuTree = {
+  id: 1, name: '根节点',
+  children: [
+    {
+      id: 2, name: '前端',
+      children: [
+        { id: 4, name: 'Vue', children: [] },
+        { id: 5, name: 'React', children: [] },
+      ],
+    },
+    {
+      id: 3, name: '后端',
+      children: [
+        { id: 6, name: 'Node.js', children: [] },
+      ],
+    },
+  ],
+};
+
+// ─── 1. DFS 深度优先（递归）────────────────────────────────────
+/**
+ * 深度优先遍历树，收集所有节点名称
+ * @param {object} node - 树节点
+ * @param {string[]} result
+ */
+function dfs(node, result = []) {
+  result.push(node.name);
+  for (const child of (node.children || [])) {
+    dfs(child, result);
+  }
+  return result;
+}
+console.log('DFS 遍历:', dfs(menuTree));
+
+// ─── 2. BFS 广度优先（队列）────────────────────────────────────
+/**
+ * 广度优先遍历树，按层收集节点
+ * @param {object} root
+ * @returns {string[][]} 每层节点名称
+ */
+function bfs(root) {
+  const levels = [];
+  const queue = [root];
+  while (queue.length) {
+    const levelSize = queue.length;
+    const level = [];
+    for (let i = 0; i &lt; levelSize; i++) {
+      const node = queue.shift();
+      level.push(node.name);
+      for (const child of (node.children || [])) queue.push(child);
+    }
+    levels.push(level);
+  }
+  return levels;
+}
+console.log('BFS 按层:', bfs(menuTree));
+
+// ─── 3. 查找节点（DFS 返回路径）──────────────────────────────
+/**
+ * 在树中查找目标 id，返回从根到目标的路径
+ * 实际场景：面包屑导航、树形选择器回显
+ * @param {object} node
+ * @param {number} targetId
+ * @param {string[]} path
+ * @returns {string[]|null}
+ */
+function findPath(node, targetId, path = []) {
+  path.push(node.name);
+  if (node.id === targetId) return path;
+  for (const child of (node.children || [])) {
+    const result = findPath(child, targetId, [...path]);
+    if (result) return result;
+  }
+  return null;
+}
+console.log('查找 id=5 的路径:', findPath(menuTree, 5));
+
+// ─── 4. 扁平数组 → 树（哈希表 O(n)）─────────────────────────
+/**
+ * 将后端返回的扁平列表转换为树结构
+ * 实际场景：权限菜单、部门树、分类树
+ * @param {object[]} list - 含 id/pid 的扁平数组
+ * @returns {object[]} 根节点数组
+ */
+function listToTree(list) {
+  const map = new Map(list.map(item => [item.id, { ...item, children: [] }]));
+  const roots = [];
+  for (const item of map.values()) {
+    const parent = map.get(item.pid);
+    parent ? parent.children.push(item) : roots.push(item);
+  }
+  return roots;
+}
+const flatList = [
+  { id: 1, pid: null, name: '根' },
+  { id: 2, pid: 1,    name: '前端' },
+  { id: 3, pid: 1,    name: '后端' },
+  { id: 4, pid: 2,    name: 'Vue' },
+  { id: 5, pid: 2,    name: 'React' },
+];
+const tree = listToTree(flatList);
+console.log('扁平→树:', JSON.stringify(tree, null, 2));
+          </div>
+        </div>
+      </section>
+
+      <!-- 4. 懒加载与虚拟列表 -->
+      <section class="section">
+        <h2 class="section-title">4. 懒加载与虚拟列表 <span class="tag-badge">前端实战</span></h2>
+        <div class="card">
+          <p class="card-desc">懒加载（Lazy Load）和虚拟列表（Virtual List）是前端性能优化的核心手段，本质上都是"按需渲染"。</p>
+          <div class="callout tip">
+            <strong>核心思路</strong>：① 图片/组件懒加载 → <code>IntersectionObserver</code>；② 长列表 → 虚拟列表，只渲染可视区域内的条目；③ 分页数据 → 滚动触底加载。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 懒加载核心：IntersectionObserver ──────────────────────
+/**
+ * 图片懒加载：元素进入视口时才加载真实资源
+ * 实际场景：商品图片、Feed 流图片、无限滚动
+ * @param {string} selector - 需要懒加载的元素选择器
+ */
+function lazyLoad(selector = '[data-src]') {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (!entry.isIntersecting) return;
+      const el = entry.target;
+      el.src = el.dataset.src;   // 替换为真实 src
+      el.removeAttribute('data-src');
+      observer.unobserve(el);    // 加载后取消观察
+    });
+  }, { rootMargin: '100px' });   // 提前 100px 开始加载
+
+  document.querySelectorAll(selector).forEach(el => observer.observe(el));
+}
+// 模拟调用（浏览器环境）
+console.log('lazyLoad 函数已定义，在浏览器中调用 lazyLoad() 即可');
+
+// ─── 2. 虚拟列表核心算法 ──────────────────────────────────────
+/**
+ * 固定行高虚拟列表：计算可视区域内应渲染的条目范围
+ * 实际场景：10万条日志、大量表格行、聊天记录
+ *
+ * @param {object} config
+ * @param {number} config.scrollTop   - 当前滚动位置
+ * @param {number} config.viewHeight  - 容器可视高度
+ * @param {number} config.itemHeight  - 每行高度（固定）
+ * @param {number} config.total       - 总数据条数
+ * @param {number} [config.buffer=3]  - 上下缓冲条数（防止白屏）
+ * @returns {{ startIndex: number, endIndex: number, offsetY: number }}
+ */
+function calcVirtualRange({ scrollTop, viewHeight, itemHeight, total, buffer = 3 }) {
+  const startIndex = Math.max(0, Math.floor(scrollTop / itemHeight) - buffer);
+  const visibleCount = Math.ceil(viewHeight / itemHeight);
+  const endIndex = Math.min(total - 1, startIndex + visibleCount + buffer * 2);
+  const offsetY = startIndex * itemHeight; // 用 transform 偏移撑起滚动高度
+  return { startIndex, endIndex, offsetY };
+}
+
+// 模拟：容器高 500px，每行 50px，共 10000 条，滚动到 2000px
+const range = calcVirtualRange({
+  scrollTop: 2000,
+  viewHeight: 500,
+  itemHeight: 50,
+  total: 10000,
+});
+console.log('虚拟列表范围:', range);
+// → { startIndex: 37, endIndex: 53, offsetY: 1850 }
+
+// ─── 3. 滚动触底加载（分页）──────────────────────────────────
+/**
+ * 检测是否滚动到底部（含阈值）
+ * @param {number} threshold - 距底部多少 px 触发（默认 100）
+ * @returns {boolean}
+ */
+function isNearBottom(threshold = 100) {
+  const { scrollTop, scrollHeight, clientHeight } = document.documentElement;
+  return scrollTop + clientHeight >= scrollHeight - threshold;
+}
+
+// 节流版本（防止频繁触发）
+function onScrollLoad(loadMore, threshold = 100) {
+  let loading = false;
+  return async function handleScroll() {
+    if (loading || !isNearBottom(threshold)) return;
+    loading = true;
+    await loadMore();
+    loading = false;
+  };
+}
+console.log('滚动触底加载函数已定义');
+
+// ─── 4. 分批渲染（requestAnimationFrame）────────────────────
+/**
+ * 将大量 DOM 插入分批到每帧执行，避免长任务阻塞主线程
+ * 实际场景：一次性渲染 1000+ 列表项
+ * @param {any[]} items - 数据数组
+ * @param {Function} renderItem - 渲染单个条目的函数
+ * @param {number} batchSize - 每帧渲染条数
+ */
+function batchRender(items, renderItem, batchSize = 20) {
+  let index = 0;
+  function renderBatch() {
+    const end = Math.min(index + batchSize, items.length);
+    for (; index &lt; end; index++) renderItem(items[index], index);
+    if (index &lt; items.length) requestAnimationFrame(renderBatch);
+  }
+  requestAnimationFrame(renderBatch);
+}
+console.log('分批渲染函数已定义，适合 1000+ 条目的初始化渲染');
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. 动态规划 -->
+      <section class="section">
+        <h2 class="section-title">5. 动态规划 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <p class="card-desc">动态规划（DP）在前端中的实际应用：最长递增子序列（Vue3 diff）、编辑距离（模糊搜索）、背包问题（资源配额）、最大子数组（数据分析）。</p>
+          <div class="callout tip">
+            <strong>解题模板</strong>：① 定义状态 dp[i]；② 找状态转移方程；③ 确定初始值；④ 确定遍历顺序。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 最长递增子序列（LIS）O(n log n) ──────────────────────
+/**
+ * 求数组的最长递增子序列长度（Vue3 diff 核心算法）
+ * 贪心 + 二分查找，O(n log n)
+ * @param {number[]} nums
+ * @returns {number[]} LIS 的元素索引数组
+ */
+function getLIS(nums) {
+  const n = nums.length;
+  const dp = new Array(n).fill(1);    // dp[i]: 以 nums[i] 结尾的 LIS 长度
+  const parent = new Array(n).fill(-1); // 记录前驱，用于回溯路径
+  const tails = [];                   // tails[i]: 长度为 i+1 的 LIS 的最小末尾值的索引
+
+  for (let i = 0; i &lt; n; i++) {
+    let lo = 0, hi = tails.length;
+    while (lo &lt; hi) {
+      const mid = (lo + hi) >> 1;
+      nums[tails[mid]] &lt; nums[i] ? (lo = mid + 1) : (hi = mid);
+    }
+    tails[lo] = i;
+    dp[i] = lo + 1;
+    if (lo > 0) parent[i] = tails[lo - 1];
+  }
+
+  // 回溯得到 LIS 的索引序列
+  let maxLen = Math.max(...dp);
+  let idx = dp.lastIndexOf(maxLen);
+  const result = [];
+  while (idx !== -1) {
+    result.unshift(idx);
+    idx = parent[idx];
+  }
+  return result;
+}
+
+const arr = [3, 5, 6, 2, 5, 4, 19, 5, 6, 7, 12];
+const lisIdx = getLIS(arr);
+console.log('LIS 索引:', lisIdx);
+console.log('LIS 值:  ', lisIdx.map(i => arr[i]));
+
+// ─── 2. 编辑距离（Levenshtein Distance）──────────────────────
+/**
+ * 计算两个字符串的最小编辑距离（插入/删除/替换各算 1 步）
+ * 实际场景：模糊搜索相似度、拼写纠错、diff 工具
+ * @param {string} s
+ * @param {string} t
+ * @returns {number}
+ */
+function editDistance(s, t) {
+  const m = s.length, n = t.length;
+  // dp[i][j]: s 前 i 个字符变成 t 前 j 个字符的最少操作数
+  const dp = Array.from({ length: m + 1 }, (_, i) =>
+    Array.from({ length: n + 1 }, (_, j) => (i === 0 ? j : j === 0 ? i : 0))
+  );
+  for (let i = 1; i &lt;= m; i++) {
+    for (let j = 1; j &lt;= n; j++) {
+      if (s[i - 1] === t[j - 1]) {
+        dp[i][j] = dp[i - 1][j - 1];
+      } else {
+        dp[i][j] = 1 + Math.min(dp[i - 1][j], dp[i][j - 1], dp[i - 1][j - 1]);
+      }
+    }
+  }
+  return dp[m][n];
+}
+console.log('编辑距离 "kitten"→"sitting":', editDistance('kitten', 'sitting')); // 3
+console.log('编辑距离 "vue"→"vues":', editDistance('vue', 'vues'));             // 1
+
+// ─── 3. 最大子数组和（Kadane 算法）────────────────────────────
+/**
+ * 求连续子数组的最大和
+ * 实际场景：股票最大收益、数据分析中的最优区间
+ * @param {number[]} nums
+ * @returns {{ maxSum: number, start: number, end: number }}
+ */
+function maxSubArray(nums) {
+  let maxSum = nums[0], curSum = nums[0];
+  let start = 0, end = 0, tempStart = 0;
+  for (let i = 1; i &lt; nums.length; i++) {
+    if (curSum &lt; 0) { curSum = nums[i]; tempStart = i; }
+    else curSum += nums[i];
+    if (curSum > maxSum) { maxSum = curSum; start = tempStart; end = i; }
+  }
+  return { maxSum, start, end, subArr: nums.slice(start, end + 1) };
+}
+console.log('最大子数组:', maxSubArray([-2, 1, -3, 4, -1, 2, 1, -5, 4]));
+
+// ─── 4. 0/1 背包问题 ──────────────────────────────────────────
+/**
+ * 0/1 背包：在容量限制内选取物品使总价值最大
+ * 实际场景：资源预算分配、广告位选择、模块按需加载
+ * @param {number[]} weights - 物品重量
+ * @param {number[]} values  - 物品价值
+ * @param {number} capacity  - 背包容量
+ * @returns {number} 最大价值
+ */
+function knapsack(weights, values, capacity) {
+  const n = weights.length;
+  const dp = new Array(capacity + 1).fill(0);
+  for (let i = 0; i &lt; n; i++) {
+    // 从右往左遍历，防止同一物品被重复选取
+    for (let w = capacity; w >= weights[i]; w--) {
+      dp[w] = Math.max(dp[w], dp[w - weights[i]] + values[i]);
+    }
+  }
+  return dp[capacity];
+}
+console.log('背包最大价值:', knapsack([2, 3, 4, 5], [3, 4, 5, 6], 8)); // 10
+          </div>
+        </div>
+      </section>
+
+      <!-- 6. 字符串处理 -->
+      <section class="section">
+        <h2 class="section-title">6. 字符串处理算法 <span class="tag-badge">前端实战</span></h2>
+        <div class="card">
+          <p class="card-desc">前端高频字符串场景：模板解析、URL 处理、高亮搜索词、格式化金额/日期、字符串压缩。</p>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 滑动窗口：最长不重复子串 ─────────────────────────────
+/**
+ * 求字符串中最长不含重复字符的子串长度
+ * 实际场景：用户名/密码强度检测、Token 解析
+ * @param {string} s
+ * @returns {{ length: number, substr: string }}
+ */
+function lengthOfLongestSubstring(s) {
+  const map = new Map(); // char → 最新索引
+  let maxLen = 0, start = 0, bestStart = 0;
+  for (let i = 0; i &lt; s.length; i++) {
+    if (map.has(s[i]) &amp;&amp; map.get(s[i]) >= start) {
+      start = map.get(s[i]) + 1;
+    }
+    map.set(s[i], i);
+    if (i - start + 1 > maxLen) { maxLen = i - start + 1; bestStart = start; }
+  }
+  return { length: maxLen, substr: s.slice(bestStart, bestStart + maxLen) };
+}
+console.log('最长不重复子串 "abcabcbb":', lengthOfLongestSubstring('abcabcbb'));
+console.log('最长不重复子串 "pwwkew":', lengthOfLongestSubstring('pwwkew'));
+
+// ─── 2. 模板字符串解析 ────────────────────────────────────────
+/**
+ * 简单模板引擎：替换 {{key}} 占位符
+ * 实际场景：邮件模板、消息通知、低代码平台
+ * @param {string} template
+ * @param {object} data
+ * @returns {string}
+ */
+function renderTemplate(template, data) {
+  return template.replace(/\{\{(\w+)\}\}/g, (_, key) => data[key] ?? `{{${key}}}`);
+}
+console.log(renderTemplate('Hello, {{name}}！你有 {{count}} 条消息。', { name: 'Alice', count: 3 }));
+
+// ─── 3. URL 参数解析 ──────────────────────────────────────────
+/**
+ * 解析 URL 查询字符串为对象
+ * 实际场景：路由参数处理、分享链接解析
+ * @param {string} search - 如 "?page=2&size=10&tag=vue"
+ * @returns {object}
+ */
+function parseQuery(search) {
+  return Object.fromEntries(new URLSearchParams(search));
+}
+console.log('解析 URL 参数:', parseQuery('?page=2&amp;size=10&amp;tag=vue'));
+
+// ─── 4. 高亮搜索关键词 ────────────────────────────────────────
+/**
+ * 在文本中高亮所有匹配的关键词（返回 HTML 字符串）
+ * 实际场景：搜索结果高亮、关键词标注
+ * @param {string} text
+ * @param {string} keyword
+ * @returns {string} 含 &lt;mark&gt; 标签的 HTML
+ */
+function highlightKeyword(text, keyword) {
+  if (!keyword) return text;
+  const escaped = keyword.replace(/[.*+?^${}()|[\]\\]/g, '\\$&amp;');
+  return text.replace(new RegExp(escaped, 'gi'), m => `&lt;mark&gt;${m}&lt;/mark&gt;`);
+}
+console.log('高亮关键词:', highlightKeyword('前端 Vue React 框架', 'react'));
+
+// ─── 5. 金额格式化 ────────────────────────────────────────────
+/**
+ * 将数字格式化为千分位金额字符串
+ * 实际场景：支付金额、财务报表、价格展示
+ * @param {number} num
+ * @param {number} decimals - 小数位数
+ * @returns {string}
+ */
+function formatAmount(num, decimals = 2) {
+  return num.toLocaleString('zh-CN', {
+    minimumFractionDigits: decimals,
+    maximumFractionDigits: decimals,
+  });
+}
+console.log('金额格式化:', formatAmount(1234567.89));   // 1,234,567.89
+console.log('金额格式化:', formatAmount(9999999, 0));   // 9,999,999
+
+// ─── 6. 字符串压缩（Run-Length Encoding）────────────────────
+/**
+ * 游程编码：连续相同字符压缩为 "字符+次数"
+ * 实际场景：日志压缩、简单数据序列化
+ * @param {string} s
+ * @returns {string}
+ */
+function compress(s) {
+  return s.replace(/(.)\1+/g, (match, char) => char + match.length) || s;
+}
+function decompress(s) {
+  return s.replace(/([a-zA-Z])(\d+)/g, (_, char, count) => char.repeat(+count));
+}
+const compressed = compress('aaabbbccddddee');
+console.log('压缩:', compressed);                    // a3b3c2d4e2
+console.log('解压:', decompress(compressed));        // aaabbbccddddee
+          </div>
+        </div>
+      </section>
+
+      <!-- 7. 缓存与记忆化 -->
+      <section class="section">
+        <h2 class="section-title">7. 缓存与记忆化 <span class="tag-badge">前端实战</span></h2>
+        <div class="card">
+          <p class="card-desc">缓存是前端性能优化的核心策略：LRU 缓存（最近最少使用）是浏览器缓存、接口缓存的常见实现；Memoize 避免重复计算；WeakMap 防止内存泄漏。</p>
+          <div class="callout tip">
+            <strong>核心思路</strong>：用 <code>Map</code> 保持插入顺序，超出容量时删除最久未使用的条目（Map 的第一个 key）。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. LRU 缓存（Map 实现）──────────────────────────────────
+/**
+ * LRU（最近最少使用）缓存
+ * 实际场景：接口响应缓存、路由组件缓存（keep-alive）、图片缓存
+ */
+class LRUCache {
+  /**
+   * @param {number} capacity - 最大缓存条数
+   */
+  constructor(capacity) {
+    this.capacity = capacity;
+    this.cache = new Map(); // Map 保持插入顺序，最旧的在最前面
+  }
+
+  /**
+   * 获取缓存值，并将其移动到"最近使用"位置
+   * @param {string|number} key
+   * @returns {any} 缓存值或 -1
+   */
+  get(key) {
+    if (!this.cache.has(key)) return -1;
+    const val = this.cache.get(key);
+    this.cache.delete(key);
+    this.cache.set(key, val); // 移到末尾（最近使用）
+    return val;
+  }
+
+  /**
+   * 设置缓存，超出容量时淘汰最久未使用的条目
+   * @param {string|number} key
+   * @param {any} val
+   */
+  set(key, val) {
+    if (this.cache.has(key)) this.cache.delete(key);
+    else if (this.cache.size >= this.capacity) {
+      // Map 的第一个 key 就是最久未使用的
+      this.cache.delete(this.cache.keys().next().value);
+    }
+    this.cache.set(key, val);
+  }
+
+  get size() { return this.cache.size; }
+}
+
+const lru = new LRUCache(3);
+lru.set('a', 1); lru.set('b', 2); lru.set('c', 3);
+console.log('get a:', lru.get('a')); // 1，a 移到最近
+lru.set('d', 4);                     // 淘汰 b（最久未使用）
+console.log('get b:', lru.get('b')); // -1，b 已被淘汰
+console.log('get c:', lru.get('c')); // 3
+console.log('get d:', lru.get('d')); // 4
+
+// ─── 2. Memoize（记忆化缓存）─────────────────────────────────
+/**
+ * 函数记忆化：缓存函数的计算结果，相同参数直接返回缓存
+ * 实际场景：复杂计算（如树的递归）、React useMemo 的手动实现
+ * @param {Function} fn
+ * @param {Function} [resolver] - 自定义缓存 key 生成函数
+ * @returns {Function}
+ */
+function memoize(fn, resolver = (...args) => JSON.stringify(args)) {
+  const cache = new Map();
+  return function (...args) {
+    const key = resolver(...args);
+    if (cache.has(key)) {
+      console.log(`[缓存命中] key=${key}`);
+      return cache.get(key);
+    }
+    const result = fn.apply(this, args);
+    cache.set(key, result);
+    return result;
+  };
+}
+
+// 斐波那契（未优化 O(2^n) → 记忆化 O(n)）
+const fib = memoize(function fibonacci(n) {
+  if (n &lt;= 1) return n;
+  return fib(n - 1) + fib(n - 2);
+});
+console.log('fib(10):', fib(10)); // 55
+console.log('fib(10):', fib(10)); // 缓存命中
+
+// ─── 3. 带过期时间的缓存 ──────────────────────────────────────
+/**
+ * 带 TTL（存活时间）的缓存
+ * 实际场景：接口数据缓存（如 5 分钟内不重复请求）
+ */
+class TTLCache {
+  constructor() { this.store = new Map(); }
+
+  /**
+   * @param {string} key
+   * @param {any} value
+   * @param {number} ttl - 存活毫秒数
+   */
+  set(key, value, ttl) {
+    const expireAt = Date.now() + ttl;
+    this.store.set(key, { value, expireAt });
+  }
+
+  get(key) {
+    const item = this.store.get(key);
+    if (!item) return null;
+    if (Date.now() > item.expireAt) { this.store.delete(key); return null; }
+    return item.value;
+  }
+}
+
+const ttlCache = new TTLCache();
+ttlCache.set('token', 'abc123', 1000); // 1 秒后过期
+console.log('TTL 缓存 get:', ttlCache.get('token')); // 'abc123'
+setTimeout(() => console.log('1.1s 后 get:', ttlCache.get('token')), 1100); // null
+          </div>
+        </div>
+      </section>
+
+      <!-- 8. 并发控制与调度 -->
+      <section class="section">
+        <h2 class="section-title">8. 并发控制与任务调度 <span class="tag-badge">前端实战</span></h2>
+        <div class="card">
+          <p class="card-desc">前端高频场景：限制并发请求数（防止接口过载）、任务队列（顺序执行异步任务）、优先级调度（React Scheduler 核心思想）。</p>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 并发限制（p-limit 核心实现）─────────────────────────
+/**
+ * 限制并发数的异步任务执行器
+ * 实际场景：批量上传文件、并发请求接口（限制最多 N 个同时进行）
+ * @param {number} limit - 最大并发数
+ * @returns {Function} run(fn) - 将任务加入受控队列
+ */
+function createConcurrencyLimit(limit) {
+  let running = 0;
+  const queue = [];
+
+  function next() {
+    if (running >= limit || queue.length === 0) return;
+    running++;
+    const { fn, resolve, reject } = queue.shift();
+    Promise.resolve(fn())
+      .then(resolve, reject)
+      .finally(() => { running--; next(); });
+  }
+
+  /**
+   * @param {Function} fn - 返回 Promise 的异步任务
+   * @returns {Promise}
+   */
+  return function run(fn) {
+    return new Promise((resolve, reject) => {
+      queue.push({ fn, resolve, reject });
+      next();
+    });
+  };
+}
+
+// 模拟：10 个任务，最多 3 个并发
+const run = createConcurrencyLimit(3);
+const mockTask = (id, ms) => () =>
+  new Promise(res => setTimeout(() => { console.log(`任务 ${id} 完成`); res(id); }, ms));
+
+const tasks = [1,2,3,4,5].map(id => run(mockTask(id, 300)));
+Promise.all(tasks).then(results => console.log('所有任务结果:', results));
+
+// ─── 2. 异步任务队列（串行执行）──────────────────────────────
+/**
+ * 串行异步队列：按顺序依次执行，前一个完成后才执行下一个
+ * 实际场景：表单分步提交、动画序列、引导流程
+ */
+class AsyncQueue {
+  constructor() {
+    this.queue = [];
+    this.running = false;
+  }
+
+  /**
+   * 添加任务到队列
+   * @param {Function} task - 返回 Promise 的函数
+   * @returns {this}
+   */
+  add(task) {
+    this.queue.push(task);
+    if (!this.running) this._run();
+    return this;
+  }
+
+  async _run() {
+    this.running = true;
+    while (this.queue.length > 0) {
+      const task = this.queue.shift();
+      await task();
+    }
+    this.running = false;
+  }
+}
+
+const aq = new AsyncQueue();
+aq.add(() => new Promise(r => setTimeout(() => { console.log('串行任务 A'); r(); }, 200)))
+  .add(() => new Promise(r => setTimeout(() => { console.log('串行任务 B'); r(); }, 100)))
+  .add(() => new Promise(r => setTimeout(() => { console.log('串行任务 C'); r(); }, 50)));
+
+// ─── 3. 带优先级的任务调度 ────────────────────────────────────
+/**
+ * 最小堆优先级队列（React Scheduler 核心数据结构）
+ * 优先级越小（数字越小）越先执行
+ */
+class MinHeap {
+  constructor() { this.heap = []; }
+
+  push(task) {
+    this.heap.push(task);
+    this._siftUp(this.heap.length - 1);
+  }
+
+  pop() {
+    const top = this.heap[0];
+    const last = this.heap.pop();
+    if (this.heap.length > 0) { this.heap[0] = last; this._siftDown(0); }
+    return top;
+  }
+
+  peek() { return this.heap[0]; }
+  get size() { return this.heap.length; }
+
+  _siftUp(i) {
+    while (i > 0) {
+      const parent = (i - 1) >> 1;
+      if (this.heap[parent].priority &lt;= this.heap[i].priority) break;
+      [this.heap[parent], this.heap[i]] = [this.heap[i], this.heap[parent]];
+      i = parent;
+    }
+  }
+
+  _siftDown(i) {
+    const n = this.heap.length;
+    while (true) {
+      let smallest = i;
+      const l = 2 * i + 1, r = 2 * i + 2;
+      if (l &lt; n &amp;&amp; this.heap[l].priority &lt; this.heap[smallest].priority) smallest = l;
+      if (r &lt; n &amp;&amp; this.heap[r].priority &lt; this.heap[smallest].priority) smallest = r;
+      if (smallest === i) break;
+      [this.heap[smallest], this.heap[i]] = [this.heap[i], this.heap[smallest]];
+      i = smallest;
+    }
+  }
+}
+
+const scheduler = new MinHeap();
+scheduler.push({ priority: 3, name: '低优先级任务' });
+scheduler.push({ priority: 1, name: '紧急任务' });
+scheduler.push({ priority: 2, name: '普通任务' });
+
+console.log('优先级调度执行顺序:');
+while (scheduler.size > 0) {
+  const task = scheduler.pop();
+  console.log(`  [P${task.priority}] ${task.name}`);
+}
+          </div>
+        </div>
+      </section>
+
+      <!-- 9. 递归与分治 -->
+      <section class="section">
+        <h2 class="section-title">9. 递归与分治 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <p class="card-desc">递归是前端处理嵌套数据的核心手段：深拷贝、树形结构操作、JSON 解析、路径计算等。</p>
+          <div class="callout warn">
+            <strong>注意</strong>：递归需防止栈溢出（深度过大时改用迭代 + 显式栈），循环引用需用 <code>WeakMap</code> 标记已访问节点。
+          </div>
+          <div
+            class="code-block"
+            data-lang="javascript"
+            data-mode="console"
+          >
+// ─── 1. 深拷贝（完整版）──────────────────────────────────────
+/**
+ * 深拷贝：支持 Date/RegExp/Map/Set/循环引用
+ * 实际场景：状态管理中不可变数据更新、表单数据备份
+ * @param {any} obj
+ * @param {WeakMap} [seen] - 用于处理循环引用
+ * @returns {any}
+ */
+function deepClone(obj, seen = new WeakMap()) {
+  if (obj === null || typeof obj !== 'object') return obj;
+  if (seen.has(obj)) return seen.get(obj); // 处理循环引用
+  if (obj instanceof Date) return new Date(obj);
+  if (obj instanceof RegExp) return new RegExp(obj);
+  if (obj instanceof Map) {
+    const m = new Map();
+    seen.set(obj, m);
+    obj.forEach((v, k) => m.set(deepClone(k, seen), deepClone(v, seen)));
+    return m;
+  }
+  if (obj instanceof Set) {
+    const s = new Set();
+    seen.set(obj, s);
+    obj.forEach(v => s.add(deepClone(v, seen)));
+    return s;
+  }
+  const clone = Array.isArray(obj) ? [] : Object.create(Object.getPrototypeOf(obj));
+  seen.set(obj, clone);
+  for (const key of Reflect.ownKeys(obj)) {
+    clone[key] = deepClone(obj[key], seen);
+  }
+  return clone;
+}
+
+const original = { a: 1, b: { c: [1, 2, 3] }, d: new Date('2024-01-01'), e: new Map([['x', 1]]) };
+const cloned = deepClone(original);
+cloned.b.c.push(4);
+console.log('原始 b.c:', original.b.c); // [1,2,3] 不受影响
+console.log('克隆 b.c:', cloned.b.c);   // [1,2,3,4]
+console.log('Date 克隆:', cloned.d instanceof Date, cloned.d.getFullYear()); // true 2024
+
+// ─── 2. 树形数据过滤（递归）──────────────────────────────────
+/**
+ * 过滤树形结构，保留满足条件的节点及其祖先
+ * 实际场景：树形菜单搜索、权限过滤
+ * @param {object[]} nodes
+ * @param {Function} predicate - 节点过滤条件
+ * @returns {object[]}
+ */
+function filterTree(nodes, predicate) {
+  return nodes.reduce((acc, node) => {
+    const children = filterTree(node.children || [], predicate);
+    if (predicate(node) || children.length > 0) {
+      acc.push({ ...node, children });
+    }
+    return acc;
+  }, []);
+}
+
+const menuData = [
+  { id: 1, name: '系统管理', children: [
+    { id: 2, name: '用户管理', children: [] },
+    { id: 3, name: '角色管理', children: [] },
+  ]},
+  { id: 4, name: '数据分析', children: [
+    { id: 5, name: '报表中心', children: [] },
+  ]},
+];
+const filtered = filterTree(menuData, node => node.name.includes('管理'));
+console.log('过滤含"管理"的节点:', filtered.map(n => n.name));
+
+// ─── 3. 全排列（回溯）────────────────────────────────────────
+/**
+ * 生成数组的全排列
+ * 实际场景：权限组合、测试用例生成
+ * @param {any[]} nums
+ * @returns {any[][]}
+ */
+function permutations(nums) {
+  const result = [];
+  function backtrack(path, remaining) {
+    if (remaining.length === 0) { result.push([...path]); return; }
+    for (let i = 0; i &lt; remaining.length; i++) {
+      path.push(remaining[i]);
+      backtrack(path, remaining.filter((_, j) => j !== i));
+      path.pop();
+    }
+  }
+  backtrack([], nums);
+  return result;
+}
+console.log('全排列 [1,2,3]:', permutations([1, 2, 3]));
+          </div>
+        </div>
+      </section>
+
+      <!-- 10. 算法复杂度速查 -->
+      <section class="section">
+        <h2 class="section-title">10. 算法复杂度速查表 <span class="tag-badge interview">面试必考</span></h2>
+        <div class="card">
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>算法</th>
+                  <th>时间复杂度</th>
+                  <th>空间复杂度</th>
+                  <th>前端应用场景</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr><td>线性查找</td><td>O(n)</td><td>O(1)</td><td>Array.find / filter 过滤列表</td></tr>
+                <tr><td>二分查找</td><td>O(log n)</td><td>O(1)</td><td>有序 ID 列表快速定位</td></tr>
+                <tr><td>哈希查找</td><td>O(1)</td><td>O(n)</td><td>Map/Set 键值缓存</td></tr>
+                <tr><td>快速排序</td><td>O(n log n) 均</td><td>O(log n)</td><td>大数据量排序</td></tr>
+                <tr><td>归并排序</td><td>O(n log n)</td><td>O(n)</td><td>稳定排序、多字段排序</td></tr>
+                <tr><td>DFS（树）</td><td>O(n)</td><td>O(h)</td><td>菜单树查找、路径计算</td></tr>
+                <tr><td>BFS（树）</td><td>O(n)</td><td>O(w)</td><td>按层渲染、最短路径</td></tr>
+                <tr><td>扁平→树</td><td>O(n)</td><td>O(n)</td><td>权限菜单、分类树构建</td></tr>
+                <tr><td>LIS（LCS）</td><td>O(n log n)</td><td>O(n)</td><td>Vue3 diff 最小移动次数</td></tr>
+                <tr><td>编辑距离</td><td>O(mn)</td><td>O(mn)</td><td>模糊搜索、拼写纠错</td></tr>
+                <tr><td>LRU 缓存</td><td>O(1) get/set</td><td>O(n)</td><td>接口缓存、keep-alive</td></tr>
+                <tr><td>虚拟列表</td><td>O(1) 计算</td><td>O(k)</td><td>10 万条列表性能优化</td></tr>
+                <tr><td>并发限制</td><td>O(n/limit)</td><td>O(limit)</td><td>批量上传、接口限流</td></tr>
+                <tr><td>最小堆</td><td>O(log n) push/pop</td><td>O(n)</td><td>React Scheduler 优先级调度</td></tr>
+                <tr><td>滑动窗口</td><td>O(n)</td><td>O(k)</td><td>最长不重复子串、限流计数</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <div class="callout info" style="margin-top:1rem">
+            <strong>面试提示</strong>：前端算法面试不追求偏难怪，重点考察 ①能否写出正确的 O(n) / O(n log n) 解法；②能否结合实际场景说明使用理由；③能否分析时间/空间复杂度。
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>
